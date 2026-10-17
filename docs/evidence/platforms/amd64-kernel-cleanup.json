@@ -1,0 +1,44 @@
+{
+  "recorded_at": "2026-10-16T15:51:55.413028+00:00",
+  "result": "passed",
+  "instances": [
+    {
+      "instance": "dm-release-debian12-amd64-kernel",
+      "status": "Stopped",
+      "owned_platform_cleanup": "passed",
+      "integration_cleanup_errors": [],
+      "platform_credentials_removed_by_harness": true,
+      "integration_account_removed": true,
+      "vm_disk_retained_for_reproduction": true
+    },
+    {
+      "instance": "dm-release-debian13-amd64-kernel",
+      "status": "Stopped",
+      "owned_platform_cleanup": "passed",
+      "integration_cleanup_errors": [],
+      "platform_credentials_removed_by_harness": true,
+      "integration_account_removed": true,
+      "vm_disk_retained_for_reproduction": true
+    },
+    {
+      "instance": "dm-release-ubuntu24-amd64-kernel",
+      "status": "Stopped",
+      "owned_platform_cleanup": "passed",
+      "integration_cleanup_errors": [],
+      "platform_credentials_removed_by_harness": true,
+      "integration_account_removed": true,
+      "vm_disk_retained_for_reproduction": true
+    }
+  ],
+  "download_cleanup": {
+    "chunks_removed": 230,
+    "bytes_reclaimed": 956694528,
+    "verified_base_images_retained": true
+  },
+  "review_docker_context": "desktop-linux",
+  "review_preview_initialized": false,
+  "review_engine_containers": [],
+  "notes": "Application fixture data, keys, cookie jars, repositories and test accounts removed by owned cleanup; stopped VM system/tools/image caches and verified base images retained. No business host or original Docker context changed.",
+  "handoff_reverification": "platforms/vm-handoff-verification.json",
+  "handoff_reverification_result": "passed"
+}

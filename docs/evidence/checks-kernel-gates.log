@@ -1,0 +1,121 @@
+pnpm --dir web build
+
+> docker-manager-web@0.3.0 build /Users/fuyangyang/Projects/Private/docker-manager/web
+> vue-tsc --noEmit && vite build
+
+vite v7.3.1 building client environment for production...
+transforming...
+✓ 2809 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.42 kB │ gzip:   0.32 kB
+dist/assets/index-BKEA8bZR.css   14.84 kB │ gzip:   4.20 kB
+dist/assets/index-Cwzy2wtV.js   502.77 kB │ gzip: 154.37 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.03s
+test -z "$(gofmt -l cmd internal web/embed.go)"
+go vet ./...
+pnpm --dir web typecheck
+
+> docker-manager-web@0.3.0 typecheck /Users/fuyangyang/Projects/Private/docker-manager/web
+> vue-tsc --noEmit
+
+for script in scripts/*.sh; do sh -n "$script"; done
+python3 -m py_compile scripts/*.py
+python3 scripts/check-acceptance.py
+{
+  "verified_at": "2026-10-16T15:43:24.077733+00:00",
+  "validator_sha256": "34bc10ffcdae873b6f8c9a1eaf06e2160e81f59f4c147a9033f3f4cfd272155f",
+  "result": "passed",
+  "ac_count": 45,
+  "applicable_ac_count": 44,
+  "deferred": [
+    "AC-ARCH-07"
+  ],
+  "release_scenarios": 10,
+  "documentation_link_scope": [
+    "docs/acceptance-matrix.md",
+    "docs/api.md",
+    "docs/development-plan-v0.3.md",
+    "docs/implementation-contract.md",
+    "docs/operations.md",
+    "docs/release-acceptance.md",
+    "docs/remote-release-requirements.md",
+    "docs/resources-api.md",
+    "docs/security-notes.md",
+    "docs/verification.md",
+    "docs/workflows-api.md"
+  ],
+  "documentation_link_algorithm": "Inline Markdown local file links; fragments omitted; external URLs excluded",
+  "documentation_links_checked": 60,
+  "missing_links": [],
+  "evidence_indexes": [
+    "C",
+    "D",
+    "E",
+    "F",
+    "L",
+    "M",
+    "P",
+    "R",
+    "U",
+    "W",
+    "X"
+  ],
+  "undefined_evidence_indexes": [],
+  "errors": [],
+  "scope": "Structural contract only. Runtime evidence and remaining release gates are documented separately."
+}
+go test ./...
+?   	github.com/docker-manager/docker-manager/cmd/server	[no test files]
+ok  	github.com/docker-manager/docker-manager/internal/api	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/config	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/database	(cached)
+?   	github.com/docker-manager/docker-manager/internal/platform	[no test files]
+ok  	github.com/docker-manager/docker-manager/internal/resources	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/restoreworker	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/safepath	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/security	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/task	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/workflows	(cached)
+?   	github.com/docker-manager/docker-manager/web	[no test files]
+pnpm --dir web test
+
+> docker-manager-web@0.3.0 test /Users/fuyangyang/Projects/Private/docker-manager/web
+> vitest run
+
+
+ RUN  v3.2.4 /Users/fuyangyang/Projects/Private/docker-manager/web
+
+ ✓ src/api.test.ts (3 tests) 18ms
+ ✓ src/stores/auth.test.ts (1 test) 15ms
+ ✓ src/components/ConfirmDialog.test.ts (1 test) 89ms
+ ✓ src/views/DashboardView.test.ts (1 test) 118ms
+ ✓ src/views/ComposeView.test.ts (2 tests) 233ms
+ ✓ src/views/ResourcesView.test.ts (3 tests) 191ms
+ ✓ src/views/HistoryPagination.test.ts (2 tests) 306ms
+ ✓ src/views/BackupView.test.ts (5 tests) 513ms
+ ✓ src/components/FormDialog.accessibility.test.ts (2 tests) 194ms
+
+ Test Files  9 passed (9)
+      Tests  20 passed (20)
+   Start at  23:43:25
+   Duration  2.90s (transform 1.43s, setup 0ms, collect 5.71s, tests 1.68s, environment 5.97s, prepare 1.19s)
+
+go test -race ./...
+?   	github.com/docker-manager/docker-manager/cmd/server	[no test files]
+ok  	github.com/docker-manager/docker-manager/internal/api	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/config	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/database	(cached)
+?   	github.com/docker-manager/docker-manager/internal/platform	[no test files]
+ok  	github.com/docker-manager/docker-manager/internal/resources	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/restoreworker	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/safepath	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/security	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/task	(cached)
+ok  	github.com/docker-manager/docker-manager/internal/workflows	(cached)
+?   	github.com/docker-manager/docker-manager/web	[no test files]

@@ -1,0 +1,207 @@
+{
+  "status": "passed",
+  "source_isolation": {
+    "method": "full Ubuntu ARM64 VZ VM stopped with colima stop",
+    "confirmed_stopped_at": "2026-10-16T14:25:18+00:00",
+    "source_remained_stopped_until_after_all_recovery_finished": true
+  },
+  "transferred": [
+    "encrypted Restic repository archive",
+    "0600 offline recovery export",
+    "expected payload metadata"
+  ],
+  "source_sqlite_transferred": false,
+  "source_application_key_transferred": false,
+  "encrypted_repository_archive_sha256": "2708a49abfa69c3082f4e0ed848b05e15b301314251293be22aac4b306440129",
+  "cases": [
+    {
+      "status": "passed",
+      "started_at": "2026-10-16T14:25:52.046699+00:00",
+      "source_sqlite_used": false,
+      "source_application_key_used": false,
+      "service_recreation_requested": false,
+      "checks": [
+        "fresh SQLite has zero users, repositories, policies and snapshot index records",
+        "fresh installation discovers verified snapshot and encrypted manifest from repository only",
+        "independent SHA256, Unix permissions and UID/GID match source expectation",
+        "fresh SQLite snapshot index stays empty after completed file-only recovery"
+      ],
+      "cleanup": {
+        "temporary_session_revoked": true,
+        "plaintext_login_file_created": false,
+        "cookie_jar_cleared": true,
+        "private_server_stopped": true
+      },
+      "root": "/var/lib/dm-cross-ubuntu-arm-debian-arm-offline",
+      "source": {
+        "os": "Ubuntu 24.04.4 LTS",
+        "arch": "aarch64",
+        "engine": "29.5.2",
+        "binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79"
+      },
+      "destination": {
+        "os": "Debian GNU/Linux 13 (trixie)",
+        "id": "debian",
+        "version": "13",
+        "arch": "aarch64",
+        "engine": {
+          "Version": "29.5.2",
+          "ApiVersion": "1.54",
+          "Os": "linux",
+          "Arch": "arm64"
+        },
+        "binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79",
+        "restic_version": "restic 0.19.1 compiled with go1.26.4 on linux/arm64"
+      },
+      "new_database": {
+        "path": "/var/lib/dm-cross-ubuntu-arm-debian-arm-offline/state/docker-manager.db",
+        "preexisting": false,
+        "initial_counts": {
+          "users": 0,
+          "backup_repositories": 0,
+          "backup_snapshots": 0,
+          "backup_policies": 0
+        },
+        "final_counts": {
+          "users": 1,
+          "backup_repositories": 1,
+          "backup_snapshots": 0,
+          "backup_policies": 0
+        }
+      },
+      "repository_location": "/var/lib/dm-cross-ubuntu-arm-debian-arm-offline/repository",
+      "snapshot": {
+        "id": "0244e8e7574a6ff78c59f61a63f1f7a20e4a6e6809699c6144b58efd4db5950d",
+        "verification_status": "verified",
+        "discovered": 1,
+        "manifest_version": 1,
+        "sources": [
+          {
+            "host_path": "/var/lib/dm-platform-ubuntu24-arm64/fixture/source",
+            "local_path": "/var/lib/dm-platform-ubuntu24-arm64/fixture/source",
+            "snapshot_path": "/var/lib/dm-platform-ubuntu24-arm64/fixture/source"
+          }
+        ]
+      },
+      "payload": {
+        "snapshot_path": "/var/lib/dm-platform-ubuntu24-arm64/fixture/source/payload.bin",
+        "restored_path": "/var/lib/dm-cross-ubuntu-arm-debian-arm-offline/restored/var/lib/dm-platform-ubuntu24-arm64/fixture/source/payload.bin",
+        "expected": {
+          "payload_sha256": "08aefb4a97ec408d79fa539e52cc944b80ea17048a473a417ba27da2fc885718",
+          "mode": 416,
+          "uid": 996,
+          "gid": 990
+        },
+        "actual": {
+          "payload_sha256": "08aefb4a97ec408d79fa539e52cc944b80ea17048a473a417ba27da2fc885718",
+          "mode": 416,
+          "uid": 996,
+          "gid": 990
+        },
+        "content_and_metadata_match": true
+      },
+      "task": {
+        "id": "cc31a174acd7443b63d37812a9849d1d",
+        "status": "Succeeded",
+        "stage": "completed",
+        "progress": 100
+      },
+      "finished_at": "2026-10-16T14:26:04.229971+00:00"
+    },
+    {
+      "status": "passed",
+      "started_at": "2026-10-16T14:25:51.786309+00:00",
+      "source_sqlite_used": false,
+      "source_application_key_used": false,
+      "service_recreation_requested": false,
+      "checks": [
+        "fresh SQLite has zero users, repositories, policies and snapshot index records",
+        "fresh installation discovers verified snapshot and encrypted manifest from repository only",
+        "independent SHA256, Unix permissions and UID/GID match source expectation",
+        "fresh SQLite snapshot index stays empty after completed file-only recovery"
+      ],
+      "cleanup": {
+        "temporary_session_revoked": true,
+        "plaintext_login_file_created": false,
+        "cookie_jar_cleared": true,
+        "private_server_stopped": true
+      },
+      "root": "/var/lib/dm-cross-ubuntu-arm-debian-amd",
+      "source": {
+        "os": "Ubuntu 24.04.4 LTS",
+        "arch": "aarch64",
+        "engine": "29.5.2",
+        "binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79"
+      },
+      "destination": {
+        "os": "Debian GNU/Linux 13 (trixie)",
+        "id": "debian",
+        "version": "13",
+        "arch": "x86_64",
+        "engine": {
+          "Version": "29.5.2",
+          "ApiVersion": "1.54",
+          "Os": "linux",
+          "Arch": "amd64"
+        },
+        "binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66",
+        "restic_version": "restic 0.19.1 compiled with go1.26.4 on linux/amd64"
+      },
+      "new_database": {
+        "path": "/var/lib/dm-cross-ubuntu-arm-debian-amd/state/docker-manager.db",
+        "preexisting": false,
+        "initial_counts": {
+          "users": 0,
+          "backup_repositories": 0,
+          "backup_snapshots": 0,
+          "backup_policies": 0
+        },
+        "final_counts": {
+          "users": 1,
+          "backup_repositories": 1,
+          "backup_snapshots": 0,
+          "backup_policies": 0
+        }
+      },
+      "repository_location": "/var/lib/dm-cross-ubuntu-arm-debian-amd/repository",
+      "snapshot": {
+        "id": "0244e8e7574a6ff78c59f61a63f1f7a20e4a6e6809699c6144b58efd4db5950d",
+        "verification_status": "verified",
+        "discovered": 1,
+        "manifest_version": 1,
+        "sources": [
+          {
+            "host_path": "/var/lib/dm-platform-ubuntu24-arm64/fixture/source",
+            "local_path": "/var/lib/dm-platform-ubuntu24-arm64/fixture/source",
+            "snapshot_path": "/var/lib/dm-platform-ubuntu24-arm64/fixture/source"
+          }
+        ]
+      },
+      "payload": {
+        "snapshot_path": "/var/lib/dm-platform-ubuntu24-arm64/fixture/source/payload.bin",
+        "restored_path": "/var/lib/dm-cross-ubuntu-arm-debian-amd/restored/var/lib/dm-platform-ubuntu24-arm64/fixture/source/payload.bin",
+        "expected": {
+          "payload_sha256": "08aefb4a97ec408d79fa539e52cc944b80ea17048a473a417ba27da2fc885718",
+          "mode": 416,
+          "uid": 996,
+          "gid": 990
+        },
+        "actual": {
+          "payload_sha256": "08aefb4a97ec408d79fa539e52cc944b80ea17048a473a417ba27da2fc885718",
+          "mode": 416,
+          "uid": 996,
+          "gid": 990
+        },
+        "content_and_metadata_match": true
+      },
+      "task": {
+        "id": "fb28c1346d637bf7603ca571f2165579",
+        "status": "Succeeded",
+        "stage": "completed",
+        "progress": 100
+      },
+      "finished_at": "2026-10-16T14:26:13.755590+00:00"
+    }
+  ],
+  "limitation": "File restore only; no service recreation requested. amd64 destination uses native CPU in Debian 13 LXD userland sharing Ubuntu kernel."
+}

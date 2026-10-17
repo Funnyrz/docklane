@@ -1,0 +1,371 @@
+{
+  "run": "ui-51da1725",
+  "service": "http://127.0.0.1:18163",
+  "scenarios": [
+    {
+      "id": "container-preview-confirm",
+      "ac": [
+        "AC-CTR-05"
+      ],
+      "result": "pass",
+      "preview_mode": "rebuild",
+      "confirm_disabled_before_ack": true,
+      "risk": "\u5c06\u6309\u7167\u9884\u89c8\u4fee\u6539\u5bb9\u5668\uff0c\u9700\u91cd\u5efa\u7684\u53d8\u66f4\u4f1a\u4ea7\u751f\u505c\u673a\u3002\u5931\u8d25\u5c06\u5c1d\u8bd5\u6062\u590d\u65e7\u5bb9\u5668\uff1b\u914d\u7f6e\u56de\u9000\u4e0d\u80fd\u64a4\u9500\u5df2\u5199\u5165\u7684\u6570\u636e\u3002"
+    },
+    {
+      "id": "rebuild-failure-rollback",
+      "ac": [
+        "AC-CTR-05",
+        "AC-TASK-02"
+      ],
+      "result": "pass",
+      "task_id": "30950d5dd7d3d500959d8de8dc23e3fa",
+      "ui_status": "Failed",
+      "engine_after": {
+        "id": "eded24fcba9d12b0df958042172a7ef2a268291c43c375280d58501a8994346b",
+        "running": true,
+        "volume": "ui-51da1725-data"
+      }
+    },
+    {
+      "id": "volume-bidirectional-and-referenced-delete",
+      "ac": [
+        "AC-STO-01",
+        "AC-STO-02"
+      ],
+      "result": "pass",
+      "volume": "ui-51da1725-data",
+      "references": [
+        "ui-51da1725-app running",
+        "ui-51da1725-stopped created"
+      ],
+      "error": "stopped containers also retain references",
+      "direction": [
+        "container data -> volume",
+        "volume reference -> container"
+      ]
+    },
+    {
+      "id": "logs-tail-timestamps-reconnect",
+      "ac": [
+        "AC-CTR-03"
+      ],
+      "result": "pass",
+      "tail": 3,
+      "timestamps": true,
+      "outage": "isolated app SIGKILL and restart; Engine untouched",
+      "automatic_reconnect": true,
+      "all_8_gap_markers_replayed": true,
+      "timestamps_false_all_8_gap_markers_replayed": true,
+      "timestamps_false_stamps_hidden": true,
+      "backend_issue": "fixed and rechecked against latest source"
+    },
+    {
+      "id": "tty-command-close-release",
+      "result": "pass",
+      "command": "printf TTY_UI_RELEASE_OK; stty size",
+      "output_marker": "TTY_UI_RELEASE_OK",
+      "engine_shell_present_while_open": true,
+      "engine_shell_absent_after_drawer_close": true,
+      "issue": "fixed: initial resize sent on WebSocket open",
+      "ac": [
+        "AC-CTR-04"
+      ],
+      "pty_rows": 24,
+      "pty_columns": 80,
+      "resize_verified_output": "24 80",
+      "ctrl_c": "sleep interrupted; prompt returned",
+      "missing_shell": "/bin/bash: no such file or directory"
+    },
+    {
+      "id": "compose-project-flow",
+      "ac": [
+        "AC-CMP-01",
+        "AC-CMP-03",
+        "AC-CTR-06"
+      ],
+      "result": "pass",
+      "import_preserved_container": "6847f8eac889722807a85a8c56852b2cc1a8d22742f06756d8a5c66a5f99befa",
+      "invalid_yaml_blocked_preview": true,
+      "dirty_draft_blocked_preview_deploy": true,
+      "task_status": "Succeeded",
+      "deployed_container": "666aa2953c4fb591ba393ad2cde1604b1afe9026f45490522b4b4b2c04d9ec58",
+      "environment": "UI_RELEASE_ACCEPTANCE=validated",
+      "external_source_change_rejected": "files changed; preview again",
+      "keyboard_confirmation_requires_ack": true
+    },
+    {
+      "id": "backup-consistency-warning",
+      "ac": [
+        "AC-BKP-07"
+      ],
+      "result": "pass",
+      "risk": "Release UI file backup\u3002\u6587\u4ef6\u7ea7\u6a21\u5f0f\u4e0d\u4fdd\u8bc1\u8fd0\u884c\u4e2d\u6570\u636e\u5e93\u4e00\u81f4\u6027\u3002\nStop mode includes all known containers writing these mounts, including containers outside the selected project. External host processes cannot be detected; live file mode does not guarantee database consistency.\n\u505c\u673a\u5bb9\u5668\uff1a[]\n\u5907\u4efd\u6e90\uff1a[\n  {\n    \"host_path\": \"/tmp/dm-ui-51da1725/fixtures/source\",\n    \"local_path\": \"/tmp/dm-ui-51da1725/fixtures/source\",\n    \"snapshot_path\": \"/sources/000\"\n  }\n]",
+      "disabled_before_ack": true
+    },
+    {
+      "id": "backup-success-and-permission-failure",
+      "ac": [
+        "AC-BKP-03",
+        "AC-TASK-01",
+        "AC-TASK-02"
+      ],
+      "result": "pass",
+      "success_task": "d80c73c676e35eec4adb8b59b0610b5c",
+      "failed_task": "34bfdb7b130e71695c76e9d9682e3ca8",
+      "failed_progress": 25,
+      "failed_stage": "backup",
+      "fault": "owned source blob chmod000",
+      "error": "TASK_FAILED \u00b7 restic failed: exit status3"
+    },
+    {
+      "id": "image-reference-and-delete-refusal",
+      "ac": [
+        "AC-IMG-02"
+      ],
+      "result": "pass",
+      "image": "ui-51da1725-image:fixture",
+      "stopped_reference": "ui-51da1725-image-stopped",
+      "error": "image is referenced by containers"
+    },
+    {
+      "id": "daemon-no-capability",
+      "ac": [
+        "AC-SYS-04"
+      ],
+      "result": "pass",
+      "preview_disabled": true,
+      "apply_restart_disabled": true,
+      "reason": "explicit enable_daemon_write authorization absent"
+    },
+    {
+      "id": "daemon-restart-risk-and-keyboard-ack",
+      "ac": [
+        "AC-IMG-04"
+      ],
+      "result": "pass",
+      "config_path": "/tmp/dm-ui-51da1725/daemon.json",
+      "systemctl": "isolated PATH stub exits99; real daemon is never controlled",
+      "opened_with": "Enter",
+      "checkbox_initially_checked": false,
+      "confirm_initially_disabled": true,
+      "focus_after_animation": "\u53d6\u6d88",
+      "submitted": false
+    },
+    {
+      "id": "task-safe-cancel",
+      "ac": [
+        "AC-TASK-01",
+        "AC-STO-03"
+      ],
+      "result": "pass",
+      "task": "e7eff667f6e99114cac887d64e4a49b6",
+      "fixture_files": 100000,
+      "stage": "scanning",
+      "final_status": "Canceled",
+      "error_code": "CANCELED",
+      "duration_seconds": 1.33
+    },
+    {
+      "id": "dashboard-auto-offline-recovery",
+      "ac": [
+        "AC-ARCH-05",
+        "AC-DASH-02"
+      ],
+      "result": "pass",
+      "fault": "stopped only own Unix Docker endpoint relay; Engine and app kept running",
+      "manual_refresh": false,
+      "offline": {
+        "errors": [
+          "\u8bf7\u6c42\u672a\u5b8c\u6210Docker connection failed: Cannot connect to the Docker daemon at unix:///tmp/dm-ui-51da1725/docker-proxy.sock. Is the docker daemon running?"
+        ],
+        "freshness": "\u6700\u8fd1\u8bfb\u53d6 22:00:02 \u00b7 \u6bcf 15 \u79d2\u81ea\u52a8\u5237\u65b0",
+        "host": "colima-docker-manager-test \u8fde\u63a5\u5f02\u5e38",
+        "metrics": []
+      },
+      "recovered": {
+        "errors": [],
+        "freshness": "\u6700\u8fd1\u8bfb\u53d6 22:00:47 \u00b7 \u6bcf 15 \u79d2\u81ea\u52a8\u5237\u65b0",
+        "host": "colima-docker-manager-test \u72b6\u6001\u5df2\u8bfb\u53d6",
+        "metrics": [
+          "7",
+          "4",
+          "14",
+          "3"
+        ]
+      }
+    },
+    {
+      "id": "container-delete-preserves-data",
+      "ac": [
+        "AC-CTR-07"
+      ],
+      "result": "pass",
+      "deleted_container": "ui-51da1725-delete",
+      "container_absent": true,
+      "volume_retained": "ui-51da1725-delete-data",
+      "bind_file_content_retained": "keep-bind-data"
+    },
+    {
+      "id": "restore-original-source-double-confirm",
+      "result": "pass",
+      "source": "/tmp/dm-ui-51da1725/fixtures/source",
+      "target_readonly": true,
+      "preview": true,
+      "second_confirm_disabled_before_ack": true,
+      "executed": false,
+      "snapshot": "aa8726f488ffea0590a59ef471b56a83fdafb14f3d31c6fbcc2b14301569a42d",
+      "verification_status": "verified",
+      "final_asset": "index-Cwzy2wtV.js"
+    },
+    {
+      "id": "verified-and-unverified-snapshot-restoration",
+      "ac": [
+        "AC-BKP-01",
+        "AC-BKP-03",
+        "AC-BKP-06"
+      ],
+      "result": "pass",
+      "new_verified_snapshot": "aa8726f488ffea0590a59ef471b56a83fdafb14f3d31c6fbcc2b14301569a42d",
+      "verified_backup_task": "4cc7e0fad936d8af",
+      "verified_restore_task": "a725ce1698e7190b",
+      "verified_files": [
+        {
+          "file": "payload.txt",
+          "sha256_equal": true,
+          "uid_gid_equal": true,
+          "mode_equal": true,
+          "size_equal": true
+        },
+        {
+          "file": "blob.bin",
+          "sha256_equal": true,
+          "uid_gid_equal": true,
+          "mode_equal": true,
+          "size_equal": true
+        }
+      ],
+      "unverified_snapshot": "226b5ff9d53281b16bb06102df105cd9d71ec2168acbb7072da0a5181f0f35f3",
+      "unverified_default_preview_disabled": true,
+      "unverified_overwrite_disabled": true,
+      "unverified_recreate_disabled": true,
+      "unverified_rescue_acknowledged_twice": true,
+      "unverified_rescue_task": "7302f97373fc4293",
+      "rescue_payload_present": true,
+      "rescue_blob_absent": true,
+      "service_started": false
+    },
+    {
+      "id": "high-risk-audit-ui",
+      "ac": [
+        "AC-SYS-03"
+      ],
+      "result": "pass",
+      "rows": [
+        "c4f05f2e0e7ff51f226322d581ef649brestoretask / a725ce1698e7190bcb04cadf02440775Succeeded2026-10-16T14:09:25.31480106Z",
+        "c4f05f2e0e7ff51f226322d581ef649brestoreworkflow / /api/v1/backup/restoreSucceeded2026-10-16T14:09:22.29803618Z",
+        "c4f05f2e0e7ff51f226322d581ef649brestoretask / a725ce1698e7190bcb04cadf02440775queued2026-10-16T14:09:22.29582249Z",
+        "c4f05f2e0e7ff51f226322d581ef649brestoreworkflow / /api/v1/backup/restoreRequested2026-10-16T14:09:18.964407573Z",
+        "c4f05f2e0e7ff51f226322d581ef649bpreviewRestoreworkflow / /api/v1/backup/restore/previewSucceeded2026-10-16T14:09:10.626334611Z",
+        "c4f05f2e0e7ff51f226322d581ef649bpreviewRestoreworkflow / /api/v1/backup/restore/previewRequested2026-10-16T14:09:07.64203296Z",
+        "c4f05f2e0e7ff51f226322d581ef649bbackuptask / 4cc7e0fad936d8af2859413c8bb67830Succeeded2026-10-16T14:08:46.679670035Z",
+        "c4f05f2e0e7ff51f226322d581ef649brunPolicyworkflow / /api/v1/backup/policies/0523b959d381bb35aa78c43231f65246/runSucceeded2026-10-16T14:08:41.65368763Z"
+      ]
+    }
+  ],
+  "complete": true,
+  "pending": [],
+  "verified_at": "2026-10-16T14:13:14.655Z",
+  "source_frozen": true,
+  "assets": {
+    "javascript": "index-Cwzy2wtV.js",
+    "css": "index-BKEA8bZR.css"
+  },
+  "automated": {
+    "typecheck": "pass",
+    "test_files": 9,
+    "tests": 20,
+    "build": "pass",
+    "production_audit": "No known vulnerabilities found; dependencies unchanged"
+  },
+  "provenance": {
+    "/tmp/docker-manager-linux-test/ui-51da1725/docker-manager-verified": "6617b9f05dd2d9def4eb64e85027e783d2d66eea931fef4a75c901f898c58ef1",
+    "web/dist/assets/index-Cwzy2wtV.js": "f306295f45722592e2ac7130dbc6140d418c91cdb90e861fda936f704101d00b",
+    "web/dist/assets/index-BKEA8bZR.css": "4b204ecb7117b46c0061a19aae9a44e812fc7a7845e38674545be0be96b462b6"
+  },
+  "console_since_final_reload": {
+    "count": 0,
+    "entries": []
+  },
+  "environment": {
+    "os": "Ubuntu 24.04.4 arm64",
+    "engine": "29.5.2",
+    "compose": "2.40.3",
+    "restic": "0.19.1",
+    "desktop": {
+      "width": 1968,
+      "height": 992
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844
+    },
+    "docker_label": "dm.ui.release=ui-51da1725",
+    "setup": "disposable existing-login account and repository prepared by fixture API; subsequent described actions used CUA"
+  },
+  "limitations": [
+    "Actual daemon apply/restart was never submitted: risk confirmation used an owned dummy config and a systemctl stub; daemon file checksum stayed unchanged.",
+    "The original-location overwrite dialog was previewed and canceled; actual restored files went to new directories.",
+    "Verified restore was file-only, so no service health outcome is claimed.",
+    "Image pull/import/export and registry credentials were not added to this UI release run; separate resource integration evidence owns those checks.",
+    "Visual score is self-review against the specified industrial direction; no external reference image was supplied."
+  ],
+  "screenshots": [
+    "backup-failed-task.png",
+    "backup-risk-confirm.png",
+    "backup-task-progress.png",
+    "compose-container-guidance.png",
+    "compose-deploy-confirm.png",
+    "compose-deploy-preview.png",
+    "compose-invalid-draft.png",
+    "compose-source-changed.png",
+    "container-config-preview.png",
+    "container-risk-confirm.png",
+    "daemon-restart-risk.png",
+    "daemon-unavailable.png",
+    "dashboard-disconnected.png",
+    "dashboard-reconnected.png",
+    "high-risk-audit.png",
+    "image-delete-rejected.png",
+    "image-references-confirm.png",
+    "log-disconnected.png",
+    "log-reconnected-no-timestamp.png",
+    "log-reconnected.png",
+    "partial-rescue-confirm-mobile.png",
+    "partial-snapshot-before-fix.png",
+    "partial-snapshot-gated-mobile.png",
+    "rebuild-failed-task.png",
+    "restore-overwrite-risk.png",
+    "snapshot-status-desktop.png",
+    "snapshot-status-mobile.png",
+    "task-canceled.png",
+    "tty-command.png",
+    "tty-shell-missing.png",
+    "verified-restore-task.png",
+    "volume-delete-rejected.png",
+    "volume-references.png"
+  ],
+  "cleanup": {
+    "status": "complete",
+    "containers_removed": 4,
+    "volumes_removed": 2,
+    "network_removed": "ui-51da1725-compose_default",
+    "image_removed": "ui-51da1725-image:fixture",
+    "remaining_owned_containers": [],
+    "remaining_owned_volumes": [],
+    "server_and_proxy_stopped": true,
+    "native_fixture_tree_removed": true,
+    "plaintext_test_login_removed": true,
+    "engine_vm_untouched": true
+  }
+}

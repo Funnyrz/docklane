@@ -1,0 +1,725 @@
+{
+  "status": "passed",
+  "scope": "P1 partial-snapshot validation/retention, production backup-worker cache, Docker self-stop protection",
+  "derived_production_image": {
+    "id": "sha256:48291999eb6d084cc025f8a8a07fabf149e8dee4184c5f7b109821e2b84d3279",
+    "architecture": "arm64",
+    "os": "linux",
+    "tag": "dm-workflows-fixed:acceptance",
+    "derivation_dockerfile": "FROM docker-manager:v0.3.0\nCOPY docker-manager /usr/local/bin/docker-manager\n",
+    "binary_sha256": "6cda8063cd9ef55780d7a2f8fdbfa4cdbe2253e9af38c5a36ed9f2e79f1bc1ea",
+    "binary_inside_image_sha256": "6cda8063cd9ef55780d7a2f8fdbfa4cdbe2253e9af38c5a36ed9f2e79f1bc1ea",
+    "image_labels": {
+      "io.docker-manager.workflows-fix": "verification-cache"
+    },
+    "qualification": "Production Dockerfile-built Debian image with only /usr/local/bin/docker-manager replaced by the recorded independently cross-built fixed binary. This is an explicit derived-image test, not a claim that the final published image was tested."
+  },
+  "initial_failures": {
+    "partial_snapshot_regression": {
+      "command": "DM_TEST_RESTIC=/tmp/docker-manager-restic-0.19.1/restic go test ./internal/workflows -run TestPartialSnapshotsStayUnverifiedAndOutsideRetention -count=1",
+      "stdout": "--- FAIL: TestPartialSnapshotsStayUnverifiedAndOutsideRetention (8.57s)\n    verification_test.go:61: complete snapshot not independently marked verified map[gid:20 hostname:yangyang-MacBook-Air.local id:6b627d5f7f7847ee2bfea3aa1ae699249c44ffe7e65f4a2aed1b038a542c920d paths:[/private/var/folders/mj/l518s0xx66zgtktk71dy30_h0000gn/T/TestPartialSnapshotsStayUnverifiedAndOutsideRetention1941598945/001/repository/.dm-manifest-3591065014/manifest.json /private/var/folders/mj/l518s0xx66zgtktk71dy30_h0000gn/T/TestPartialSnapshotsStayUnverifiedAndOutsideRetention1941598945/001/source] program_version:restic 0.19.1 short_id:6b627d5f summary:map[backup_end:2026-10-16T22:04:02.484558+08:00 backup_start:2026-10-16T22:04:01.735823+08:00 data_added:6970 data_added_packed:4995 data_blobs:2 dirs_changed:0 dirs_new:11 dirs_unmodified:0 files_changed:0 files_new:2 files_unmodified:0 total_bytes_processed:1122 total_files_processed:2 tree_blobs:12] tags:[dm-policy:verified-policy] time:2026-10-16T22:04:01.735823+08:00 tree:e57775de1c8ee2af38d05cf97e92da65844d4f30dbbf1a9f37cbf72f2f767f36 uid:501 username:fuyangyang]\nFAIL\nFAIL\tgithub.com/docker-manager/docker-manager/internal/workflows\t9.565s\nFAIL\n"
+    },
+    "production_image_cache": {
+      "phases": [
+        {
+          "phase": "docker",
+          "started_at": "2026-10-16T14:01:30.779163+00:00",
+          "checks": [],
+          "environment": {
+            "os": {
+              "PRETTY_NAME": "Ubuntu 24.04.4 LTS",
+              "NAME": "Ubuntu",
+              "VERSION_ID": "24.04",
+              "VERSION": "24.04.4 LTS (Noble Numbat)",
+              "VERSION_CODENAME": "noble",
+              "ID": "ubuntu",
+              "ID_LIKE": "debian",
+              "HOME_URL": "https://www.ubuntu.com/",
+              "SUPPORT_URL": "https://help.ubuntu.com/",
+              "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+              "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+              "UBUNTU_CODENAME": "noble",
+              "LOGO": "ubuntu-logo"
+            },
+            "machine": "aarch64",
+            "kernel": "6.8.0-117-generic",
+            "environment": "vm",
+            "process": {
+              "boot_id": "c226e0ba-9e0a-413f-a3a0-a6a13761e0d0",
+              "pid1_start_ticks": "0",
+              "pid1_comm": "systemd",
+              "pid1_command": "/sbin/init"
+            },
+            "engine": {
+              "Platform": {
+                "Name": "Docker Engine - Community"
+              },
+              "Version": "29.5.2",
+              "ApiVersion": "1.54",
+              "MinAPIVersion": "1.40",
+              "Os": "linux",
+              "Arch": "arm64",
+              "Components": [
+                {
+                  "Name": "Engine",
+                  "Version": "29.5.2",
+                  "Details": {
+                    "ApiVersion": "1.54",
+                    "Arch": "arm64",
+                    "BuildTime": "Wed May 20 14:39:25 2026",
+                    "Experimental": "false",
+                    "GitCommit": "568f755",
+                    "GoVersion": "go1.26.3",
+                    "KernelVersion": "6.8.0-117-generic",
+                    "MinAPIVersion": "1.40",
+                    "Module": "github.com/moby/moby/v2",
+                    "ModuleVersion": "v2.0.0+unknown",
+                    "Os": "linux"
+                  }
+                },
+                {
+                  "Name": "containerd",
+                  "Version": "v2.2.4",
+                  "Details": {
+                    "GitCommit": "193637f7ee8ae5f5aa5248f49e7baa3e6164966e"
+                  }
+                },
+                {
+                  "Name": "runc",
+                  "Version": "1.3.5",
+                  "Details": {
+                    "GitCommit": "v1.3.5-0-g488fc13e"
+                  }
+                },
+                {
+                  "Name": "docker-init",
+                  "Version": "0.19.0",
+                  "Details": {
+                    "GitCommit": "de40ad0"
+                  }
+                }
+              ],
+              "GitCommit": "568f755",
+              "GoVersion": "go1.26.3",
+              "KernelVersion": "6.8.0-117-generic",
+              "BuildTime": "2026-05-20T14:39:25.000000000+00:00"
+            },
+            "docker_cli": "Docker version 29.5.2, build 79eb04c",
+            "compose": "5.1.4",
+            "restic": "unavailable on host (image-bundled tools checked separately)",
+            "supplied_binary_sha256": "ade403e342dcb33eb16abcaf796c98489815628fb6b8b0df0480a6790693faa3"
+          },
+          "status": "failed",
+          "error": "task 354af985c2d1e755607492a066f8bd65 returned unexpected status: backup worker exited with status 1; check source permissions and repository free space; inspect sanitized worker stderr in task logs; sanitized task logs: Worker stderr: unable to open cache: mkdir /root/.cache: read-only file system\n{\"message_type\":\"exit_error\",\"code\":1,\"message\":\"mkdir /root/.cache: read-only file system\\ngithub.com/restic/restic/internal/backend/cache.New\\n\\t/restic/internal/backend/cache/cache.go:89\\ngithub.com/restic/restic/internal/global.setupCache\\n\\t/restic/internal/global/global.go:423\\ngithub.com/restic/restic/internal/global.OpenRepository\\n\\t/restic/internal/global/global.go:333\\nmain.internalOpenWithLocked\\n\\t/restic/cmd/restic/lock.go:12\\nmain.openWithAppendLock\\n\\t/restic/cmd/restic/lock.go:47\\nmain.runBackup\\n\\t/restic/cmd/restic/cmd_backup.go:534\\nmain.newBackupCommand.func2\\n\\t/restic/cmd/restic/cmd_backup.go:76\\ngithub.com/spf13/cobra.(*Command).execute\\n\\t/home/build/go/pkg/mod/github.com/spf13/cobra@v1.10.2/command.go:1015\\ngithub.com/spf13/cobra.(*Command).ExecuteC\\n\\t/home/build/go/pkg/mod/github.com/spf13/cobra@v1.10.2/command.go:1148\\ngithub.com/spf13/cobra.(*Command).Execute\\n\\t/home/build/go/pkg/mod/github.com/spf13/cobra@v1.10.2/command.go:1071\\ngithub.com/spf13/cobra.(*Command).ExecuteContext\\n\\t/home/build/go/pkg/mod/github.com/spf13/cobra@v1.10.2/command.go:1064\\nmain.main.func2\\n\\t/restic/cmd/restic/main.go:189\\nmain.main\\n\\t/restic/cmd/restic/main.go:197\\nruntime.main\\n\\t/usr/local/go/src/runtime/proc.go:290\\nruntime.goexit\\n\\t/usr/local/go/src/runtime/asm_arm64.s:1447\"}\n\nbackup worker exited with status 1; check source permissions and repository free space; inspect sanitized worker stderr in task logs",
+          "finished_at": "2026-10-16T14:01:35.735259+00:00"
+        },
+        {
+          "phase": "cleanup",
+          "started_at": "2026-10-16T14:06:48.323974+00:00",
+          "checks": [
+            {
+              "name": "owned installation/resources/secret fixtures cleaned; report retained",
+              "status": "passed",
+              "evidence": {
+                "remaining_owned_containers": []
+              }
+            }
+          ],
+          "environment": {
+            "os": {
+              "PRETTY_NAME": "Ubuntu 24.04.4 LTS",
+              "NAME": "Ubuntu",
+              "VERSION_ID": "24.04",
+              "VERSION": "24.04.4 LTS (Noble Numbat)",
+              "VERSION_CODENAME": "noble",
+              "ID": "ubuntu",
+              "ID_LIKE": "debian",
+              "HOME_URL": "https://www.ubuntu.com/",
+              "SUPPORT_URL": "https://help.ubuntu.com/",
+              "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+              "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+              "UBUNTU_CODENAME": "noble",
+              "LOGO": "ubuntu-logo"
+            },
+            "machine": "aarch64",
+            "kernel": "6.8.0-117-generic",
+            "environment": "vm",
+            "process": {
+              "boot_id": "c226e0ba-9e0a-413f-a3a0-a6a13761e0d0",
+              "pid1_start_ticks": "0",
+              "pid1_comm": "systemd",
+              "pid1_command": "/sbin/init"
+            },
+            "engine": {
+              "Platform": {
+                "Name": "Docker Engine - Community"
+              },
+              "Version": "29.5.2",
+              "ApiVersion": "1.54",
+              "MinAPIVersion": "1.40",
+              "Os": "linux",
+              "Arch": "arm64",
+              "Components": [
+                {
+                  "Name": "Engine",
+                  "Version": "29.5.2",
+                  "Details": {
+                    "ApiVersion": "1.54",
+                    "Arch": "arm64",
+                    "BuildTime": "Wed May 20 14:39:25 2026",
+                    "Experimental": "false",
+                    "GitCommit": "568f755",
+                    "GoVersion": "go1.26.3",
+                    "KernelVersion": "6.8.0-117-generic",
+                    "MinAPIVersion": "1.40",
+                    "Module": "github.com/moby/moby/v2",
+                    "ModuleVersion": "v2.0.0+unknown",
+                    "Os": "linux"
+                  }
+                },
+                {
+                  "Name": "containerd",
+                  "Version": "v2.2.4",
+                  "Details": {
+                    "GitCommit": "193637f7ee8ae5f5aa5248f49e7baa3e6164966e"
+                  }
+                },
+                {
+                  "Name": "runc",
+                  "Version": "1.3.5",
+                  "Details": {
+                    "GitCommit": "v1.3.5-0-g488fc13e"
+                  }
+                },
+                {
+                  "Name": "docker-init",
+                  "Version": "0.19.0",
+                  "Details": {
+                    "GitCommit": "de40ad0"
+                  }
+                }
+              ],
+              "GitCommit": "568f755",
+              "GoVersion": "go1.26.3",
+              "KernelVersion": "6.8.0-117-generic",
+              "BuildTime": "2026-05-20T14:39:25.000000000+00:00"
+            },
+            "docker_cli": "Docker version 29.5.2, build 79eb04c",
+            "compose": "5.1.4",
+            "restic": "unavailable on host (image-bundled tools checked separately)",
+            "supplied_binary_sha256": "ade403e342dcb33eb16abcaf796c98489815628fb6b8b0df0480a6790693faa3"
+          },
+          "status": "passed",
+          "finished_at": "2026-10-16T14:06:48.813776+00:00"
+        }
+      ],
+      "state": "/var/lib/dm-platform-colima-workflows-final",
+      "namespace": "dm-platform-6906ce93caa49e2e"
+    },
+    "self_writer_scope_harness_rejection": {
+      "phases": [
+        {
+          "phase": "docker",
+          "started_at": "2026-10-16T13:59:35.475001+00:00",
+          "checks": [],
+          "environment": {
+            "os": {
+              "PRETTY_NAME": "Ubuntu 24.04.4 LTS",
+              "NAME": "Ubuntu",
+              "VERSION_ID": "24.04",
+              "VERSION": "24.04.4 LTS (Noble Numbat)",
+              "VERSION_CODENAME": "noble",
+              "ID": "ubuntu",
+              "ID_LIKE": "debian",
+              "HOME_URL": "https://www.ubuntu.com/",
+              "SUPPORT_URL": "https://help.ubuntu.com/",
+              "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+              "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+              "UBUNTU_CODENAME": "noble",
+              "LOGO": "ubuntu-logo"
+            },
+            "machine": "aarch64",
+            "kernel": "6.8.0-117-generic",
+            "environment": "vm",
+            "process": {
+              "boot_id": "c226e0ba-9e0a-413f-a3a0-a6a13761e0d0",
+              "pid1_start_ticks": "0",
+              "pid1_comm": "systemd",
+              "pid1_command": "/sbin/init"
+            },
+            "engine": {
+              "Platform": {
+                "Name": "Docker Engine - Community"
+              },
+              "Version": "29.5.2",
+              "ApiVersion": "1.54",
+              "MinAPIVersion": "1.40",
+              "Os": "linux",
+              "Arch": "arm64",
+              "Components": [
+                {
+                  "Name": "Engine",
+                  "Version": "29.5.2",
+                  "Details": {
+                    "ApiVersion": "1.54",
+                    "Arch": "arm64",
+                    "BuildTime": "Wed May 20 14:39:25 2026",
+                    "Experimental": "false",
+                    "GitCommit": "568f755",
+                    "GoVersion": "go1.26.3",
+                    "KernelVersion": "6.8.0-117-generic",
+                    "MinAPIVersion": "1.40",
+                    "Module": "github.com/moby/moby/v2",
+                    "ModuleVersion": "v2.0.0+unknown",
+                    "Os": "linux"
+                  }
+                },
+                {
+                  "Name": "containerd",
+                  "Version": "v2.2.4",
+                  "Details": {
+                    "GitCommit": "193637f7ee8ae5f5aa5248f49e7baa3e6164966e"
+                  }
+                },
+                {
+                  "Name": "runc",
+                  "Version": "1.3.5",
+                  "Details": {
+                    "GitCommit": "v1.3.5-0-g488fc13e"
+                  }
+                },
+                {
+                  "Name": "docker-init",
+                  "Version": "0.19.0",
+                  "Details": {
+                    "GitCommit": "de40ad0"
+                  }
+                }
+              ],
+              "GitCommit": "568f755",
+              "GoVersion": "go1.26.3",
+              "KernelVersion": "6.8.0-117-generic",
+              "BuildTime": "2026-05-20T14:39:25.000000000+00:00"
+            },
+            "docker_cli": "Docker version 29.5.2, build 79eb04c",
+            "compose": "5.1.4",
+            "restic": "unavailable on host (image-bundled tools checked separately)",
+            "supplied_binary_sha256": "ade403e342dcb33eb16abcaf796c98489815628fb6b8b0df0480a6790693faa3"
+          },
+          "status": "failed",
+          "error": "backup writer scope differs from sole owned fixture",
+          "finished_at": "2026-10-16T13:59:37.883831+00:00"
+        },
+        {
+          "phase": "cleanup",
+          "started_at": "2026-10-16T14:01:03.335453+00:00",
+          "checks": [
+            {
+              "name": "owned installation/resources/secret fixtures cleaned; report retained",
+              "status": "passed",
+              "evidence": {
+                "remaining_owned_containers": []
+              }
+            }
+          ],
+          "environment": {
+            "os": {
+              "PRETTY_NAME": "Ubuntu 24.04.4 LTS",
+              "NAME": "Ubuntu",
+              "VERSION_ID": "24.04",
+              "VERSION": "24.04.4 LTS (Noble Numbat)",
+              "VERSION_CODENAME": "noble",
+              "ID": "ubuntu",
+              "ID_LIKE": "debian",
+              "HOME_URL": "https://www.ubuntu.com/",
+              "SUPPORT_URL": "https://help.ubuntu.com/",
+              "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+              "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+              "UBUNTU_CODENAME": "noble",
+              "LOGO": "ubuntu-logo"
+            },
+            "machine": "aarch64",
+            "kernel": "6.8.0-117-generic",
+            "environment": "vm",
+            "process": {
+              "boot_id": "c226e0ba-9e0a-413f-a3a0-a6a13761e0d0",
+              "pid1_start_ticks": "0",
+              "pid1_comm": "systemd",
+              "pid1_command": "/sbin/init"
+            },
+            "engine": {
+              "Platform": {
+                "Name": "Docker Engine - Community"
+              },
+              "Version": "29.5.2",
+              "ApiVersion": "1.54",
+              "MinAPIVersion": "1.40",
+              "Os": "linux",
+              "Arch": "arm64",
+              "Components": [
+                {
+                  "Name": "Engine",
+                  "Version": "29.5.2",
+                  "Details": {
+                    "ApiVersion": "1.54",
+                    "Arch": "arm64",
+                    "BuildTime": "Wed May 20 14:39:25 2026",
+                    "Experimental": "false",
+                    "GitCommit": "568f755",
+                    "GoVersion": "go1.26.3",
+                    "KernelVersion": "6.8.0-117-generic",
+                    "MinAPIVersion": "1.40",
+                    "Module": "github.com/moby/moby/v2",
+                    "ModuleVersion": "v2.0.0+unknown",
+                    "Os": "linux"
+                  }
+                },
+                {
+                  "Name": "containerd",
+                  "Version": "v2.2.4",
+                  "Details": {
+                    "GitCommit": "193637f7ee8ae5f5aa5248f49e7baa3e6164966e"
+                  }
+                },
+                {
+                  "Name": "runc",
+                  "Version": "1.3.5",
+                  "Details": {
+                    "GitCommit": "v1.3.5-0-g488fc13e"
+                  }
+                },
+                {
+                  "Name": "docker-init",
+                  "Version": "0.19.0",
+                  "Details": {
+                    "GitCommit": "de40ad0"
+                  }
+                }
+              ],
+              "GitCommit": "568f755",
+              "GoVersion": "go1.26.3",
+              "KernelVersion": "6.8.0-117-generic",
+              "BuildTime": "2026-05-20T14:39:25.000000000+00:00"
+            },
+            "docker_cli": "Docker version 29.5.2, build 79eb04c",
+            "compose": "5.1.4",
+            "restic": "unavailable on host (image-bundled tools checked separately)",
+            "supplied_binary_sha256": "ade403e342dcb33eb16abcaf796c98489815628fb6b8b0df0480a6790693faa3"
+          },
+          "status": "passed",
+          "finished_at": "2026-10-16T14:01:23.608007+00:00"
+        }
+      ],
+      "state": "/var/lib/dm-platform-colima-workflows-20261016",
+      "namespace": "dm-platform-0931f9e93bdd445b"
+    }
+  },
+  "after_fixes": {
+    "linux_real_restic_regression": {
+      "command": "DM_TEST_RESTIC=/tmp/docker-manager-linux-test/tools/linux/restic /tmp/docker-manager-linux-test/workflows-verification.test -test.v -test.run TestPartialSnapshotsStayUnverifiedAndOutsideRetention|TestVolumeWorkerMountsAreExplicitReadOnlyAndUnprivileged",
+      "test_binary_sha256": "dbf6d68159f3f18267d97aa1e293918acc01509dfeb6424ec1a9853d52f8aa74",
+      "stdout": "=== RUN   TestPartialSnapshotsStayUnverifiedAndOutsideRetention\n--- PASS: TestPartialSnapshotsStayUnverifiedAndOutsideRetention (19.96s)\n=== RUN   TestVolumeWorkerMountsAreExplicitReadOnlyAndUnprivileged\n--- PASS: TestVolumeWorkerMountsAreExplicitReadOnlyAndUnprivileged (0.03s)\nPASS\n",
+      "exit_code": 0,
+      "assertions": [
+        "actual nonzero Restic backup commits partial snapshot",
+        "complete snapshot marked in encrypted repository only after full data verification and writer recovery",
+        "tag changed full snapshot ID consumed by SQL and task log",
+        "partial remains visible/unverified and default restore denied",
+        "explicit rescue only to new directory; overwrite/recreation denied",
+        "fresh SQLite/Vault imports repository and distinguishes both states without old database",
+        "next successful keep_last=1 retains one latest verified snapshot and preserves partial outside retention"
+      ]
+    },
+    "production_image_docker_lifecycle_and_readonly_source_positive": {
+      "phases": [
+        {
+          "phase": "docker",
+          "started_at": "2026-10-16T14:07:21.048172+00:00",
+          "checks": [
+            {
+              "name": "real image remove/recreate preserves named-volume users/session/policy/repository/tasks/key",
+              "status": "passed",
+              "evidence": {
+                "first_container_id": "86119cbae1ba8069bf46b65723e6ab3aee3afed06b020e1d53c96a1f05dd669b",
+                "replacement_container_id": "f243d28d59abbfb205c9bcc928e405302df83eedbf05b3b8f8df23bd506addb6",
+                "volume": "dm-platform-9793a2dee0d6342e-manager-data",
+                "image_id": "sha256:48291999eb6d084cc025f8a8a07fabf149e8dee4184c5f7b109821e2b84d3279",
+                "image_architecture": "arm64",
+                "explicit_mappings": [
+                  {
+                    "host": "/var/lib/dm-platform-colima-fixed-verification/docker-fixture/source",
+                    "local": "/source",
+                    "read_only": true
+                  },
+                  {
+                    "host": "/var/lib/dm-platform-colima-fixed-verification/docker-fixture/repository",
+                    "local": "/repository",
+                    "read_only": false
+                  },
+                  {
+                    "host": "/var/lib/dm-platform-colima-fixed-verification/docker-fixture/restored",
+                    "local": "/restored",
+                    "read_only": false
+                  }
+                ],
+                "master_key_sha256": "a3ebe71158af55337577d07bdfe9a51cf6e4dd106fc9d6b4df1cb886e091f089",
+                "tools": {
+                  "compose": "2.40.3",
+                  "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64"
+                },
+                "retained": {
+                  "user_id": "f28240e277820d35c19e33a885f674f3",
+                  "repository_id": "3f0709bb1ceed22b6eec2768fe6c37a3",
+                  "policy_id": "2db9d4b2bf07fd8419edcc98abe6e71e",
+                  "task_ids": [
+                    "1f6fe64556d6f83b16a27c2640ab4b89",
+                    "24a25b3b570ce60769eea1e10733ac87"
+                  ],
+                  "snapshot_id": "062dc6a4b15e838dc9eaa1cb9ef36692e0c71e353beff6343758347f705cfd3f",
+                  "restored_payload": "/var/lib/dm-platform-colima-fixed-verification/docker-fixture/restored/sources/000/payload.bin",
+                  "original_container_id": "7ece75ec2e5352ec1f9c585a7f7517f251888895b59e9c371d1447e82a2f6e25",
+                  "restored_sha256": "64fdb4760d5db80636cc88a2c4ec18235a48800467b19a347356ebc707b3f377"
+                },
+                "host_root_mounted": false
+              }
+            }
+          ],
+          "environment": {
+            "os": {
+              "PRETTY_NAME": "Ubuntu 24.04.4 LTS",
+              "NAME": "Ubuntu",
+              "VERSION_ID": "24.04",
+              "VERSION": "24.04.4 LTS (Noble Numbat)",
+              "VERSION_CODENAME": "noble",
+              "ID": "ubuntu",
+              "ID_LIKE": "debian",
+              "HOME_URL": "https://www.ubuntu.com/",
+              "SUPPORT_URL": "https://help.ubuntu.com/",
+              "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+              "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+              "UBUNTU_CODENAME": "noble",
+              "LOGO": "ubuntu-logo"
+            },
+            "machine": "aarch64",
+            "kernel": "6.8.0-117-generic",
+            "environment": "vm",
+            "process": {
+              "boot_id": "c226e0ba-9e0a-413f-a3a0-a6a13761e0d0",
+              "pid1_start_ticks": "0",
+              "pid1_comm": "systemd",
+              "pid1_command": "/sbin/init"
+            },
+            "engine": {
+              "Platform": {
+                "Name": "Docker Engine - Community"
+              },
+              "Version": "29.5.2",
+              "ApiVersion": "1.54",
+              "MinAPIVersion": "1.40",
+              "Os": "linux",
+              "Arch": "arm64",
+              "Components": [
+                {
+                  "Name": "Engine",
+                  "Version": "29.5.2",
+                  "Details": {
+                    "ApiVersion": "1.54",
+                    "Arch": "arm64",
+                    "BuildTime": "Wed May 20 14:39:25 2026",
+                    "Experimental": "false",
+                    "GitCommit": "568f755",
+                    "GoVersion": "go1.26.3",
+                    "KernelVersion": "6.8.0-117-generic",
+                    "MinAPIVersion": "1.40",
+                    "Module": "github.com/moby/moby/v2",
+                    "ModuleVersion": "v2.0.0+unknown",
+                    "Os": "linux"
+                  }
+                },
+                {
+                  "Name": "containerd",
+                  "Version": "v2.2.4",
+                  "Details": {
+                    "GitCommit": "193637f7ee8ae5f5aa5248f49e7baa3e6164966e"
+                  }
+                },
+                {
+                  "Name": "runc",
+                  "Version": "1.3.5",
+                  "Details": {
+                    "GitCommit": "v1.3.5-0-g488fc13e"
+                  }
+                },
+                {
+                  "Name": "docker-init",
+                  "Version": "0.19.0",
+                  "Details": {
+                    "GitCommit": "de40ad0"
+                  }
+                }
+              ],
+              "GitCommit": "568f755",
+              "GoVersion": "go1.26.3",
+              "KernelVersion": "6.8.0-117-generic",
+              "BuildTime": "2026-05-20T14:39:25.000000000+00:00"
+            },
+            "docker_cli": "Docker version 29.5.2, build 79eb04c",
+            "compose": "5.1.4",
+            "restic": "unavailable on host (image-bundled tools checked separately)",
+            "supplied_binary_sha256": "6cda8063cd9ef55780d7a2f8fdbfa4cdbe2253e9af38c5a36ed9f2e79f1bc1ea"
+          },
+          "status": "passed",
+          "finished_at": "2026-10-16T14:07:39.697462+00:00"
+        },
+        {
+          "phase": "cleanup",
+          "started_at": "2026-10-16T14:10:45.647955+00:00",
+          "checks": [
+            {
+              "name": "owned installation/resources/secret fixtures cleaned; report retained",
+              "status": "passed",
+              "evidence": {
+                "remaining_owned_containers": []
+              }
+            }
+          ],
+          "environment": {
+            "os": {
+              "PRETTY_NAME": "Ubuntu 24.04.4 LTS",
+              "NAME": "Ubuntu",
+              "VERSION_ID": "24.04",
+              "VERSION": "24.04.4 LTS (Noble Numbat)",
+              "VERSION_CODENAME": "noble",
+              "ID": "ubuntu",
+              "ID_LIKE": "debian",
+              "HOME_URL": "https://www.ubuntu.com/",
+              "SUPPORT_URL": "https://help.ubuntu.com/",
+              "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+              "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+              "UBUNTU_CODENAME": "noble",
+              "LOGO": "ubuntu-logo"
+            },
+            "machine": "aarch64",
+            "kernel": "6.8.0-117-generic",
+            "environment": "vm",
+            "process": {
+              "boot_id": "c226e0ba-9e0a-413f-a3a0-a6a13761e0d0",
+              "pid1_start_ticks": "0",
+              "pid1_comm": "systemd",
+              "pid1_command": "/sbin/init"
+            },
+            "engine": {
+              "Platform": {
+                "Name": "Docker Engine - Community"
+              },
+              "Version": "29.5.2",
+              "ApiVersion": "1.54",
+              "MinAPIVersion": "1.40",
+              "Os": "linux",
+              "Arch": "arm64",
+              "Components": [
+                {
+                  "Name": "Engine",
+                  "Version": "29.5.2",
+                  "Details": {
+                    "ApiVersion": "1.54",
+                    "Arch": "arm64",
+                    "BuildTime": "Wed May 20 14:39:25 2026",
+                    "Experimental": "false",
+                    "GitCommit": "568f755",
+                    "GoVersion": "go1.26.3",
+                    "KernelVersion": "6.8.0-117-generic",
+                    "MinAPIVersion": "1.40",
+                    "Module": "github.com/moby/moby/v2",
+                    "ModuleVersion": "v2.0.0+unknown",
+                    "Os": "linux"
+                  }
+                },
+                {
+                  "Name": "containerd",
+                  "Version": "v2.2.4",
+                  "Details": {
+                    "GitCommit": "193637f7ee8ae5f5aa5248f49e7baa3e6164966e"
+                  }
+                },
+                {
+                  "Name": "runc",
+                  "Version": "1.3.5",
+                  "Details": {
+                    "GitCommit": "v1.3.5-0-g488fc13e"
+                  }
+                },
+                {
+                  "Name": "docker-init",
+                  "Version": "0.19.0",
+                  "Details": {
+                    "GitCommit": "de40ad0"
+                  }
+                }
+              ],
+              "GitCommit": "568f755",
+              "GoVersion": "go1.26.3",
+              "KernelVersion": "6.8.0-117-generic",
+              "BuildTime": "2026-05-20T14:39:25.000000000+00:00"
+            },
+            "docker_cli": "Docker version 29.5.2, build 79eb04c",
+            "compose": "5.1.4",
+            "restic": "unavailable on host (image-bundled tools checked separately)",
+            "supplied_binary_sha256": "6cda8063cd9ef55780d7a2f8fdbfa4cdbe2253e9af38c5a36ed9f2e79f1bc1ea"
+          },
+          "status": "passed",
+          "finished_at": "2026-10-16T14:10:47.361258+00:00"
+        }
+      ],
+      "state": "/var/lib/dm-platform-colima-fixed-verification",
+      "namespace": "dm-platform-9793a2dee0d6342e"
+    },
+    "parent_rw_custom_hostname_self_stop_negative": {
+      "status": "passed",
+      "case": "real Docker parent RW refuses own-container stop without hostname assumptions",
+      "manager_id": "10f8af0417d7805267f469509e548ff792e2a4021d74b8ce38dc8091f0f7a2d8",
+      "manager_hostname": "explicit-hostname-is-not-identity",
+      "spoofed_hostname_env": "7ece75ec2e5352ec1f9c585a7f7517f251888895b59e9c371d1447e82a2f6e25",
+      "writer_id": "7ece75ec2e5352ec1f9c585a7f7517f251888895b59e9c371d1447e82a2f6e25",
+      "preview_error": {
+        "error": {
+          "code": "WORKFLOW_ERROR",
+          "message": "refusing to stop Docker Manager or a container sharing its installation data (10f8af0417d7805267f469509e548ff792e2a4021d74b8ce38dc8091f0f7a2d8); mount backup sources read-only in the management container, or explicitly use file mode without database consistency guarantees",
+          "trace_id": "ff41bb2185cea66b26531a89360c9a1b"
+        }
+      },
+      "run_error": {
+        "error": {
+          "code": "WORKFLOW_ERROR",
+          "message": "refusing to stop Docker Manager or a container sharing its installation data (10f8af0417d7805267f469509e548ff792e2a4021d74b8ce38dc8091f0f7a2d8); mount backup sources read-only in the management container, or explicitly use file mode without database consistency guarantees",
+          "trace_id": "37ed5eab0190507e3e85881e5665ff76"
+        }
+      },
+      "both_remain_running": true,
+      "data_volume": "dm-platform-9793a2dee0d6342e-manager-data",
+      "image_id": "sha256:48291999eb6d084cc025f8a8a07fabf149e8dee4184c5f7b109821e2b84d3279"
+    },
+    "race": {
+      "command": "DM_TEST_RESTIC=/tmp/docker-manager-restic-0.19.1/restic go test -race ./internal/workflows",
+      "stdout": "ok  \tgithub.com/docker-manager/docker-manager/internal/workflows\t69.014s\n",
+      "exit_code": 0
+    },
+    "go_vet": {
+      "command": "go vet ./internal/workflows",
+      "exit_code": 0
+    }
+  },
+  "sources": [
+    "https://restic.readthedocs.io/en/stable/075_scripting.html#tag",
+    "https://restic.readthedocs.io/en/stable/075_scripting.html#environment-variables"
+  ],
+  "cleanup": {
+    "docker_lifecycle_cleanup_passed": true,
+    "self_stop_fixtures_removed_by_same_own_label_cleanup": true,
+    "no_daemon_configuration_or_engine_restart": true
+  },
+  "limitations": [
+    "Exact final release artifact/image hashes are verified separately by the coordinating agent; the derived test image/binary identities above are authoritative for these tests.",
+    "Legacy snapshots without the repository marker remain unverified even when an old local SQLite index called them verified; they are preserved for explicitly acknowledged new-directory file rescue."
+  ]
+}

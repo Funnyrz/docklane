@@ -1,0 +1,341 @@
+{
+  "kind": "browser route fixtures only; no real resource actions",
+  "checks": [
+    {
+      "scenario": "dashboard",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "dashboard",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "dashboard",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "scenario": "dashboard",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "container-config",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "container-logs",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "container-terminal",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "container-risk-confirm",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "compose-editor",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "form-error",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "task-filter-menu",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "task-detail",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "backup-policy",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "snapshots",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "unverified-restore",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "restore-risk-confirm",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "container-config",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "container-logs",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "container-terminal",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "container-risk-confirm",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "compose-editor",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "form-error",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "task-filter-menu",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "task-detail",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "backup-policy",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "snapshots",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "unverified-restore",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "restore-risk-confirm",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "scenario": "offline",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "scenario": "loading",
+      "width": 390,
+      "overflow": false
+    }
+  ],
+  "writes": [
+    {
+      "endpoint": "/hosts/local/images/pull",
+      "method": "POST",
+      "intercepted": true
+    },
+    {
+      "endpoint": "/backup/restore/preview",
+      "method": "POST",
+      "intercepted": true
+    },
+    {
+      "endpoint": "/hosts/local/images/pull",
+      "method": "POST",
+      "intercepted": true
+    },
+    {
+      "endpoint": "/backup/restore/preview",
+      "method": "POST",
+      "intercepted": true
+    }
+  ],
+  "mobileFocus": "pass",
+  "confirmationSafety": "pass",
+  "editorFont": "pass",
+  "browserErrors": []
+}

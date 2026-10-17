@@ -1,0 +1,524 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-16T15:35:39.236167+00:00",
+  "mode": "read-only",
+  "remote_ci_executed": false,
+  "published": false,
+  "source_sha": null,
+  "repository": null,
+  "release_tag": null,
+  "registry": null,
+  "authenticated_account": "Funnyrz",
+  "repository_settings": {},
+  "gate_status": {
+    "ci": "blocked",
+    "local_artifacts": "passed",
+    "publication": "blocked"
+  },
+  "checks": [
+    {
+      "name": "committed_source",
+      "status": "blocked",
+      "detail": "No local commit; remote CI has no immutable source commit",
+      "gate": "ci"
+    },
+    {
+      "name": "committed_worktree",
+      "status": "blocked",
+      "detail": "Commit the reviewed source and evidence before selecting a release SHA",
+      "gate": "ci"
+    },
+    {
+      "name": "github_target",
+      "status": "blocked",
+      "detail": "Set the intended GitHub OWNER/REPO and origin; no repository is inferred from the Go module",
+      "gate": "ci"
+    },
+    {
+      "name": "release_tag",
+      "status": "blocked",
+      "detail": "Select existing tag v0.3.0; current build scripts use this fixed version",
+      "gate": "publication"
+    },
+    {
+      "name": "registry_target",
+      "status": "blocked",
+      "detail": "Choose the exact lowercase ghcr.io/OWNER/IMAGE destination and package visibility",
+      "gate": "publication"
+    },
+    {
+      "name": "SHA256SUMS",
+      "status": "passed",
+      "detail": "all listed payload hashes match; this does not authenticate a publisher",
+      "gate": "local_artifacts"
+    },
+    {
+      "name": "IMAGE-SHA256SUMS",
+      "status": "passed",
+      "detail": "all listed payload hashes match; this does not authenticate a publisher",
+      "gate": "local_artifacts"
+    },
+    {
+      "name": "ELF_amd64",
+      "status": "passed",
+      "detail": "Linux ELF64 machine verified",
+      "gate": "local_artifacts"
+    },
+    {
+      "name": "ELF_arm64",
+      "status": "passed",
+      "detail": "Linux ELF64 machine verified",
+      "gate": "local_artifacts"
+    },
+    {
+      "name": "workflow_syntax",
+      "status": "passed",
+      "detail": "actionlint accepted both workflows",
+      "gate": "local_artifacts"
+    },
+    {
+      "name": "github_auth",
+      "status": "passed",
+      "detail": "Authenticated API account: Funnyrz",
+      "gate": "ci"
+    },
+    {
+      "name": "remote_configuration",
+      "status": "blocked",
+      "detail": "Repository/default branch, Actions policy, exact-commit run, tag, runner availability and package access cannot be verified without an accessible target",
+      "gate": "ci"
+    },
+    {
+      "name": "registry_write_and_visibility",
+      "status": "unverified",
+      "detail": "Read-only preflight does not authenticate to or push a registry; verify package Actions write access and intended visibility before publication",
+      "gate": "publication"
+    },
+    {
+      "name": "formal_publication",
+      "status": "blocked",
+      "detail": "Only artifact preparation is automated. An authorized maintainer must select the target, review candidate hashes/security notes and explicitly publish the GHCR manifest and GitHub Release",
+      "gate": "publication"
+    }
+  ],
+  "workflow_sha256": {
+    ".github/workflows/release-prepare.yml": "9c5ef6cffa38a8ef6e9f30599e0eebe78ba365e786e3eb90db35640ed4658ff7",
+    ".github/workflows/ci.yml": "b727e109ca82ac0a2d30e5d83e0db121b2d348fd307e35ba4110c6ad5e747249"
+  },
+  "local_validation": {
+    "actionlint": {
+      "version": "v1.7.12",
+      "status": "passed",
+      "shellcheck": "not installed/not run",
+      "pyflakes": "not installed/not run"
+    },
+    "python_compile": "passed",
+    "target_parser_cases": {
+      "count": 4,
+      "status": "passed",
+      "cases": [
+        "HTTPS repo",
+        "SSH repo",
+        "credentials removed",
+        "non-GitHub rejected"
+      ]
+    },
+    "checksum_manifest_cases": {
+      "count": 6,
+      "status": "passed",
+      "cases": [
+        "matching digest",
+        "digest mismatch rejected",
+        "duplicate rejected",
+        "path traversal rejected",
+        "symlink rejected",
+        "malformed rejected"
+      ]
+    },
+    "release_exact_commit_gate_cases": {
+      "count": 4,
+      "status": "passed",
+      "cases": [
+        "successful exact push SHA accepted",
+        "missing CI rejected",
+        "pull request-only run rejected",
+        "different SHA rejected"
+      ]
+    },
+    "bash_workflow_blocks": {
+      "count": 8,
+      "status": "passed"
+    },
+    "action_refs": {
+      "verification": "read-only official GitHub API refs; annotated pnpm v4 tag dereferenced to commit",
+      "status": "passed"
+    },
+    "acceptance_structure": "passed: 45 AC, 10 scenarios, local documentation links and evidence indexes",
+    "remote_ci": "not run",
+    "publication": "not performed"
+  },
+  "local_ci_rehearsal": {
+    "result": "passed",
+    "remote_ci_run": false,
+    "environment": "Dedicated Debian 13 arm64 complete VZ VM; native aarch64 CPU; Linux 6.12.111+deb13-cloud-arm64",
+    "engines": [
+      {
+        "version": "28.5.1",
+        "test_count": 16,
+        "result": "passed",
+        "integration": {
+          "namespace": "dm-e2e-6c3d1adaa0fa5cad",
+          "engine": "28.5.1",
+          "compose": "2.40.3",
+          "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64",
+          "binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79",
+          "worker_image_id": "sha256:ccef2b2675ab6741db305b6941a07d4fd806be6b96415c949ff21697b9352131",
+          "host": {
+            "system": "Linux",
+            "architecture": "aarch64",
+            "uid": 501
+          },
+          "engine_os": "Debian GNU/Linux 13 (trixie)",
+          "started_at": "2026-10-16T15:26:08.284532+00:00",
+          "tests": [
+            {
+              "name": "installation preserves pre-existing container ID and running state",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "authentication, single setup, CSRF, API404 and daemon capability enforcement",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "dashboard counts match independent Engine inventory and repeated refresh preserves resources",
+              "status": "passed",
+              "detail": "independent CLI/Engine HTTP; running/stopped/paused fixtures; three refreshes; IDs/config/mounts/network/state unchanged"
+            },
+            {
+              "name": "CLI discovery and Engine-verified lifecycle with task idempotency",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "healthy container rebuild creates new ID and failing replacement restores original ID/data",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "real streamed Docker image export and asynchronous tar import",
+              "status": "passed",
+              "detail": "5242880-byte tar exceeds ordinary API body cap"
+            },
+            {
+              "name": "real Compose multiconfig/env/profile import preserves IDs, ports and mounts",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "stop-writer directory backup, full Restic data read and content/mode/ownership restore",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "SIGKILL during real stopped-writer Restic backup terminates child and recovers writer on restart",
+              "status": "passed",
+              "detail": "256MiB random source; direct child executable+PPID+starttime verified through /proc; task Failed/INTERRUPTED"
+            },
+            {
+              "name": "container snapshot recreates a running service against verified recovered bind data",
+              "status": "passed",
+              "detail": "original ID remains running; new ID/name/bind path and in-container content independently verified"
+            },
+            {
+              "name": "named Volume worker backup and verified restore",
+              "status": "passed",
+              "detail": "locally pinned worker image ID"
+            },
+            {
+              "name": "worker ambient capability reads foreign UID mode0600 and preserves repository ownership",
+              "status": "passed",
+              "detail": "app UID 501, source UID 1001"
+            },
+            {
+              "name": "non-root manager restores foreign UID/GID mode0600 through scoped worker",
+              "status": "passed",
+              "detail": "independent read-only Docker stat and content check"
+            },
+            {
+              "name": "real Cron Volume file backup commits snapshot and restart preserves unique UTC task instance",
+              "status": "passed",
+              "detail": "file consistency only; no database consistency claim; no clock or database manipulation"
+            },
+            {
+              "name": "restart persists users, sessions, policies and completed tasks",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "fresh database imports encrypted repository and restores without original SQLite or source directory",
+              "status": "passed",
+              "detail": ""
+            }
+          ],
+          "limitations": [
+            "systemd/distro and dual-architecture runtime matrix are separate release checks",
+            "daemon configuration mutation/restart is a separate isolated release check"
+          ],
+          "dashboard_counts": {
+            "total": 3,
+            "running": 1,
+            "stopped": 1,
+            "abnormal": 1,
+            "images": 2,
+            "volumes": 1
+          },
+          "sigkill_recovery": {
+            "observed_restic_pid": 4831,
+            "restic_inactive_after_panel_kill": true,
+            "task_id": "f07684d214b5af653d750f338b0d41da",
+            "error_code": "INTERRUPTED",
+            "original_writer_recovered": true
+          },
+          "scheduled_instance": {
+            "error": "",
+            "policy_id": "8c44470f3a622655a806a00ec04f1279",
+            "scheduled_at_utc": "2026-10-16T15:29:00Z",
+            "task_id": "c6c332113ac258d6efdc9e023977b6ea"
+          },
+          "result": "passed",
+          "cleanup_errors": [],
+          "finished_at": "2026-10-16T15:29:27.847461+00:00"
+        },
+        "engine": {
+          "ID": "a08afa22-d4ee-4b28-8f44-953231ddceb6",
+          "ServerVersion": "28.5.1",
+          "Driver": "overlay2",
+          "DriverStatus": [
+            [
+              "Backing Filesystem",
+              "extfs"
+            ],
+            [
+              "Supports d_type",
+              "true"
+            ],
+            [
+              "Using metacopy",
+              "false"
+            ],
+            [
+              "Native Overlay Diff",
+              "true"
+            ],
+            [
+              "userxattr",
+              "false"
+            ]
+          ],
+          "DockerRootDir": "/var/tmp/dm-ci-rehearsal-28-buildx/docker-manager-engine-data",
+          "KernelVersion": "6.12.111+deb13-cloud-arm64",
+          "OperatingSystem": "Debian GNU/Linux 13 (trixie)",
+          "Architecture": "aarch64"
+        },
+        "buildx": "github.com/docker/buildx v0.29.1 a32761aeb3debd39be1eca514af3693af0db334b",
+        "builder": "Name:   default\nDriver: docker\n\nNodes:\nName:             default\nEndpoint:         default\nStatus:           running\nBuildKit version: v0.25.1\nPlatforms:        linux/arm64\nLabels:\n org.mobyproject.buildkit.worker.moby.host-gateway-ip: 172.31.250.1\nGC Policy rule#0:\n All:            false\n Filters:        type==source.local,type==exec.cachemount,type==source.git.checkout\n Keep Duration:  48h0m0s\n Max Used Space: 488.3MiB\nGC Policy rule#1:\n All:            false\n Keep Duration:  1440h0m0s\n Reserved Space: 953.7MiB\n Max Used Space: 7.451GiB\n Min Free Space: 1.863GiB\nGC Policy rule#2:\n All:            false\n Reserved Space: 953.7MiB\n Max Used Space: 7.451GiB\n Min Free Space: 1.863GiB\nGC Policy rule#3:\n All:            true\n Reserved Space: 953.7MiB\n Max Used Space: 7.451GiB\n Min Free Space: 1.863GiB\n",
+        "built_fixture_image_id": "sha256:9d2391dd3045156c3fdb36cfc12b40f175fd96189e2a02ae3b9bf09786bf0881",
+        "build_load_native_run": "passed"
+      },
+      {
+        "version": "29.5.2",
+        "test_count": 16,
+        "result": "passed",
+        "integration": {
+          "namespace": "dm-e2e-05f2dadc0278da48",
+          "engine": "29.5.2",
+          "compose": "2.40.3",
+          "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64",
+          "binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79",
+          "worker_image_id": "sha256:18fd1728e7370e8cdad56605aaab06a632437c4763fcd26c273b86fa808cf387",
+          "host": {
+            "system": "Linux",
+            "architecture": "aarch64",
+            "uid": 501
+          },
+          "engine_os": "Debian GNU/Linux 13 (trixie)",
+          "started_at": "2026-10-16T15:31:37.280840+00:00",
+          "tests": [
+            {
+              "name": "installation preserves pre-existing container ID and running state",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "authentication, single setup, CSRF, API404 and daemon capability enforcement",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "dashboard counts match independent Engine inventory and repeated refresh preserves resources",
+              "status": "passed",
+              "detail": "independent CLI/Engine HTTP; running/stopped/paused fixtures; three refreshes; IDs/config/mounts/network/state unchanged"
+            },
+            {
+              "name": "CLI discovery and Engine-verified lifecycle with task idempotency",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "healthy container rebuild creates new ID and failing replacement restores original ID/data",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "real streamed Docker image export and asynchronous tar import",
+              "status": "passed",
+              "detail": "5242880-byte tar exceeds ordinary API body cap"
+            },
+            {
+              "name": "real Compose multiconfig/env/profile import preserves IDs, ports and mounts",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "stop-writer directory backup, full Restic data read and content/mode/ownership restore",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "SIGKILL during real stopped-writer Restic backup terminates child and recovers writer on restart",
+              "status": "passed",
+              "detail": "256MiB random source; direct child executable+PPID+starttime verified through /proc; task Failed/INTERRUPTED"
+            },
+            {
+              "name": "container snapshot recreates a running service against verified recovered bind data",
+              "status": "passed",
+              "detail": "original ID remains running; new ID/name/bind path and in-container content independently verified"
+            },
+            {
+              "name": "named Volume worker backup and verified restore",
+              "status": "passed",
+              "detail": "locally pinned worker image ID"
+            },
+            {
+              "name": "worker ambient capability reads foreign UID mode0600 and preserves repository ownership",
+              "status": "passed",
+              "detail": "app UID 501, source UID 1001"
+            },
+            {
+              "name": "non-root manager restores foreign UID/GID mode0600 through scoped worker",
+              "status": "passed",
+              "detail": "independent read-only Docker stat and content check"
+            },
+            {
+              "name": "real Cron Volume file backup commits snapshot and restart preserves unique UTC task instance",
+              "status": "passed",
+              "detail": "file consistency only; no database consistency claim; no clock or database manipulation"
+            },
+            {
+              "name": "restart persists users, sessions, policies and completed tasks",
+              "status": "passed",
+              "detail": ""
+            },
+            {
+              "name": "fresh database imports encrypted repository and restores without original SQLite or source directory",
+              "status": "passed",
+              "detail": ""
+            }
+          ],
+          "limitations": [
+            "systemd/distro and dual-architecture runtime matrix are separate release checks",
+            "daemon configuration mutation/restart is a separate isolated release check"
+          ],
+          "dashboard_counts": {
+            "total": 3,
+            "running": 1,
+            "stopped": 1,
+            "abnormal": 1,
+            "images": 3,
+            "volumes": 1
+          },
+          "sigkill_recovery": {
+            "observed_restic_pid": 13692,
+            "restic_inactive_after_panel_kill": true,
+            "task_id": "3d95c1aab5b55b16286ec3d0179f261f",
+            "error_code": "INTERRUPTED",
+            "original_writer_recovered": true
+          },
+          "scheduled_instance": {
+            "error": "",
+            "policy_id": "99ad7eaaa0b86b342ed7050552600994",
+            "scheduled_at_utc": "2026-10-16T15:34:00Z",
+            "task_id": "23dc8d120f6979b6360825f42a178ea8"
+          },
+          "result": "passed",
+          "cleanup_errors": [],
+          "finished_at": "2026-10-16T15:34:25.981778+00:00"
+        },
+        "engine": {
+          "ID": "fb8b60fd-1a0d-487e-b8cc-55932c670be6",
+          "ServerVersion": "29.5.2",
+          "Driver": "overlayfs",
+          "DriverStatus": [
+            [
+              "driver-type",
+              "io.containerd.snapshotter.v1"
+            ]
+          ],
+          "DockerRootDir": "/var/tmp/dm-ci-rehearsal-29/docker-manager-engine-data",
+          "KernelVersion": "6.12.111+deb13-cloud-arm64",
+          "OperatingSystem": "Debian GNU/Linux 13 (trixie)",
+          "Architecture": "aarch64"
+        },
+        "buildx": "github.com/docker/buildx v0.29.1 a32761aeb3debd39be1eca514af3693af0db334b",
+        "builder": "Name:   default\nDriver: docker\n\nNodes:\nName:             default\nEndpoint:         default\nStatus:           running\nBuildKit version: v0.30.0\nPlatforms:        linux/arm64\nLabels:\n org.mobyproject.buildkit.worker.apparmor.profile:     docker-default\n org.mobyproject.buildkit.worker.containerd.namespace: moby\n org.mobyproject.buildkit.worker.containerd.uuid:      8ca86b74-4884-454e-b980-4694c780e2b6\n org.mobyproject.buildkit.worker.executor:             containerd\n org.mobyproject.buildkit.worker.hostname:             lima-dm-release-debian13-arm64\n org.mobyproject.buildkit.worker.moby.host-gateway-ip: 172.31.250.1\n org.mobyproject.buildkit.worker.network:              host\n org.mobyproject.buildkit.worker.selinux.enabled:      false\n org.mobyproject.buildkit.worker.snapshotter:          overlayfs\nGC Policy rule#0:\n All:            false\n Filters:        type==source.local,type==exec.cachemount,type==source.git.checkout\n Keep Duration:  48h0m0s\n Max Used Space: 488.3MiB\nGC Policy rule#1:\n All:            false\n Keep Duration:  1440h0m0s\n Reserved Space: 953.7MiB\n Max Used Space: 7.451GiB\n Min Free Space: 1.863GiB\nGC Policy rule#2:\n All:            false\n Reserved Space: 953.7MiB\n Max Used Space: 7.451GiB\n Min Free Space: 1.863GiB\nGC Policy rule#3:\n All:            true\n Reserved Space: 953.7MiB\n Max Used Space: 7.451GiB\n Min Free Space: 1.863GiB\n",
+        "built_fixture_image_id": "sha256:b4b7be2aa70c705b0918fc4e59e21173ecad90f25e0b1dd3d702db561783af86",
+        "build_load_native_run": "passed"
+      }
+    ],
+    "buildx_download": {
+      "version": "0.29.1",
+      "url": "https://github.com/docker/buildx/releases/download/v0.29.1/buildx-v0.29.1.linux-arm64",
+      "sha256": "50e85c4e290b698908421161c1aee069bcc5d4a65b7b7201bfac3a176b223a7e",
+      "verification": "Compared with upstream checksums.txt"
+    },
+    "fixes": [
+      {
+        "problem": "dockerd refuses simultaneous --bridge and --bip",
+        "fix": "Create only the owned bridge, assign its address before launch, pass --bridge alone, clean up only with ownership marker",
+        "result": "Both Engine versions start and pass full integration"
+      },
+      {
+        "problem": "Local rehearsal initially used a 1 GiB Debian /tmp tmpfs and hit ENOSPC while loading the second Engine image store",
+        "fix": "Move rehearsal data to /var/tmp on guest ext4 and repeat Engine29 tests; no application code change",
+        "result": "Engine29 full integration passed; CI records RUNNER_TEMP disk space"
+      }
+    ],
+    "cleanup": {
+      "original_engine_inventory_and_config_unchanged": true,
+      "original_engine": {
+        "engine": "29.5.2",
+        "id": "bb4f2f88-503e-4555-bceb-9d437c416576",
+        "containers": [],
+        "images": [
+          "sha256:ccef2b2675ab6741db305b6941a07d4fd806be6b96415c949ff21697b9352131",
+          "sha256:ccef2b2675ab6741db305b6941a07d4fd806be6b96415c949ff21697b9352131"
+        ],
+        "daemon_config_sha256": "abacc8808a943796bd5bc54889e376c56e98461e7584ffc718bf5c3a9b0210db"
+      },
+      "private_socket_absent": true,
+      "owned_bridge_absent": true,
+      "owned_data_directories_absent": true,
+      "vm_stopped": true,
+      "vm_name": "dm-release-debian13-arm64"
+    },
+    "original_engine_baseline_scope": "Original Engine snapshot taken after first Engine28 integration and before Engine29 integration; compared again after Engine29 integration and Engine28 Buildx rehearsal",
+    "limitations": [
+      "Not a GitHub Actions run, not a verification of target repository policy, billing, hosted runner allocation or token scopes",
+      "Official Docker static archives and existing pinned Compose/Restic binaries reused locally; setup actions and hosted-runner download steps not executed",
+      "Buildx native fixture was built/loaded/run; full production worker image was a previously verified release artifact, not rebuilt from the entire Dockerfile in this rehearsal",
+      "Both local rehearsals are arm64; remote CI declares native amd64 and arm64 jobs but has not executed"
+    ]
+  }
+}

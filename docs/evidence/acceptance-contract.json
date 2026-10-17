@@ -1,0 +1,44 @@
+{
+  "verified_at": "2026-10-16T15:52:05.718390+00:00",
+  "validator_sha256": "34bc10ffcdae873b6f8c9a1eaf06e2160e81f59f4c147a9033f3f4cfd272155f",
+  "result": "passed",
+  "ac_count": 45,
+  "applicable_ac_count": 44,
+  "deferred": [
+    "AC-ARCH-07"
+  ],
+  "release_scenarios": 10,
+  "documentation_link_scope": [
+    "docs/acceptance-matrix.md",
+    "docs/api.md",
+    "docs/development-plan-v0.3.md",
+    "docs/implementation-contract.md",
+    "docs/operations.md",
+    "docs/release-acceptance.md",
+    "docs/remote-release-requirements.md",
+    "docs/resources-api.md",
+    "docs/security-notes.md",
+    "docs/verification.md",
+    "docs/workflows-api.md"
+  ],
+  "documentation_link_algorithm": "Inline Markdown local file links; fragments omitted; external URLs excluded",
+  "documentation_links_checked": 68,
+  "missing_links": [],
+  "evidence_indexes": [
+    "C",
+    "D",
+    "E",
+    "F",
+    "K",
+    "L",
+    "M",
+    "P",
+    "R",
+    "U",
+    "W",
+    "X"
+  ],
+  "undefined_evidence_indexes": [],
+  "errors": [],
+  "scope": "Structural contract only. Runtime evidence and remaining release gates are documented separately."
+}

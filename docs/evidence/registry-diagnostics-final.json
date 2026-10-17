@@ -1,0 +1,256 @@
+{
+  "started_at": "2026-10-16T15:23:48.584329+00:00",
+  "binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79",
+  "harness_sha256": "78e3a28dee6682b0140ca582c96c80681aaedf8d88332cf0f39cedce8a44ed08",
+  "integration_helper_sha256": "0eb072e12faf830a8867a8d912af062335d46c7949a4fd8a88a43b27e18b8a66",
+  "platform": {
+    "system": "Linux",
+    "architecture": "aarch64",
+    "kernel": "6.8.0-117-generic"
+  },
+  "endpoint": "unix:///var/run/docker.sock",
+  "checks": [
+    {
+      "name": "reachable TCP and Registry API do not imply image availability or silently trigger a pull",
+      "status": "passed",
+      "evidence": {
+        "image_pull": {
+          "reason": "An explicitly confirmed image pull is required; network/API reachability does not prove image availability.",
+          "tested": false
+        },
+        "manual_guide": "On the host, back up /etc/docker/daemon.json; merge registry-mirrors while retaining all other fields; run dockerd --validate --config-file /etc/docker/daemon.json; review downtime, then systemctl restart docker; verify docker info and perform an explicit pull. Restore the backup and restart if verification fails. registry-mirrors mainly applies to Docker Hub.",
+        "network": {
+          "available": true
+        },
+        "registry_api": {
+          "authentication_required": false,
+          "available": true,
+          "status_code": 200
+        }
+      }
+    },
+    {
+      "name": "real Engine pull fails with an inspectable task while TCP and Registry API remain available",
+      "status": "passed",
+      "evidence": {
+        "diagnostic": {
+          "image_pull": {
+            "note": "Pull uses the Engine's current registry routing. It does not prove an unapplied mirror was used.",
+            "task_id": "013ef8164730f7562ce254ca29ff212c",
+            "tested": false
+          },
+          "manual_guide": "On the host, back up /etc/docker/daemon.json; merge registry-mirrors while retaining all other fields; run dockerd --validate --config-file /etc/docker/daemon.json; review downtime, then systemctl restart docker; verify docker info and perform an explicit pull. Restore the backup and restart if verification fails. registry-mirrors mainly applies to Docker Hub.",
+          "network": {
+            "available": true
+          },
+          "registry_api": {
+            "authentication_required": false,
+            "available": true,
+            "status_code": 200
+          }
+        },
+        "task_id": "013ef8164730f7562ce254ca29ff212c",
+        "task_status": "Failed",
+        "error_code": "TASK_FAILED",
+        "error_message": "Error response from daemon: failed to resolve reference \"127.0.0.1:36645/dm-diagnostics-a8d5c2db57eac27a/image:missing\": failed to do request: Head \"https://127.0.0.1:36645/v2/dm-diagnostics-a8d5c2db57eac27a/image/manifests/missing\": tls: first record does not look like a TLS handshake",
+        "task_logs": [
+          {
+            "id": 1,
+            "task_id": "013ef8164730f7562ce254ca29ff212c",
+            "message": "Error response from daemon: failed to resolve reference \"127.0.0.1:36645/dm-diagnostics-a8d5c2db57eac27a/image:missing\": failed to do request: Head \"https://127.0.0.1:36645/v2/dm-diagnostics-a8d5c2db57eac27a/image/manifests/missing\": tls: first record does not look like a TLS handshake",
+            "created_at": "2026-10-16T15:23:48.845987656Z"
+          }
+        ],
+        "image_absent_after_failure": true,
+        "engine_fixture_contact": {
+          "manifest_404": false,
+          "tls_client_hellos": 1
+        }
+      }
+    },
+    {
+      "name": "Registry HTTP 401 is reachable but requires authentication and does not prove a pull",
+      "status": "passed",
+      "evidence": {
+        "image_pull": {
+          "reason": "An explicitly confirmed image pull is required; network/API reachability does not prove image availability.",
+          "tested": false
+        },
+        "manual_guide": "On the host, back up /etc/docker/daemon.json; merge registry-mirrors while retaining all other fields; run dockerd --validate --config-file /etc/docker/daemon.json; review downtime, then systemctl restart docker; verify docker info and perform an explicit pull. Restore the backup and restart if verification fails. registry-mirrors mainly applies to Docker Hub.",
+        "network": {
+          "available": true
+        },
+        "registry_api": {
+          "authentication_required": true,
+          "available": true,
+          "status_code": 401
+        }
+      }
+    },
+    {
+      "name": "closed TCP endpoint reports network failure independently of untested image pull",
+      "status": "passed",
+      "evidence": {
+        "image_pull": {
+          "reason": "An explicitly confirmed image pull is required; network/API reachability does not prove image availability.",
+          "tested": false
+        },
+        "manual_guide": "On the host, back up /etc/docker/daemon.json; merge registry-mirrors while retaining all other fields; run dockerd --validate --config-file /etc/docker/daemon.json; review downtime, then systemctl restart docker; verify docker info and perform an explicit pull. Restore the backup and restart if verification fails. registry-mirrors mainly applies to Docker Hub.",
+        "network": {
+          "available": false,
+          "error": "dial tcp 127.0.0.1:36645: connect: connection refused"
+        },
+        "registry_api": {
+          "available": false
+        }
+      }
+    }
+  ],
+  "scope": "AC-IMG-05 and RELEASE-04; final compiled service against real Engine and owned empty loopback Registry v2",
+  "limitations": [
+    "Loopback HTTP fixture does not prove remote Registry TLS or mirror performance.",
+    "Actual pull uses current Engine routing; no unapplied mirror is claimed to have been used."
+  ],
+  "reproduction": {
+    "command": [
+      "/usr/bin/python3",
+      "/tmp/dm-registry-diagnostics-harness-3h30611s/registry-diagnostics-acceptance.py",
+      "--binary",
+      "/tmp/dm-registry-diagnostics-harness-3h30611s/docker-manager-linux-arm64",
+      "--report",
+      "/tmp/docker-manager-linux-test/registry-diagnostics-final/registry-diagnostics-final.json"
+    ],
+    "environment": {
+      "DM_TEST_DOCKER": "/usr/bin/docker",
+      "DM_TEST_RESTIC": "/tmp/docker-manager-linux-test/tools/linux/restic",
+      "DM_TEST_DOCKER_ENDPOINT": "unix:///var/run/docker.sock"
+    }
+  },
+  "engine": {
+    "Platform": {
+      "Name": "Docker Engine - Community"
+    },
+    "Version": "29.5.2",
+    "ApiVersion": "1.54",
+    "MinAPIVersion": "1.40",
+    "Os": "linux",
+    "Arch": "arm64",
+    "Components": [
+      {
+        "Name": "Engine",
+        "Version": "29.5.2",
+        "Details": {
+          "ApiVersion": "1.54",
+          "Arch": "arm64",
+          "BuildTime": "Wed May 20 14:39:25 2026",
+          "Experimental": "false",
+          "GitCommit": "568f755",
+          "GoVersion": "go1.26.3",
+          "KernelVersion": "6.8.0-117-generic",
+          "MinAPIVersion": "1.40",
+          "Module": "github.com/moby/moby/v2",
+          "ModuleVersion": "v2.0.0+unknown",
+          "Os": "linux"
+        }
+      },
+      {
+        "Name": "containerd",
+        "Version": "v2.2.4",
+        "Details": {
+          "GitCommit": "193637f7ee8ae5f5aa5248f49e7baa3e6164966e"
+        }
+      },
+      {
+        "Name": "runc",
+        "Version": "1.3.5",
+        "Details": {
+          "GitCommit": "v1.3.5-0-g488fc13e"
+        }
+      },
+      {
+        "Name": "docker-init",
+        "Version": "0.19.0",
+        "Details": {
+          "GitCommit": "de40ad0"
+        }
+      }
+    ],
+    "GitCommit": "568f755",
+    "GoVersion": "go1.26.3",
+    "KernelVersion": "6.8.0-117-generic",
+    "BuildTime": "2026-05-20T14:39:25.000000000+00:00"
+  },
+  "registry_requests": [
+    {
+      "method": "GET",
+      "path": "/v2/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v2/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v2/",
+      "status": 401
+    }
+  ],
+  "cleanup": {
+    "server_stopped": true,
+    "temporary_installation_removed": true,
+    "registry_closed": true,
+    "daemon_reconfigured": false,
+    "docker_resources_created": 0,
+    "errors": []
+  },
+  "result": "passed",
+  "finished_at": "2026-10-16T15:23:49.518543+00:00",
+  "artifact_qualification": "Final standalone Linux arm64 release binary recorded in artifacts.json; independent Ubuntu ARM64 VM, Engine 29.5.2. Fixture observed actual Engine TLS ClientHello and its failed pull; TCP and HTTP Registry API 200 succeeded independently.",
+  "prior_harness_attempts": [
+    {
+      "attempt": "wrapper-attempt.json",
+      "result": "failed",
+      "failure": "external tool failed (docker): invalid argument \"unix:///var/run/docker.sock\" for \"-H, --host\" flag: specify only one -H\n\nUsage:  docker [OPTIONS] COMMAND [ARG...]\n\nRun 'docker --help' for more information\n",
+      "cleanup": {
+        "server_stopped": true,
+        "temporary_installation_removed": true,
+        "registry_closed": true,
+        "daemon_reconfigured": false,
+        "docker_resources_created": 0,
+        "errors": []
+      }
+    },
+    {
+      "attempt": "dynamic-port-attempt.json",
+      "result": "failed",
+      "failure": "real Engine never requested the intentionally missing manifest",
+      "cleanup": {
+        "server_stopped": true,
+        "temporary_installation_removed": true,
+        "registry_closed": true,
+        "daemon_reconfigured": false,
+        "docker_resources_created": 0,
+        "errors": []
+      }
+    },
+    {
+      "attempt": "tls-policy-attempt.json",
+      "result": "failed",
+      "failure": "real Engine never requested the intentionally missing manifest: Error response from daemon: failed to resolve reference \"127.0.0.1:44091/dm-diagnostics-b2bb0275208b8f22/image:missing\": failed to do request: Head \"https://127.0.0.1:44091/v2/dm-diagnostics-b2bb0275208b8f22/image/manifests/missing\": tls: first record does not look like a TLS handshake; requests=[{\"method\": \"GET\", \"path\": \"/v2/\", \"status\": 200}, {\"method\": \"GET\", \"path\": \"/v2/\", \"status\": 200}]",
+      "cleanup": {
+        "server_stopped": true,
+        "temporary_installation_removed": true,
+        "registry_closed": true,
+        "daemon_reconfigured": false,
+        "docker_resources_created": 0,
+        "errors": []
+      }
+    }
+  ],
+  "harness_corrections": [
+    "Use actual guest Docker CLI because the existing tool wrapper already supplied --host.",
+    "Accept and record real Engine TLS-policy failure as an actual pull failure. A missing manifest is not required when current Engine routing refuses HTTP earlier; no daemon trust settings were changed."
+  ]
+}

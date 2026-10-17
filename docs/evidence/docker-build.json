@@ -1,0 +1,105 @@
+{
+  "verified_at": "2026-10-16T14:19:44.501813+00:00",
+  "compiled_input_sha256": "88333a7c8f5620426bda6d4879b66576b53872d663985fd360a848783dcff252",
+  "compiled_inputs": {
+    "Dockerfile": "7d11e60996440747f7144b4d7d517334be065fee385dd9ac6136c6c07ac89ed2",
+    "cmd/server/main.go": "b7f2747aa1a886cac8f3f27d653a9a305ec875bf504f5746f68cd91511434004",
+    "go.mod": "e2adf2b304a663db5191fcb53711fc83a56d5b00fd7ea0a48bc117878ee277a5",
+    "go.sum": "d81ff5654e68e69975d720f5b567e679d4a6de3d89de6bba5d735ba5cc497e43",
+    "internal/api/auth.go": "a926db640cc713fcfb8bccf5dc7d27ac7dd1a7275b1c541305c05f9e1a977f59",
+    "internal/api/dashboard.go": "fcbb5d13a4de05ff7c3b9e8c4ebc2450e9df73949f5e0a66bb9f230c8c9f2c82",
+    "internal/api/server.go": "ee7639e2625b97016d031696b7c53938d08917d3905c4af79b6862b6860ea191",
+    "internal/config/config.go": "26a9d859c92dc26f21444199d72df07329d681b4592bc8b173c9365438ae0622",
+    "internal/database/database.go": "8d96e576bb8e99b268547644387f3497acf82764a48560f9337d4acd304c54ec",
+    "internal/database/lock.go": "108bf4f19b5a2b963025b29d94315339db11a145388310e58d023d4d3f9b6938",
+    "internal/platform/app.go": "f22123449deb4090324a8801197ce2f7c09c60da5be0f39c768a4847d9df4199",
+    "internal/platform/http.go": "d34aac4ee8ab8709b8505cd583ebff025db8ae6192c936e6ca15b329b6190aeb",
+    "internal/resources/config.go": "73a989fbc0186c401371ca1de3e5cb33eb955c1a0c11189a272d61f64b8a81d5",
+    "internal/resources/images_storage.go": "0ed96c30717d083bc0bc89c4d0b5009ca1ae310a258eadf68735595d778f830e",
+    "internal/resources/resources.go": "6dbabb088b13154f6fcbff5991799b3ec34f3fa0ba29dc9c9df533b8c5c1bc6a",
+    "internal/resources/streams.go": "0348ba75281db8d86771d78d2b0710d6a3f2a336beae179220d66e566431a567",
+    "internal/restoreworker/run_linux.go": "69af0d9230d26226e091c934023b999ad1b904c2b1bd410f963d3d243f91a06f",
+    "internal/restoreworker/run_other.go": "e740e88bf6c0bf5d9e46a3ae1aa74e7bbd1b5285e04273891d791fc9125fcd18",
+    "internal/restoreworker/spec.go": "5343cc740c45312ca7fa64e1893508f2a13a251e100540a59a94902bfd31bfe5",
+    "internal/safepath/path.go": "3d622c17fbd46af899f1a3b84c7f5484f7e517b6f70727dda6aef489a01b59e8",
+    "internal/security/security.go": "eb4e7d7a61ff4a10430916782b5378f9388674d98567829b914cff7854a75fdb",
+    "internal/task/task.go": "bbcd28d77f01c89b7700da74612ec27e9d9bb9e00549803163ac9e6d7d33feae",
+    "internal/workflows/backup.go": "790b546cfd6be86683d8894f7a4ab382ba01934b2f40edda98279380addc1553",
+    "internal/workflows/compose.go": "adb41a1cff4f585f340da5a144df50003fc797ec356c529afaf00c9f28526e5f",
+    "internal/workflows/host.go": "376e492b5d3869d1069f24a3e016c6f3a607f120ddce739f98195483ae727d07",
+    "internal/workflows/process_group.go": "4a35387fc21d0523748c9e47d1a643a6e434691ca468f112c77b612f7a03faec",
+    "internal/workflows/process_linux.go": "c5526ca82f51dbd56b4c6caaea3c625f0fbb1acaa9b08cdafedccdaea716b338",
+    "internal/workflows/process_other.go": "dab9451fc229c8f1d3fd92cde9fe69b7d49a6ee0ab2d92545c0008dd621a506a",
+    "internal/workflows/process_unix.go": "c96ff7b909be4590f9d57051796aad59ea9d1d20c701960a8b8312da0f22c073",
+    "internal/workflows/recreate.go": "70fef6556f1272ab60845ab9d42b58fd258881443d63822b584f38166bb67948",
+    "internal/workflows/restore.go": "976010e8327e5c3b420c50153fff33c5e479191756358b0a65f40d03c28f54b2",
+    "internal/workflows/restore_worker.go": "e7001ae4ee5b297c56778f52be2578053d16acf2cf1bfc7067819d324e197365",
+    "internal/workflows/self_guard.go": "b5ff24c0c387617867bd88f68eb1502d2db539408d08df8bec6009e4b5dc74a4",
+    "internal/workflows/service.go": "7adb896908bbec716dc65140202de78a08bd36107b316b66d096d795e0b3ac4e",
+    "internal/workflows/verification.go": "cc2d3d878c5f1c2b60329f098e3932cca50637cf5de6ce22afa62f5a6d3ebf23",
+    "internal/workflows/worker_args.go": "3bb985a1919b89f8c1ec2d44ee6a2b6c57a09a1ffb2106a4ccc2fa744e4ae829",
+    "internal/workflows/worker_linux.go": "47737def8c3c48792f5ecf5dbcdb002f7306bb059c6fe29035346d5e9d7b092b",
+    "internal/workflows/worker_logs.go": "c9e30c03c280745b82e07ff58d4f9186639445e69624c2352d1fcf873c7ecdde",
+    "internal/workflows/worker_other.go": "78d48461df1ba85561e816b58961cab55b6d2876ae57af2ec2c77dfd23853e8e",
+    "web/embed.go": "9db73c124fcfea0050dfab7eb019ed6e593baa5362594a04d179a153408dde2b",
+    "web/index.html": "9a29bf7cbec93794ba853fd199b5a32576a537e5d6974438b22ef66d2c311dc0",
+    "web/package.json": "7afb77726b63ce2b69ab243939105da06707d7a52e7a997bc5f5219995c82917",
+    "web/pnpm-lock.yaml": "998fbe2f8bfa257225c035eb0fbb57ccaa4db6d80d35b3ef4c8f0daf9f298093",
+    "web/src/App.vue": "95caf55d031ac556c43b7a034ceac87cadc3d422f13de958d788a2727c267c8d",
+    "web/src/api.ts": "be39fb588f3e15465c1a4352755add4d9ddaed20974d117e940adada7b1c7f20",
+    "web/src/components/ConfirmDialog.vue": "fa075c116e0c040c0283d4f6d94b65b0cca01bf9e5bde52464abd5d51603768c",
+    "web/src/components/FormDialog.vue": "8814c744d3e5463824afebb1571fb0d4d39cbf26affe9c85522f098854a4a293",
+    "web/src/components/Notice.vue": "009faeb1a7eb159f9f43983b10b7496e901c9ff7f7cbc8eaf03ab12fe5e28be0",
+    "web/src/main.ts": "0a333f20c86caf275eb09cd70949f88a71911dcb67c7db0d878169152389d7a9",
+    "web/src/stores/auth.ts": "078970a51e0c25a99fdf83e7339923ba2dac209474291a4bb8ba4908076f527b",
+    "web/src/style.css": "5565152187a47b0836a83ce02de64ca58f2bab32a5f51a909d652a37e4d7be20",
+    "web/src/views/BackupView.vue": "aef7048496fdd51e8cdf4d101f41f052a4405c5df9f1d1f0a7fbe0368b709087",
+    "web/src/views/ComposeView.vue": "5878544a5214970d7f242e576c0e54b01c2cae3347fee4fed9920fe70f7bfd6b",
+    "web/src/views/DashboardView.vue": "04dd1495e7f92b149cb195419db746ca60f01bb7cc7b9e55a3f8092f770466f6",
+    "web/src/views/ResourcesView.vue": "8be8e3d5ac6b996d292750d28f6ccf4e9958cb823ab68b65789e326d59d7c2ef",
+    "web/src/views/SettingsView.vue": "d0518967faa24c413f4ca5a0febc99b5a558c0bf270779899e04cfc3adf92b54",
+    "web/src/views/TasksView.vue": "db0fb547c998eb690a809b579841364fe3dbe25e5e184667e85c88bd96d4d96b",
+    "web/vite.config.ts": "0c484d9ae723003a6ae081e361ece5dc5a116610973cfccd745e17a518254101"
+  },
+  "dockerfile_sha256": "7d11e60996440747f7144b4d7d517334be065fee385dd9ac6136c6c07ac89ed2",
+  "go_mod_sha256": "e2adf2b304a663db5191fcb53711fc83a56d5b00fd7ea0a48bc117878ee277a5",
+  "go_sum_sha256": "d81ff5654e68e69975d720f5b567e679d4a6de3d89de6bba5d735ba5cc497e43",
+  "frontend_lock_sha256": "998fbe2f8bfa257225c035eb0fbb57ccaa4db6d80d35b3ef4c8f0daf9f298093",
+  "build_platform": "linux/arm64",
+  "qemu_used": false,
+  "target_platforms": [
+    "linux/amd64",
+    "linux/arm64"
+  ],
+  "runtime_validation": "platforms/*.json",
+  "images": [
+    {
+      "Id": "sha256:d3c50f7ecd39c20bd5255fde43a51de0e2411a980de1a0cee1ef884560ce39b7",
+      "RepoTags": [
+        "docker-manager:v0.3.0-amd64"
+      ],
+      "Architecture": "amd64",
+      "Os": "linux",
+      "Created": "2026-10-16T22:11:32.4636358+08:00",
+      "Descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:d3c50f7ecd39c20bd5255fde43a51de0e2411a980de1a0cee1ef884560ce39b7",
+        "size": 856
+      }
+    },
+    {
+      "Id": "sha256:993e8705118179a3fdaba03f63f368138e14713fd584dd90f20f0e559d2235fa",
+      "RepoTags": [
+        "docker-manager:v0.3.0-arm64"
+      ],
+      "Architecture": "arm64",
+      "Os": "linux",
+      "Created": "2026-10-16T22:12:12.703922566+08:00",
+      "Descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:993e8705118179a3fdaba03f63f368138e14713fd584dd90f20f0e559d2235fa",
+        "size": 856
+      }
+    }
+  ]
+}

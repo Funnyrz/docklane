@@ -1,0 +1,56 @@
+{
+  "recorded_at": "2026-10-16T15:47:22.826254+00:00",
+  "result": "passed",
+  "environment": "Full-system QEMU 11.1.2 TCG x86_64 guests, independent Linux kernels and systemd; host macOS arm64",
+  "platforms": [
+    {
+      "platform": "ubuntu24-amd64",
+      "os": "Ubuntu 24.04.5 LTS",
+      "kernel": "6.8.0-146-generic",
+      "engine": "29.5.2",
+      "platform_checks_passed": 10,
+      "integration_checks_passed": 16,
+      "platform_evidence": "platforms/ubuntu24-amd64-kernel.json",
+      "integration_evidence": "platforms/ubuntu24-amd64-integration.json",
+      "boot_id_before": "6803192e-46c7-4673-9987-0f8c3dec713b",
+      "boot_id_after": "3930a67e-cc77-4d0f-b91a-c92e5d6b78c7",
+      "binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+    },
+    {
+      "platform": "debian12-amd64",
+      "os": "Debian GNU/Linux 12 (bookworm)",
+      "kernel": "6.1.0-53-cloud-amd64",
+      "engine": "28.5.1",
+      "platform_checks_passed": 10,
+      "integration_checks_passed": 16,
+      "platform_evidence": "platforms/debian12-amd64-kernel.json",
+      "integration_evidence": "platforms/debian12-amd64-integration.json",
+      "boot_id_before": "8b2773c3-e18a-4b99-add6-f6ed926185ad",
+      "boot_id_after": "47ef7842-819e-4814-820c-7458212efc97",
+      "binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+    },
+    {
+      "platform": "debian13-amd64",
+      "os": "Debian GNU/Linux 13 (trixie)",
+      "kernel": "6.12.111+deb13-cloud-amd64",
+      "engine": "29.5.2",
+      "platform_checks_passed": 10,
+      "integration_checks_passed": 16,
+      "platform_evidence": "platforms/debian13-amd64-kernel.json",
+      "integration_evidence": "platforms/debian13-amd64-integration.json",
+      "boot_id_before": "07b3683f-b2a5-494f-bf22-939582e3c81e",
+      "boot_id_after": "c84e3c49-f5ea-44a7-b3c9-0b218ac53315",
+      "binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+    }
+  ],
+  "platform_checks_passed": 30,
+  "integration_checks_passed": 48,
+  "counts_note": "The 30 platform checks are also included in the primary matrix 60; the additional 48 integration checks are separate.",
+  "provenance": "platforms/amd64-kernel-provenance.json",
+  "limitations": [
+    "Software CPU emulation does not measure native x86_64 hardware performance.",
+    "Historical native x86_64 LXD runtime evidence is supplementary and is never treated as an independent kernel VM.",
+    "No remote CI, image push, or formal release occurred."
+  ],
+  "controller_handoff_note": "Two one-off host controller stop commands timed out after all platform phases passed because the next suite restarted too early. Full logs and correction are retained in provenance; final control handoff is independently verified."
+}

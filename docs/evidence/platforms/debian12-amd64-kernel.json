@@ -1,0 +1,688 @@
+{
+  "phases": [
+    {
+      "phase": "prepare",
+      "started_at": "2026-10-16T15:31:02.262614+00:00",
+      "checks": [
+        {
+          "name": "actual install preserves pre-existing fixture and seeds encrypted backup/restore",
+          "status": "passed",
+          "evidence": {
+            "expected": {
+              "user_id": "4ab353221a865966d4ca7fe7b608e286",
+              "repository_id": "0d3bfd14094bdae58fe59718ec95eaf8",
+              "policy_id": "600d0f60a73211cd68b0c04f5d7dc6bd",
+              "task_ids": [
+                "1665a6346cd926eb39874cb1b81fd5d7",
+                "def6f00b854cfa67426df149f4ce4fa6"
+              ],
+              "snapshot_id": "65ce6c44b8d2283636d8925df9169fbb01cc69ef730bbb7c52f0b8ef95e33855",
+              "restored_payload": "/var/lib/dm-platform-debian12-amd64-kernel/fixture/restored/var/lib/dm-platform-debian12-amd64-kernel/fixture/source/payload.bin"
+            },
+            "original_container_id": "88e2a2910774406bd3fca7ec297cb74baf9d43956d8110dbd9f0606830356685",
+            "unit": {
+              "MainPID": "1267",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ActiveState": "active",
+              "SubState": "running",
+              "FragmentPath": "/etc/systemd/system/docker-manager.service",
+              "UnitFileState": "enabled"
+            },
+            "master_key_sha256": "6adcccbce253c123a2cf85342aa79c7c72b4d302a121b7a22782aef3d9ecb599"
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Debian GNU/Linux 12 (bookworm)",
+          "NAME": "Debian GNU/Linux",
+          "VERSION_ID": "12",
+          "VERSION": "12 (bookworm)",
+          "VERSION_CODENAME": "bookworm",
+          "ID": "debian",
+          "HOME_URL": "https://www.debian.org/",
+          "SUPPORT_URL": "https://www.debian.org/support",
+          "BUG_REPORT_URL": "https://bugs.debian.org/"
+        },
+        "machine": "x86_64",
+        "kernel": "6.1.0-53-cloud-amd64",
+        "environment": "emulated-vm",
+        "process": {
+          "boot_id": "8b2773c3-e18a-4b99-add6-f6ed926185ad",
+          "pid1_start_ticks": "37",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "28.5.1",
+              "Details": {
+                "ApiVersion": "1.51",
+                "Arch": "amd64",
+                "BuildTime": "Wed Oct  8 12:18:57 2025",
+                "Experimental": "false",
+                "GitCommit": "f8215cc2",
+                "GoVersion": "go1.24.8",
+                "KernelVersion": "6.1.0-53-cloud-amd64",
+                "MinAPIVersion": "1.24",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v1.7.28",
+              "Details": {
+                "GitCommit": "b98a3aace656320842a23f4a392a33f46af97866"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.0",
+              "Details": {
+                "GitCommit": "v1.3.0-0-g4ca628d"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "Version": "28.5.1",
+          "ApiVersion": "1.51",
+          "MinAPIVersion": "1.24",
+          "GitCommit": "f8215cc2",
+          "GoVersion": "go1.24.8",
+          "Os": "linux",
+          "Arch": "amd64",
+          "KernelVersion": "6.1.0-53-cloud-amd64",
+          "BuildTime": "2025-10-08T12:18:57.000000000+00:00"
+        },
+        "docker_cli": "Docker version 28.5.1, build e180ab8",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/amd64",
+        "supplied_binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T15:31:40.722948+00:00"
+    },
+    {
+      "phase": "resume",
+      "started_at": "2026-10-16T15:32:42.302556+00:00",
+      "checks": [
+        {
+          "name": "actual guest restart preserves enabled service/container identity and all management data",
+          "status": "passed",
+          "evidence": {
+            "before": {
+              "boot_id": "8b2773c3-e18a-4b99-add6-f6ed926185ad",
+              "pid1_start_ticks": "37",
+              "pid1_comm": "systemd",
+              "pid1_command": "/sbin/init"
+            },
+            "after": {
+              "boot_id": "47ef7842-819e-4814-820c-7458212efc97",
+              "pid1_start_ticks": "58",
+              "pid1_comm": "systemd",
+              "pid1_command": "/sbin/init"
+            },
+            "retained": {
+              "user_id": "4ab353221a865966d4ca7fe7b608e286",
+              "repository_id": "0d3bfd14094bdae58fe59718ec95eaf8",
+              "policy_id": "600d0f60a73211cd68b0c04f5d7dc6bd",
+              "task_ids": [
+                "1665a6346cd926eb39874cb1b81fd5d7",
+                "def6f00b854cfa67426df149f4ce4fa6"
+              ],
+              "snapshot_id": "65ce6c44b8d2283636d8925df9169fbb01cc69ef730bbb7c52f0b8ef95e33855",
+              "restored_payload": "/var/lib/dm-platform-debian12-amd64-kernel/fixture/restored/var/lib/dm-platform-debian12-amd64-kernel/fixture/source/payload.bin",
+              "original_container_id": "88e2a2910774406bd3fca7ec297cb74baf9d43956d8110dbd9f0606830356685",
+              "restored_sha256": "cb307e7fa1cfb8f119ab0911103482ceadeea77ef516286634d78baf9998e434"
+            },
+            "unit": {
+              "MainPID": "859",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ActiveState": "active",
+              "SubState": "running",
+              "FragmentPath": "/etc/systemd/system/docker-manager.service",
+              "UnitFileState": "enabled"
+            }
+          }
+        },
+        {
+          "name": "actual same-version upgrade creates matching backup and preserves management data",
+          "status": "passed",
+          "evidence": {
+            "backup": {
+              "path": "/var/backups/docker-manager/20261016T153248Z",
+              "fingerprints": {
+                "database": "0a7d6b63076620a5bd7ca81165579b39e562b4143a634d220b04a15e98eb49d7",
+                "master_key": "6adcccbce253c123a2cf85342aa79c7c72b4d302a121b7a22782aef3d9ecb599",
+                "config": "21148fba2705c13c6c501099fd7e77e87faaf73f542f54d1f04bc4eddbd4a3ec",
+                "binary": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+              },
+              "exit_code": 0
+            },
+            "retained": {
+              "user_id": "4ab353221a865966d4ca7fe7b608e286",
+              "repository_id": "0d3bfd14094bdae58fe59718ec95eaf8",
+              "policy_id": "600d0f60a73211cd68b0c04f5d7dc6bd",
+              "task_ids": [
+                "1665a6346cd926eb39874cb1b81fd5d7",
+                "def6f00b854cfa67426df149f4ce4fa6"
+              ],
+              "snapshot_id": "65ce6c44b8d2283636d8925df9169fbb01cc69ef730bbb7c52f0b8ef95e33855",
+              "restored_payload": "/var/lib/dm-platform-debian12-amd64-kernel/fixture/restored/var/lib/dm-platform-debian12-amd64-kernel/fixture/source/payload.bin",
+              "original_container_id": "88e2a2910774406bd3fca7ec297cb74baf9d43956d8110dbd9f0606830356685",
+              "restored_sha256": "cb307e7fa1cfb8f119ab0911103482ceadeea77ef516286634d78baf9998e434"
+            },
+            "limitation": "Same-version lifecycle check; no historical business release or migration result is fabricated."
+          }
+        },
+        {
+          "name": "actual invalid-binary upgrade fails and leaves service stopped",
+          "status": "passed",
+          "evidence": {
+            "backup": {
+              "path": "/var/backups/docker-manager/20261016T153255Z",
+              "fingerprints": {
+                "database": "638cba1120a1c00704098d8a955b8ac1a8269c58a639e4fcd0b916ddc4c7062e",
+                "master_key": "6adcccbce253c123a2cf85342aa79c7c72b4d302a121b7a22782aef3d9ecb599",
+                "config": "21148fba2705c13c6c501099fd7e77e87faaf73f542f54d1f04bc4eddbd4a3ec",
+                "binary": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+              },
+              "exit_code": 1
+            },
+            "unit": {
+              "MainPID": "0",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ActiveState": "inactive",
+              "SubState": "dead",
+              "FragmentPath": "/etc/systemd/system/docker-manager.service",
+              "UnitFileState": "enabled"
+            }
+          }
+        },
+        {
+          "name": "documented matching binary/config/database/key rollback recovers service and data",
+          "status": "passed",
+          "evidence": {
+            "retained": {
+              "user_id": "4ab353221a865966d4ca7fe7b608e286",
+              "repository_id": "0d3bfd14094bdae58fe59718ec95eaf8",
+              "policy_id": "600d0f60a73211cd68b0c04f5d7dc6bd",
+              "task_ids": [
+                "1665a6346cd926eb39874cb1b81fd5d7",
+                "def6f00b854cfa67426df149f4ce4fa6"
+              ],
+              "snapshot_id": "65ce6c44b8d2283636d8925df9169fbb01cc69ef730bbb7c52f0b8ef95e33855",
+              "restored_payload": "/var/lib/dm-platform-debian12-amd64-kernel/fixture/restored/var/lib/dm-platform-debian12-amd64-kernel/fixture/source/payload.bin",
+              "original_container_id": "88e2a2910774406bd3fca7ec297cb74baf9d43956d8110dbd9f0606830356685",
+              "restored_sha256": "cb307e7fa1cfb8f119ab0911103482ceadeea77ef516286634d78baf9998e434"
+            }
+          }
+        },
+        {
+          "name": "actual uninstall preserves database/key/config/account/repository and external container",
+          "status": "passed",
+          "evidence": {
+            "master_key_sha256": "6adcccbce253c123a2cf85342aa79c7c72b4d302a121b7a22782aef3d9ecb599"
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Debian GNU/Linux 12 (bookworm)",
+          "NAME": "Debian GNU/Linux",
+          "VERSION_ID": "12",
+          "VERSION": "12 (bookworm)",
+          "VERSION_CODENAME": "bookworm",
+          "ID": "debian",
+          "HOME_URL": "https://www.debian.org/",
+          "SUPPORT_URL": "https://www.debian.org/support",
+          "BUG_REPORT_URL": "https://bugs.debian.org/"
+        },
+        "machine": "x86_64",
+        "kernel": "6.1.0-53-cloud-amd64",
+        "environment": "emulated-vm",
+        "process": {
+          "boot_id": "47ef7842-819e-4814-820c-7458212efc97",
+          "pid1_start_ticks": "58",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "28.5.1",
+              "Details": {
+                "ApiVersion": "1.51",
+                "Arch": "amd64",
+                "BuildTime": "Wed Oct  8 12:18:57 2025",
+                "Experimental": "false",
+                "GitCommit": "f8215cc2",
+                "GoVersion": "go1.24.8",
+                "KernelVersion": "6.1.0-53-cloud-amd64",
+                "MinAPIVersion": "1.24",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v1.7.28",
+              "Details": {
+                "GitCommit": "b98a3aace656320842a23f4a392a33f46af97866"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.0",
+              "Details": {
+                "GitCommit": "v1.3.0-0-g4ca628d"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "Version": "28.5.1",
+          "ApiVersion": "1.51",
+          "MinAPIVersion": "1.24",
+          "GitCommit": "f8215cc2",
+          "GoVersion": "go1.24.8",
+          "Os": "linux",
+          "Arch": "amd64",
+          "KernelVersion": "6.1.0-53-cloud-amd64",
+          "BuildTime": "2025-10-08T12:18:57.000000000+00:00"
+        },
+        "docker_cli": "Docker version 28.5.1, build e180ab8",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/amd64",
+        "supplied_binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T15:33:08.391610+00:00"
+    },
+    {
+      "phase": "migration",
+      "started_at": "2026-10-16T15:33:09.386379+00:00",
+      "checks": [
+        {
+          "name": "actual migration SQL abort stops upgrade and preserves matching recovery material",
+          "status": "passed",
+          "evidence": {
+            "backup": {
+              "path": "/var/backups/docker-manager/20261016T153318Z",
+              "fingerprints": {
+                "database": "5e68893464754fb28f140bd896e0a66c3f425b599fb764ebe540eb5d827ca350",
+                "master_key": "6adcccbce253c123a2cf85342aa79c7c72b4d302a121b7a22782aef3d9ecb599",
+                "config": "21148fba2705c13c6c501099fd7e77e87faaf73f542f54d1f04bc4eddbd4a3ec",
+                "binary": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+              },
+              "exit_code": 1
+            },
+            "injection": "DM_ACCEPTANCE_MIGRATION_ABORT",
+            "applied_versions": [
+              1
+            ],
+            "unit": {
+              "MainPID": "0",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ActiveState": "inactive",
+              "SubState": "dead",
+              "FragmentPath": "/etc/systemd/system/docker-manager.service",
+              "UnitFileState": "enabled"
+            },
+            "limitation": "Explicit SQL fault injection on schema v1; not a cross-business-version migration claim."
+          }
+        },
+        {
+          "name": "matching-group recovery after removing injected SQL fault preserves all management data",
+          "status": "passed",
+          "evidence": {
+            "retained": {
+              "user_id": "4ab353221a865966d4ca7fe7b608e286",
+              "repository_id": "0d3bfd14094bdae58fe59718ec95eaf8",
+              "policy_id": "600d0f60a73211cd68b0c04f5d7dc6bd",
+              "task_ids": [
+                "1665a6346cd926eb39874cb1b81fd5d7",
+                "def6f00b854cfa67426df149f4ce4fa6"
+              ],
+              "snapshot_id": "65ce6c44b8d2283636d8925df9169fbb01cc69ef730bbb7c52f0b8ef95e33855",
+              "restored_payload": "/var/lib/dm-platform-debian12-amd64-kernel/fixture/restored/var/lib/dm-platform-debian12-amd64-kernel/fixture/source/payload.bin",
+              "original_container_id": "88e2a2910774406bd3fca7ec297cb74baf9d43956d8110dbd9f0606830356685",
+              "restored_sha256": "cb307e7fa1cfb8f119ab0911103482ceadeea77ef516286634d78baf9998e434"
+            }
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Debian GNU/Linux 12 (bookworm)",
+          "NAME": "Debian GNU/Linux",
+          "VERSION_ID": "12",
+          "VERSION": "12 (bookworm)",
+          "VERSION_CODENAME": "bookworm",
+          "ID": "debian",
+          "HOME_URL": "https://www.debian.org/",
+          "SUPPORT_URL": "https://www.debian.org/support",
+          "BUG_REPORT_URL": "https://bugs.debian.org/"
+        },
+        "machine": "x86_64",
+        "kernel": "6.1.0-53-cloud-amd64",
+        "environment": "emulated-vm",
+        "process": {
+          "boot_id": "47ef7842-819e-4814-820c-7458212efc97",
+          "pid1_start_ticks": "58",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "28.5.1",
+              "Details": {
+                "ApiVersion": "1.51",
+                "Arch": "amd64",
+                "BuildTime": "Wed Oct  8 12:18:57 2025",
+                "Experimental": "false",
+                "GitCommit": "f8215cc2",
+                "GoVersion": "go1.24.8",
+                "KernelVersion": "6.1.0-53-cloud-amd64",
+                "MinAPIVersion": "1.24",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v1.7.28",
+              "Details": {
+                "GitCommit": "b98a3aace656320842a23f4a392a33f46af97866"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.0",
+              "Details": {
+                "GitCommit": "v1.3.0-0-g4ca628d"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "Version": "28.5.1",
+          "ApiVersion": "1.51",
+          "MinAPIVersion": "1.24",
+          "GitCommit": "f8215cc2",
+          "GoVersion": "go1.24.8",
+          "Os": "linux",
+          "Arch": "amd64",
+          "KernelVersion": "6.1.0-53-cloud-amd64",
+          "BuildTime": "2025-10-08T12:18:57.000000000+00:00"
+        },
+        "docker_cli": "Docker version 28.5.1, build e180ab8",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/amd64",
+        "supplied_binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T15:33:29.949876+00:00"
+    },
+    {
+      "phase": "docker",
+      "started_at": "2026-10-16T15:33:30.994831+00:00",
+      "checks": [
+        {
+          "name": "real image remove/recreate preserves named-volume users/session/policy/repository/tasks/key",
+          "status": "passed",
+          "evidence": {
+            "first_container_id": "3b64e0bb98abfb853cbe805efc74fd0cfd16d145761af9a0885236a8acae100e",
+            "replacement_container_id": "ff7d043a17d87902e59b28273513720174ee02154b5bef90d92095eb6efeea2b",
+            "volume": "dm-platform-f2895b072ce5e2cd-manager-data",
+            "image_id": "sha256:45e1e289bb2e0900a7c6e62de3233f6db56023d6c2fdded2c0a97755f93726d7",
+            "image_architecture": "amd64",
+            "explicit_mappings": [
+              {
+                "host": "/var/lib/dm-platform-debian12-amd64-kernel/docker-fixture/source",
+                "local": "/source",
+                "read_only": true
+              },
+              {
+                "host": "/var/lib/dm-platform-debian12-amd64-kernel/docker-fixture/repository",
+                "local": "/repository",
+                "read_only": false
+              },
+              {
+                "host": "/var/lib/dm-platform-debian12-amd64-kernel/docker-fixture/restored",
+                "local": "/restored",
+                "read_only": false
+              }
+            ],
+            "master_key_sha256": "88deabc361761a88247fde34991e45ea0d104d2e12bd1f2d602020a215aaaf60",
+            "tools": {
+              "compose": "2.40.3",
+              "restic": "restic 0.19.1 compiled with go1.26.4 on linux/amd64"
+            },
+            "retained": {
+              "user_id": "589eb11002494e709beb386a1ea2c295",
+              "repository_id": "bc0b04a6ae7cd98377919d3fdd30267e",
+              "policy_id": "af07332a579b7601ed7e7496cef21594",
+              "task_ids": [
+                "67bd23241d2eb5d671137f81753d252d",
+                "ed3a95bfca476740b22b2fcb6e8d2624"
+              ],
+              "snapshot_id": "953cab40de0694939887534894f1a75bec3d643d9d65fa423c34c4e8aeb46e32",
+              "restored_payload": "/var/lib/dm-platform-debian12-amd64-kernel/docker-fixture/restored/sources/000/payload.bin",
+              "original_container_id": "00719ad028faf0d09687e236a806e65b326d02d3a06989530f94774448afa604",
+              "restored_sha256": "576c357627fabe0a1aa46cddb2e47a1604a7b5f4fb55176152f3dec7881c6543"
+            },
+            "host_root_mounted": false
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Debian GNU/Linux 12 (bookworm)",
+          "NAME": "Debian GNU/Linux",
+          "VERSION_ID": "12",
+          "VERSION": "12 (bookworm)",
+          "VERSION_CODENAME": "bookworm",
+          "ID": "debian",
+          "HOME_URL": "https://www.debian.org/",
+          "SUPPORT_URL": "https://www.debian.org/support",
+          "BUG_REPORT_URL": "https://bugs.debian.org/"
+        },
+        "machine": "x86_64",
+        "kernel": "6.1.0-53-cloud-amd64",
+        "environment": "emulated-vm",
+        "process": {
+          "boot_id": "47ef7842-819e-4814-820c-7458212efc97",
+          "pid1_start_ticks": "58",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "28.5.1",
+              "Details": {
+                "ApiVersion": "1.51",
+                "Arch": "amd64",
+                "BuildTime": "Wed Oct  8 12:18:57 2025",
+                "Experimental": "false",
+                "GitCommit": "f8215cc2",
+                "GoVersion": "go1.24.8",
+                "KernelVersion": "6.1.0-53-cloud-amd64",
+                "MinAPIVersion": "1.24",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v1.7.28",
+              "Details": {
+                "GitCommit": "b98a3aace656320842a23f4a392a33f46af97866"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.0",
+              "Details": {
+                "GitCommit": "v1.3.0-0-g4ca628d"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "Version": "28.5.1",
+          "ApiVersion": "1.51",
+          "MinAPIVersion": "1.24",
+          "GitCommit": "f8215cc2",
+          "GoVersion": "go1.24.8",
+          "Os": "linux",
+          "Arch": "amd64",
+          "KernelVersion": "6.1.0-53-cloud-amd64",
+          "BuildTime": "2025-10-08T12:18:57.000000000+00:00"
+        },
+        "docker_cli": "Docker version 28.5.1, build e180ab8",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/amd64",
+        "supplied_binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T15:34:04.999243+00:00"
+    },
+    {
+      "phase": "cleanup",
+      "started_at": "2026-10-16T15:34:06.341011+00:00",
+      "checks": [
+        {
+          "name": "owned installation/resources/secret fixtures cleaned; report retained",
+          "status": "passed",
+          "evidence": {
+            "remaining_owned_containers": []
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Debian GNU/Linux 12 (bookworm)",
+          "NAME": "Debian GNU/Linux",
+          "VERSION_ID": "12",
+          "VERSION": "12 (bookworm)",
+          "VERSION_CODENAME": "bookworm",
+          "ID": "debian",
+          "HOME_URL": "https://www.debian.org/",
+          "SUPPORT_URL": "https://www.debian.org/support",
+          "BUG_REPORT_URL": "https://bugs.debian.org/"
+        },
+        "machine": "x86_64",
+        "kernel": "6.1.0-53-cloud-amd64",
+        "environment": "emulated-vm",
+        "process": {
+          "boot_id": "47ef7842-819e-4814-820c-7458212efc97",
+          "pid1_start_ticks": "58",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "28.5.1",
+              "Details": {
+                "ApiVersion": "1.51",
+                "Arch": "amd64",
+                "BuildTime": "Wed Oct  8 12:18:57 2025",
+                "Experimental": "false",
+                "GitCommit": "f8215cc2",
+                "GoVersion": "go1.24.8",
+                "KernelVersion": "6.1.0-53-cloud-amd64",
+                "MinAPIVersion": "1.24",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v1.7.28",
+              "Details": {
+                "GitCommit": "b98a3aace656320842a23f4a392a33f46af97866"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.0",
+              "Details": {
+                "GitCommit": "v1.3.0-0-g4ca628d"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "Version": "28.5.1",
+          "ApiVersion": "1.51",
+          "MinAPIVersion": "1.24",
+          "GitCommit": "f8215cc2",
+          "GoVersion": "go1.24.8",
+          "Os": "linux",
+          "Arch": "amd64",
+          "KernelVersion": "6.1.0-53-cloud-amd64",
+          "BuildTime": "2025-10-08T12:18:57.000000000+00:00"
+        },
+        "docker_cli": "Docker version 28.5.1, build e180ab8",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/amd64",
+        "supplied_binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T15:34:14.720019+00:00"
+    }
+  ],
+  "state": "/var/lib/dm-platform-debian12-amd64-kernel",
+  "namespace": "dm-platform-f2895b072ce5e2cd"
+}

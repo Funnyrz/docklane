@@ -1,0 +1,9 @@
+.git
+.omx
+node_modules
+web/node_modules
+web/dist
+bin
+data
+coverage
+*.db*

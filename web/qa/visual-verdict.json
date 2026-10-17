@@ -1,0 +1,8 @@
+{
+  "score": 94,
+  "verdict": "pass",
+  "category_match": true,
+  "differences": [],
+  "suggestions": [],
+  "reasoning": "Desktop and 390px screenshots retain the intended industrial operations hierarchy, warm off-white surfaces, dark navigation and restrained status colors, with readable cards and contained table scrolling. No reference image was supplied: this is design-direction and responsive-layout self-review, not an external-reference fidelity score."
+}

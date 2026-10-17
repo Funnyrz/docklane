@@ -1,0 +1,149 @@
+RUN limactl start -y --timeout=10m dm-release-ubuntu24-amd64-kernel
+time="2026-10-16T23:35:03+08:00" level=info msg="Using the existing instance `dm-release-ubuntu24-amd64-kernel`"
+time="2026-10-16T23:35:03+08:00" level=info msg="Starting the instance `dm-release-ubuntu24-amd64-kernel` with internal VM driver `qemu`"
+time="2026-10-16T23:35:03+08:00" level=info msg="[hostagent] hostagent socket created at /Users/fuyangyang/.lima/dm-release-ubuntu24-amd64-kernel/ha.sock"
+time="2026-10-16T23:35:04+08:00" level=info msg="[hostagent] Using system firmware (`/opt/homebrew/share/qemu/edk2-x86_64-code.fd`)"
+time="2026-10-16T23:35:04+08:00" level=info msg="[hostagent] Starting QEMU (hint: to watch the boot progress, see `/Users/fuyangyang/.lima/dm-release-ubuntu24-amd64-kernel/serial*.log`)"
+time="2026-10-16T23:35:04+08:00" level=info msg="SSH Local Port: 56788"
+time="2026-10-16T23:35:04+08:00" level=info msg="[hostagent] Running in plain mode. Mounts, dynamic port forwarding, containerd, etc. will be ignored. Guest agent will not be running."
+time="2026-10-16T23:35:04+08:00" level=info msg="[hostagent] Waiting for the essential requirement 1 of 2: `ssh`"
+time="2026-10-16T23:35:54+08:00" level=info msg="[hostagent] The essential requirement 1 of 2 is satisfied"
+time="2026-10-16T23:35:54+08:00" level=info msg="[hostagent] Waiting for the essential requirement 2 of 2: `Explicitly start ssh ControlMaster`"
+time="2026-10-16T23:35:55+08:00" level=info msg="[hostagent] The essential requirement 2 of 2 is satisfied"
+time="2026-10-16T23:35:55+08:00" level=info msg="[hostagent] Waiting for the final requirement 1 of 1: `boot scripts must have finished`"
+time="2026-10-16T23:36:05+08:00" level=info msg="[hostagent] The final requirement 1 of 1 is satisfied"
+time="2026-10-16T23:36:05+08:00" level=info msg="READY. Run `ssh -F `/Users/fuyangyang/.lima/dm-release-ubuntu24-amd64-kernel/ssh.config` lima-dm-release-ubuntu24-amd64-kernel` to open the shell."
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 python3 /opt/dm-kernel-acceptance/bootstrap.py --root /opt/dm-kernel-acceptance --engine 29.5.2
+groupadd: group 'docker' already exists
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  libip4tc2 libip6tc2 libnetfilter-conntrack3 libnfnetlink0 libnftnl11
+Suggested packages:
+  firewalld
+Recommended packages:
+  nftables
+The following NEW packages will be installed:
+  iptables libip4tc2 libip6tc2 libnetfilter-conntrack3 libnfnetlink0
+  libnftnl11
+0 upgraded, 6 newly installed, 0 to remove and 25 not upgraded.
+Need to get 554 kB of archives.
+After this operation, 3049 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble/main amd64 libip4tc2 amd64 1.8.10-3ubuntu2 [23.3 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble/main amd64 libip6tc2 amd64 1.8.10-3ubuntu2 [23.7 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble/main amd64 libnfnetlink0 amd64 1.0.2-2build1 [14.8 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble/main amd64 libnetfilter-conntrack3 amd64 1.0.9-6build1 [45.2 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble/main amd64 libnftnl11 amd64 1.2.6-2build1 [66.0 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble/main amd64 iptables amd64 1.8.10-3ubuntu2 [381 kB]
+debconf: delaying package configuration, since apt-utils is not installed
+Fetched 554 kB in 6s (100 kB/s)
+Selecting previously unselected package libip4tc2:amd64.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15099 files and directories currently installed.)
+Preparing to unpack .../0-libip4tc2_1.8.10-3ubuntu2_amd64.deb ...
+Unpacking libip4tc2:amd64 (1.8.10-3ubuntu2) ...
+Selecting previously unselected package libip6tc2:amd64.
+Preparing to unpack .../1-libip6tc2_1.8.10-3ubuntu2_amd64.deb ...
+Unpacking libip6tc2:amd64 (1.8.10-3ubuntu2) ...
+Selecting previously unselected package libnfnetlink0:amd64.
+Preparing to unpack .../2-libnfnetlink0_1.0.2-2build1_amd64.deb ...
+Unpacking libnfnetlink0:amd64 (1.0.2-2build1) ...
+Selecting previously unselected package libnetfilter-conntrack3:amd64.
+Preparing to unpack .../3-libnetfilter-conntrack3_1.0.9-6build1_amd64.deb ...
+Unpacking libnetfilter-conntrack3:amd64 (1.0.9-6build1) ...
+Selecting previously unselected package libnftnl11:amd64.
+Preparing to unpack .../4-libnftnl11_1.2.6-2build1_amd64.deb ...
+Unpacking libnftnl11:amd64 (1.2.6-2build1) ...
+Selecting previously unselected package iptables.
+Preparing to unpack .../5-iptables_1.8.10-3ubuntu2_amd64.deb ...
+Unpacking iptables (1.8.10-3ubuntu2) ...
+Setting up libip4tc2:amd64 (1.8.10-3ubuntu2) ...
+Setting up libip6tc2:amd64 (1.8.10-3ubuntu2) ...
+Setting up libnftnl11:amd64 (1.2.6-2build1) ...
+Setting up libnfnetlink0:amd64 (1.0.2-2build1) ...
+Setting up libnetfilter-conntrack3:amd64 (1.0.9-6build1) ...
+Setting up iptables (1.8.10-3ubuntu2) ...
+update-alternatives: using /usr/sbin/iptables-legacy to provide /usr/sbin/iptables (iptables) in auto mode
+update-alternatives: using /usr/sbin/ip6tables-legacy to provide /usr/sbin/ip6tables (ip6tables) in auto mode
+update-alternatives: using /usr/sbin/iptables-nft to provide /usr/sbin/iptables (iptables) in auto mode
+update-alternatives: using /usr/sbin/ip6tables-nft to provide /usr/sbin/ip6tables (ip6tables) in auto mode
+update-alternatives: using /usr/sbin/arptables-nft to provide /usr/sbin/arptables (arptables) in auto mode
+update-alternatives: using /usr/sbin/ebtables-nft to provide /usr/sbin/ebtables (ebtables) in auto mode
+Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/docker.service → /etc/systemd/system/docker.service.
+Loaded image: docker-manager:v0.3.0-amd64
+29.5.2
+2.40.3
+restic 0.19.1 compiled with go1.26.4 on linux/amd64
+BOOTSTRAP PASS Linux-6.8.0-146-generic-x86_64-with-glibc2.39
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 DM_PLATFORM_ENVIRONMENT=emulated-vm python3 /opt/dm-kernel-acceptance/source/scripts/platform-acceptance.py --phase prepare --state /var/lib/dm-platform-ubuntu24-amd64-kernel --source /opt/dm-kernel-acceptance/source --binary /opt/dm-kernel-acceptance/docker-manager-linux-amd64 --image docker-manager:v0.3.0 --fixture-image docker-manager:v0.3.0 --report /var/lib/dm-platform-ubuntu24-amd64-kernel-report.json
+PASS actual install preserves pre-existing fixture and seeds encrypted backup/restore
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo chmod 0644 /var/lib/dm-platform-ubuntu24-amd64-kernel-report.json
+RUN limactl copy --backend=scp dm-release-ubuntu24-amd64-kernel:/var/lib/dm-platform-ubuntu24-amd64-kernel-report.json /Users/fuyangyang/Projects/Private/docker-manager/docs/evidence/platforms/ubuntu24-amd64-kernel.json
+RUN limactl stop dm-release-ubuntu24-amd64-kernel
+time="2026-10-16T23:39:19+08:00" level=info msg="Sending SIGINT to hostagent process 30723"
+time="2026-10-16T23:39:19+08:00" level=info msg="Waiting for the host agent and the driver processes to shut down"
+time="2026-10-16T23:39:19+08:00" level=info msg="[hostagent] Received SIGINT, shutting down the host agent"
+time="2026-10-16T23:39:19+08:00" level=info msg="[hostagent] Shutting down the host agent"
+time="2026-10-16T23:39:19+08:00" level=info msg="[hostagent] Shutting down QEMU with the power button"
+time="2026-10-16T23:39:19+08:00" level=info msg="[hostagent] Sending QMP system_powerdown command"
+time="2026-10-16T23:39:23+08:00" level=info msg="[hostagent] QEMU has exited"
+time="2026-10-16T23:39:23+08:00" level=info msg="Waiting for the instance to shut down"
+time="2026-10-16T23:39:23+08:00" level=info msg="The instance dm-release-ubuntu24-amd64-kernel has shut down"
+RUN limactl start -y --timeout=10m dm-release-ubuntu24-amd64-kernel
+time="2026-10-16T23:39:23+08:00" level=info msg="Using the existing instance `dm-release-ubuntu24-amd64-kernel`"
+time="2026-10-16T23:39:23+08:00" level=info msg="Starting the instance `dm-release-ubuntu24-amd64-kernel` with internal VM driver `qemu`"
+time="2026-10-16T23:39:23+08:00" level=info msg="[hostagent] hostagent socket created at /Users/fuyangyang/.lima/dm-release-ubuntu24-amd64-kernel/ha.sock"
+time="2026-10-16T23:39:24+08:00" level=info msg="[hostagent] Using system firmware (`/opt/homebrew/share/qemu/edk2-x86_64-code.fd`)"
+time="2026-10-16T23:39:24+08:00" level=info msg="[hostagent] Starting QEMU (hint: to watch the boot progress, see `/Users/fuyangyang/.lima/dm-release-ubuntu24-amd64-kernel/serial*.log`)"
+time="2026-10-16T23:39:24+08:00" level=info msg="SSH Local Port: 57504"
+time="2026-10-16T23:39:24+08:00" level=info msg="[hostagent] Running in plain mode. Mounts, dynamic port forwarding, containerd, etc. will be ignored. Guest agent will not be running."
+time="2026-10-16T23:39:24+08:00" level=info msg="[hostagent] Waiting for the essential requirement 1 of 2: `ssh`"
+time="2026-10-16T23:40:02+08:00" level=info msg="[hostagent] The essential requirement 1 of 2 is satisfied"
+time="2026-10-16T23:40:02+08:00" level=info msg="[hostagent] Waiting for the essential requirement 2 of 2: `Explicitly start ssh ControlMaster`"
+time="2026-10-16T23:40:03+08:00" level=info msg="[hostagent] The essential requirement 2 of 2 is satisfied"
+time="2026-10-16T23:40:03+08:00" level=info msg="[hostagent] Waiting for the final requirement 1 of 1: `boot scripts must have finished`"
+time="2026-10-16T23:40:21+08:00" level=info msg="READY. Run `ssh -F `/Users/fuyangyang/.lima/dm-release-ubuntu24-amd64-kernel/ssh.config` lima-dm-release-ubuntu24-amd64-kernel` to open the shell."
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 DM_PLATFORM_ENVIRONMENT=emulated-vm python3 /opt/dm-kernel-acceptance/source/scripts/platform-acceptance.py --phase resume --state /var/lib/dm-platform-ubuntu24-amd64-kernel --source /opt/dm-kernel-acceptance/source --binary /opt/dm-kernel-acceptance/docker-manager-linux-amd64 --image docker-manager:v0.3.0 --fixture-image docker-manager:v0.3.0 --report /var/lib/dm-platform-ubuntu24-amd64-kernel-report.json
+PASS actual guest restart preserves enabled service/container identity and all management data
+PASS actual same-version upgrade creates matching backup and preserves management data
+PASS actual invalid-binary upgrade fails and leaves service stopped
+PASS documented matching binary/config/database/key rollback recovers service and data
+PASS actual uninstall preserves database/key/config/account/repository and external container
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo chmod 0644 /var/lib/dm-platform-ubuntu24-amd64-kernel-report.json
+RUN limactl copy --backend=scp dm-release-ubuntu24-amd64-kernel:/var/lib/dm-platform-ubuntu24-amd64-kernel-report.json /Users/fuyangyang/Projects/Private/docker-manager/docs/evidence/platforms/ubuntu24-amd64-kernel.json
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 DM_PLATFORM_ENVIRONMENT=emulated-vm python3 /opt/dm-kernel-acceptance/source/scripts/platform-acceptance.py --phase migration --state /var/lib/dm-platform-ubuntu24-amd64-kernel --source /opt/dm-kernel-acceptance/source --binary /opt/dm-kernel-acceptance/docker-manager-linux-amd64 --image docker-manager:v0.3.0 --fixture-image docker-manager:v0.3.0 --report /var/lib/dm-platform-ubuntu24-amd64-kernel-report.json
+PASS actual migration SQL abort stops upgrade and preserves matching recovery material
+PASS matching-group recovery after removing injected SQL fault preserves all management data
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo chmod 0644 /var/lib/dm-platform-ubuntu24-amd64-kernel-report.json
+RUN limactl copy --backend=scp dm-release-ubuntu24-amd64-kernel:/var/lib/dm-platform-ubuntu24-amd64-kernel-report.json /Users/fuyangyang/Projects/Private/docker-manager/docs/evidence/platforms/ubuntu24-amd64-kernel.json
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 DM_PLATFORM_ENVIRONMENT=emulated-vm python3 /opt/dm-kernel-acceptance/source/scripts/platform-acceptance.py --phase docker --state /var/lib/dm-platform-ubuntu24-amd64-kernel --source /opt/dm-kernel-acceptance/source --binary /opt/dm-kernel-acceptance/docker-manager-linux-amd64 --image docker-manager:v0.3.0 --fixture-image docker-manager:v0.3.0 --report /var/lib/dm-platform-ubuntu24-amd64-kernel-report.json
+PASS real image remove/recreate preserves named-volume users/session/policy/repository/tasks/key
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo chmod 0644 /var/lib/dm-platform-ubuntu24-amd64-kernel-report.json
+RUN limactl copy --backend=scp dm-release-ubuntu24-amd64-kernel:/var/lib/dm-platform-ubuntu24-amd64-kernel-report.json /Users/fuyangyang/Projects/Private/docker-manager/docs/evidence/platforms/ubuntu24-amd64-kernel.json
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 DM_PLATFORM_ENVIRONMENT=emulated-vm python3 /opt/dm-kernel-acceptance/source/scripts/platform-acceptance.py --phase cleanup --state /var/lib/dm-platform-ubuntu24-amd64-kernel --source /opt/dm-kernel-acceptance/source --binary /opt/dm-kernel-acceptance/docker-manager-linux-amd64 --image docker-manager:v0.3.0 --fixture-image docker-manager:v0.3.0 --report /var/lib/dm-platform-ubuntu24-amd64-kernel-report.json
+PASS owned installation/resources/secret fixtures cleaned; report retained
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo chmod 0644 /var/lib/dm-platform-ubuntu24-amd64-kernel-report.json
+RUN limactl copy --backend=scp dm-release-ubuntu24-amd64-kernel:/var/lib/dm-platform-ubuntu24-amd64-kernel-report.json /Users/fuyangyang/Projects/Private/docker-manager/docs/evidence/platforms/ubuntu24-amd64-kernel.json
+ALL PHASES PASSED Ubuntu24 after HTTPS package preparation
+RUN limactl stop dm-release-ubuntu24-amd64-kernel
+time="2026-10-16T23:41:48+08:00" level=info msg="Sending SIGINT to hostagent process 31140"
+time="2026-10-16T23:41:48+08:00" level=info msg="Waiting for the host agent and the driver processes to shut down"
+time="2026-10-16T23:41:48+08:00" level=info msg="[hostagent] Received SIGINT, shutting down the host agent"
+time="2026-10-16T23:41:48+08:00" level=info msg="[hostagent] Shutting down the host agent"
+time="2026-10-16T23:41:48+08:00" level=info msg="[hostagent] Shutting down QEMU with the power button"
+time="2026-10-16T23:41:48+08:00" level=info msg="[hostagent] Sending QMP system_powerdown command"
+time="2026-10-16T23:41:50+08:00" level=info msg="[hostagent] QEMU has exited"
+time="2026-10-16T23:41:50+08:00" level=info msg="Waiting for the instance to shut down"
+time="2026-10-16T23:44:50+08:00" level=fatal msg="timed out waiting for instance to shut down after 3 minutes"
+Traceback (most recent call last):
+  File "/tmp/docker-manager-release-platforms/resume-kernel-ubuntu-vm.py", line 22, in <module>
+    finally:run('limactl','stop',name,timeout=300)
+            ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/docker-manager-release-platforms/resume-kernel-ubuntu-vm.py", line 4, in run
+    print('RUN',*args,flush=True);return subprocess.run(list(args),check=True,timeout=timeout)
+                                         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['limactl', 'stop', 'dm-release-ubuntu24-amd64-kernel']' returned non-zero exit status 1.

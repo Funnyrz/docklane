@@ -1,0 +1,15 @@
+{
+  "platform": "Ubuntu 24.04 arm64",
+  "started_at": "2026-10-16T10:13:39.723780+00:00",
+  "steps": [
+    "install starts service and initialization succeeds",
+    "systemd restart retains administrator and session",
+    "unit enabled for boot; reboot not exercised",
+    "upgrade preserves account/session/key and consistent data/config/binary backup",
+    "journal has structured startup logs without setup password",
+    "uninstall preserves data, configuration and backups"
+  ],
+  "scope": "isolated test VM; same-version upgrade; boot enablement without VM reboot",
+  "passed": true,
+  "finished_at": "2026-10-16T10:13:43.381796+00:00"
+}

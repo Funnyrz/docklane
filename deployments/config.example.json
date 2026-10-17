@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "log_level": "info",
+  "backup_temp_dir": "/var/lib/docker-manager/tmp",
+  "listen": ":8080",
+  "data_dir": "/var/lib/docker-manager",
+  "docker_endpoint": "unix:///var/run/docker.sock",
+  "mode": "binary",
+  "session_secure": false,
+  "allowed_paths": ["/srv/compose", "/srv/data", "/srv/backups", "/srv/restores"],
+  "path_mappings": [],
+  "compose_path": "docker",
+  "restic_path": "restic",
+  "daemon_config_path": "/etc/docker/daemon.json",
+  "enable_daemon_write": false,
+  "backup_worker_image": "docker-manager:v0.3.0"
+}

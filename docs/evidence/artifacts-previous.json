@@ -1,0 +1,26 @@
+{
+  "verified_at": "2026-10-16T11:46:32.976291+00:00",
+  "checks": [
+    "SHA256SUMS verified",
+    "IMAGE-SHA256SUMS verified",
+    "gzip integrity verified",
+    "Docker archive manifest has linux/amd64 and linux/arm64 images"
+  ],
+  "artifacts": [
+    {
+      "file": "docker-manager-linux-amd64",
+      "size_bytes": 28303520,
+      "sha256": "90deaec197a8bb2d7199911ade5730eb43bd9bfc28eaab92121c625e8c6533d3"
+    },
+    {
+      "file": "docker-manager-linux-arm64",
+      "size_bytes": 26411168,
+      "sha256": "48e6f234d4d03f2dafeaf6f6ed682816664f1ebf00f6888362b5ffa9fcf8207a"
+    },
+    {
+      "file": "docker-manager-images.tar.gz",
+      "size_bytes": 179025476,
+      "sha256": "6b7bdc67a1ce1a62a93fe7fecb3e81c13c66aa9ac83f31b0b55bc57b09f60370"
+    }
+  ]
+}

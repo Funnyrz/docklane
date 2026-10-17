@@ -1,0 +1,14 @@
+{
+  "started_at": "2026-10-16T11:45:59.507124+00:00",
+  "platform": "Ubuntu 24.04.4 arm64",
+  "steps": [
+    "authorized preview/validate/backup/atomic write/actual restart/Engine verification succeeds and preserves unrelated fields",
+    "injected restart failure returns Failed, restores exact prior file and restarts Engine once for compensation",
+    "panel restart retains failure/audit without replaying compensated daemon changes"
+  ],
+  "scope": "isolated Engine; real daemon validation/restart with one injected restart command failure",
+  "result": "passed",
+  "original_config_restored": true,
+  "original_config_sha256": "98cca37c96431bbc76bcdf978832b7fd6cea9b115254765ebae3d063fbe82b25",
+  "finished_at": "2026-10-16T11:46:02.852380+00:00"
+}

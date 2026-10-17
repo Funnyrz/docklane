@@ -1,0 +1,291 @@
+{
+  "verified_at": "2026-10-16T11:43:14.636Z",
+  "service": "isolated localhost :18093",
+  "account": "existing disposable test account",
+  "actions": "login, read-only navigation, invalid-origin validation only",
+  "desktop": [
+    {
+      "page": "containers",
+      "alerts": [],
+      "disabled": [
+        "上一页",
+        "下一页"
+      ],
+      "empty": [],
+      "heading": "容器",
+      "rows": 4,
+      "sections": [
+        "本机容器 4"
+      ],
+      "viewport": {
+        "height": 757,
+        "overflow": false,
+        "width": 1230
+      }
+    },
+    {
+      "page": "images",
+      "alerts": [],
+      "disabled": [
+        "上一页"
+      ],
+      "empty": [
+        "∅暂无记录此处显示主机上的实际资源。"
+      ],
+      "heading": "镜像与仓库",
+      "rows": 30,
+      "sections": [
+        "本机镜像 32",
+        "仓库凭据 0"
+      ],
+      "viewport": {
+        "height": 757,
+        "overflow": false,
+        "width": 1230
+      }
+    },
+    {
+      "page": "networks",
+      "alerts": [],
+      "disabled": [
+        "上一页",
+        "下一页"
+      ],
+      "empty": [],
+      "heading": "网络",
+      "rows": 3,
+      "sections": [
+        "本机网络 3"
+      ],
+      "viewport": {
+        "height": 757,
+        "overflow": false,
+        "width": 1230
+      }
+    },
+    {
+      "page": "volumes",
+      "alerts": [],
+      "disabled": [
+        "上一页",
+        "下一页"
+      ],
+      "empty": [],
+      "heading": "存储",
+      "rows": 4,
+      "sections": [
+        "本机数据卷 2",
+        "容器挂载关系"
+      ],
+      "viewport": {
+        "height": 757,
+        "overflow": false,
+        "width": 1230
+      }
+    },
+    {
+      "page": "compose",
+      "alerts": [],
+      "disabled": [],
+      "empty": [
+        "∅暂无记录此处显示主机上的实际资源。",
+        "暂无发现结果"
+      ],
+      "heading": "Compose 项目",
+      "rows": 0,
+      "sections": [
+        "已管理项目 0",
+        "主机发现"
+      ],
+      "viewport": {
+        "height": 757,
+        "overflow": false,
+        "width": 1230
+      }
+    },
+    {
+      "page": "backups",
+      "alerts": [],
+      "disabled": [
+        "＋ 创建策略"
+      ],
+      "empty": [
+        "∅暂无记录此处显示主机上的实际资源。",
+        "∅暂无记录此处显示主机上的实际资源。"
+      ],
+      "heading": "备份与恢复",
+      "rows": 0,
+      "sections": [
+        "备份策略 0",
+        "备份仓库 0"
+      ],
+      "viewport": {
+        "height": 757,
+        "overflow": false,
+        "width": 1230
+      }
+    },
+    {
+      "page": "tasks",
+      "alerts": [],
+      "connection": "实时事件已连接",
+      "disabled": [
+        "上一页",
+        "下一页"
+      ],
+      "empty": [
+        "∅暂无记录此处显示主机上的实际资源。"
+      ],
+      "heading": "任务中心",
+      "rows": 0,
+      "sections": [
+        "执行记录 0"
+      ],
+      "viewport": {
+        "height": 757,
+        "overflow": false,
+        "width": 1230
+      }
+    },
+    {
+      "page": "settings",
+      "alerts": [],
+      "disabled": [
+        "执行分层诊断",
+        "预览配置修改",
+        "应用并重启 Docker",
+        "上一页",
+        "下一页"
+      ],
+      "empty": [],
+      "heading": "系统设置",
+      "rows": 2,
+      "sections": [
+        "平台配置",
+        "主机能力",
+        "镜像加速诊断",
+        "操作审计"
+      ],
+      "viewport": {
+        "height": 757,
+        "overflow": false,
+        "width": 1230
+      }
+    }
+  ],
+  "mobile": [
+    {
+      "page": "dashboard",
+      "alerts": [],
+      "heading": "工作台",
+      "menuOpen": false,
+      "overflow": false,
+      "width": 390
+    },
+    {
+      "page": "containers",
+      "alerts": [],
+      "heading": "容器",
+      "menuOpen": false,
+      "overflow": false,
+      "width": 390
+    },
+    {
+      "page": "images",
+      "alerts": [],
+      "heading": "镜像与仓库",
+      "menuOpen": false,
+      "overflow": false,
+      "width": 390
+    },
+    {
+      "page": "networks",
+      "alerts": [],
+      "heading": "网络",
+      "menuOpen": false,
+      "overflow": false,
+      "width": 390
+    },
+    {
+      "page": "volumes",
+      "alerts": [],
+      "heading": "存储",
+      "menuOpen": false,
+      "overflow": false,
+      "width": 390
+    },
+    {
+      "page": "compose",
+      "alerts": [],
+      "heading": "Compose 项目",
+      "menuOpen": false,
+      "overflow": false,
+      "width": 390
+    },
+    {
+      "page": "backups",
+      "alerts": [],
+      "heading": "备份与恢复",
+      "menuOpen": false,
+      "overflow": false,
+      "width": 390
+    },
+    {
+      "page": "tasks",
+      "alerts": [],
+      "heading": "任务中心",
+      "menuOpen": false,
+      "overflow": false,
+      "width": 390
+    },
+    {
+      "page": "settings",
+      "alerts": [],
+      "heading": "系统设置",
+      "menuOpen": false,
+      "overflow": false,
+      "width": 390
+    }
+  ],
+  "validation": {
+    "mirror_origin": "invalid-test-origin",
+    "image": "empty",
+    "alert": "请求未完成\nmirror must be an http(s) origin without credentials, path, query or fragment",
+    "latest_asset": "/assets/index-C37pCd6h.js"
+  },
+  "audit_fix": {
+    "status": "verified against rebuilt embedded service",
+    "fields": [
+      "actor_id",
+      "resource_type",
+      "resource_id"
+    ],
+    "desktop": {
+      "alerts": [],
+      "height": 757,
+      "overflow": false,
+      "rows": [
+        "fd20dba4848b385e50421df2fe8d20e4POST /api/v1/host/diagnosticshttpHTTP_4002026-10-16T11:35:06.609101Z",
+        "fd20dba4848b385e50421df2fe8d20e4auth.loginuser / fd20dba4848b385e50421df2fe8d20e4Succeeded2026-10-16T11:32:16.925984Z",
+        "fd20dba4848b385e50421df2fe8d20e4auth.setupuser / fd20dba4848b385e50421df2fe8d20e4Succeeded2026-10-16T11:31:39.888221Z"
+      ],
+      "script": "/assets/index-C37pCd6h.js",
+      "width": 1230
+    },
+    "mobile": {
+      "height": 844,
+      "overflow": false,
+      "rows": [
+        "fd20dba4848b385e50421df2fe8d20e4POST /api/v1/host/diagnosticshttpHTTP_4002026-10-16T11:35:06.609101Z",
+        "fd20dba4848b385e50421df2fe8d20e4auth.loginuser / fd20dba4848b385e50421df2fe8d20e4Succeeded2026-10-16T11:32:16.925984Z",
+        "fd20dba4848b385e50421df2fe8d20e4auth.setupuser / fd20dba4848b385e50421df2fe8d20e4Succeeded2026-10-16T11:31:39.888221Z"
+      ],
+      "width": 390
+    },
+    "screenshots": [
+      "settings-desktop.png",
+      "settings-mobile.png"
+    ]
+  },
+  "console_warnings_errors": []
+}

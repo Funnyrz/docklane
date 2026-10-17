@@ -1,0 +1,703 @@
+{
+  "phases": [
+    {
+      "phase": "prepare",
+      "started_at": "2026-10-16T14:11:07.959203+00:00",
+      "checks": [
+        {
+          "name": "actual install preserves pre-existing fixture and seeds encrypted backup/restore",
+          "status": "passed",
+          "evidence": {
+            "expected": {
+              "user_id": "f6ed87888edf865866c1a8553f25fc55",
+              "repository_id": "26f6ce637ad96e461136bead52e8c94b",
+              "policy_id": "cce345ac8bba1a448757dcfe5715630e",
+              "task_ids": [
+                "cd31a6f26ed815d5e81ddf6863613f36",
+                "6f079e05ca77ffccde11bec39743a1f7"
+              ],
+              "snapshot_id": "35b6feabd81679be9d1d1f0c70f2761f5deda22b01b5ed6ecb6788f622863557",
+              "restored_payload": "/var/lib/dm-platform-debian13-arm64/fixture/restored/var/lib/dm-platform-debian13-arm64/fixture/source/payload.bin"
+            },
+            "original_container_id": "92c0f8ab98509133d1c2190b690851e259f6ce281a8fe41390359ebf8c4427fe",
+            "unit": {
+              "MainPID": "2107",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ActiveState": "active",
+              "SubState": "running",
+              "FragmentPath": "/etc/systemd/system/docker-manager.service",
+              "UnitFileState": "enabled"
+            },
+            "master_key_sha256": "376d259df7c3cf5f41976f6a6b14cb978128514ac152dd0586a279276df622b1"
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Debian GNU/Linux 13 (trixie)",
+          "NAME": "Debian GNU/Linux",
+          "VERSION_ID": "13",
+          "VERSION": "13 (trixie)",
+          "VERSION_CODENAME": "trixie",
+          "DEBIAN_VERSION_FULL": "13.7",
+          "ID": "debian",
+          "HOME_URL": "https://www.debian.org/",
+          "SUPPORT_URL": "https://www.debian.org/support",
+          "BUG_REPORT_URL": "https://bugs.debian.org/"
+        },
+        "machine": "aarch64",
+        "kernel": "6.12.111+deb13-cloud-arm64",
+        "environment": "vm",
+        "process": {
+          "boot_id": "286af100-6bfb-4a28-84b4-ca9ff8651222",
+          "pid1_start_ticks": "0",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Version": "29.5.2",
+          "ApiVersion": "1.54",
+          "MinAPIVersion": "1.40",
+          "Os": "linux",
+          "Arch": "arm64",
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "29.5.2",
+              "Details": {
+                "ApiVersion": "1.54",
+                "Arch": "arm64",
+                "BuildTime": "Wed May 20 14:40:07 2026",
+                "Experimental": "false",
+                "GitCommit": "568f755e",
+                "GoVersion": "go1.26.3",
+                "KernelVersion": "6.12.111+deb13-cloud-arm64",
+                "MinAPIVersion": "1.40",
+                "Module": "github.com/moby/moby/v2",
+                "ModuleVersion": "v2.0.0+unknown",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v2.2.3",
+              "Details": {
+                "GitCommit": "77c84241c7cbdd9b4eca2591793e3d4f4317c590"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.5",
+              "Details": {
+                "GitCommit": "v1.3.5-0-g488fc13"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "GitCommit": "568f755e",
+          "GoVersion": "go1.26.3",
+          "KernelVersion": "6.12.111+deb13-cloud-arm64",
+          "BuildTime": "2026-05-20T14:40:07.000000000+00:00"
+        },
+        "docker_cli": "Docker version 29.5.2, build 79eb04c",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64",
+        "supplied_binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T14:11:26.833400+00:00"
+    },
+    {
+      "phase": "resume",
+      "started_at": "2026-10-16T14:13:32.379100+00:00",
+      "checks": [
+        {
+          "name": "actual guest restart preserves enabled service/container identity and all management data",
+          "status": "passed",
+          "evidence": {
+            "before": {
+              "boot_id": "286af100-6bfb-4a28-84b4-ca9ff8651222",
+              "pid1_start_ticks": "0",
+              "pid1_comm": "systemd",
+              "pid1_command": "/sbin/init"
+            },
+            "after": {
+              "boot_id": "69e11f10-3778-4689-a18c-7622d64b4c36",
+              "pid1_start_ticks": "0",
+              "pid1_comm": "systemd",
+              "pid1_command": "/sbin/init"
+            },
+            "retained": {
+              "user_id": "f6ed87888edf865866c1a8553f25fc55",
+              "repository_id": "26f6ce637ad96e461136bead52e8c94b",
+              "policy_id": "cce345ac8bba1a448757dcfe5715630e",
+              "task_ids": [
+                "cd31a6f26ed815d5e81ddf6863613f36",
+                "6f079e05ca77ffccde11bec39743a1f7"
+              ],
+              "snapshot_id": "35b6feabd81679be9d1d1f0c70f2761f5deda22b01b5ed6ecb6788f622863557",
+              "restored_payload": "/var/lib/dm-platform-debian13-arm64/fixture/restored/var/lib/dm-platform-debian13-arm64/fixture/source/payload.bin",
+              "original_container_id": "92c0f8ab98509133d1c2190b690851e259f6ce281a8fe41390359ebf8c4427fe",
+              "restored_sha256": "8a10594619103693532c0bb68b52f0b4199fdc87851029f84d0a1a940640bf4b"
+            },
+            "unit": {
+              "MainPID": "945",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ActiveState": "active",
+              "SubState": "running",
+              "FragmentPath": "/etc/systemd/system/docker-manager.service",
+              "UnitFileState": "enabled"
+            }
+          }
+        },
+        {
+          "name": "actual same-version upgrade creates matching backup and preserves management data",
+          "status": "passed",
+          "evidence": {
+            "backup": {
+              "path": "/var/backups/docker-manager/20261016T141333Z",
+              "fingerprints": {
+                "database": "24f6045fe220428fe3361f5f71e848515d89756cb168593b78bee35c4217a4f9",
+                "master_key": "376d259df7c3cf5f41976f6a6b14cb978128514ac152dd0586a279276df622b1",
+                "config": "e05a5112053fc24221af737c5ed38591ece6e4bb91289fc3c4da01bbdd2f9706",
+                "binary": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79"
+              },
+              "exit_code": 0
+            },
+            "retained": {
+              "user_id": "f6ed87888edf865866c1a8553f25fc55",
+              "repository_id": "26f6ce637ad96e461136bead52e8c94b",
+              "policy_id": "cce345ac8bba1a448757dcfe5715630e",
+              "task_ids": [
+                "cd31a6f26ed815d5e81ddf6863613f36",
+                "6f079e05ca77ffccde11bec39743a1f7"
+              ],
+              "snapshot_id": "35b6feabd81679be9d1d1f0c70f2761f5deda22b01b5ed6ecb6788f622863557",
+              "restored_payload": "/var/lib/dm-platform-debian13-arm64/fixture/restored/var/lib/dm-platform-debian13-arm64/fixture/source/payload.bin",
+              "original_container_id": "92c0f8ab98509133d1c2190b690851e259f6ce281a8fe41390359ebf8c4427fe",
+              "restored_sha256": "8a10594619103693532c0bb68b52f0b4199fdc87851029f84d0a1a940640bf4b"
+            },
+            "limitation": "Same-version lifecycle check; no historical business release or migration result is fabricated."
+          }
+        },
+        {
+          "name": "actual invalid-binary upgrade fails and leaves service stopped",
+          "status": "passed",
+          "evidence": {
+            "backup": {
+              "path": "/var/backups/docker-manager/20261016T141336Z",
+              "fingerprints": {
+                "database": "a17fb1e726da6ed9e255810d8984b057dbb6b86d591f339ebe199eaf2c05d510",
+                "master_key": "376d259df7c3cf5f41976f6a6b14cb978128514ac152dd0586a279276df622b1",
+                "config": "e05a5112053fc24221af737c5ed38591ece6e4bb91289fc3c4da01bbdd2f9706",
+                "binary": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79"
+              },
+              "exit_code": 1
+            },
+            "unit": {
+              "MainPID": "0",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ActiveState": "inactive",
+              "SubState": "dead",
+              "FragmentPath": "/etc/systemd/system/docker-manager.service",
+              "UnitFileState": "enabled"
+            }
+          }
+        },
+        {
+          "name": "documented matching binary/config/database/key rollback recovers service and data",
+          "status": "passed",
+          "evidence": {
+            "retained": {
+              "user_id": "f6ed87888edf865866c1a8553f25fc55",
+              "repository_id": "26f6ce637ad96e461136bead52e8c94b",
+              "policy_id": "cce345ac8bba1a448757dcfe5715630e",
+              "task_ids": [
+                "cd31a6f26ed815d5e81ddf6863613f36",
+                "6f079e05ca77ffccde11bec39743a1f7"
+              ],
+              "snapshot_id": "35b6feabd81679be9d1d1f0c70f2761f5deda22b01b5ed6ecb6788f622863557",
+              "restored_payload": "/var/lib/dm-platform-debian13-arm64/fixture/restored/var/lib/dm-platform-debian13-arm64/fixture/source/payload.bin",
+              "original_container_id": "92c0f8ab98509133d1c2190b690851e259f6ce281a8fe41390359ebf8c4427fe",
+              "restored_sha256": "8a10594619103693532c0bb68b52f0b4199fdc87851029f84d0a1a940640bf4b"
+            }
+          }
+        },
+        {
+          "name": "actual uninstall preserves database/key/config/account/repository and external container",
+          "status": "passed",
+          "evidence": {
+            "master_key_sha256": "376d259df7c3cf5f41976f6a6b14cb978128514ac152dd0586a279276df622b1"
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Debian GNU/Linux 13 (trixie)",
+          "NAME": "Debian GNU/Linux",
+          "VERSION_ID": "13",
+          "VERSION": "13 (trixie)",
+          "VERSION_CODENAME": "trixie",
+          "DEBIAN_VERSION_FULL": "13.7",
+          "ID": "debian",
+          "HOME_URL": "https://www.debian.org/",
+          "SUPPORT_URL": "https://www.debian.org/support",
+          "BUG_REPORT_URL": "https://bugs.debian.org/"
+        },
+        "machine": "aarch64",
+        "kernel": "6.12.111+deb13-cloud-arm64",
+        "environment": "vm",
+        "process": {
+          "boot_id": "69e11f10-3778-4689-a18c-7622d64b4c36",
+          "pid1_start_ticks": "0",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Version": "29.5.2",
+          "ApiVersion": "1.54",
+          "MinAPIVersion": "1.40",
+          "Os": "linux",
+          "Arch": "arm64",
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "29.5.2",
+              "Details": {
+                "ApiVersion": "1.54",
+                "Arch": "arm64",
+                "BuildTime": "Wed May 20 14:40:07 2026",
+                "Experimental": "false",
+                "GitCommit": "568f755e",
+                "GoVersion": "go1.26.3",
+                "KernelVersion": "6.12.111+deb13-cloud-arm64",
+                "MinAPIVersion": "1.40",
+                "Module": "github.com/moby/moby/v2",
+                "ModuleVersion": "v2.0.0+unknown",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v2.2.3",
+              "Details": {
+                "GitCommit": "77c84241c7cbdd9b4eca2591793e3d4f4317c590"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.5",
+              "Details": {
+                "GitCommit": "v1.3.5-0-g488fc13"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "GitCommit": "568f755e",
+          "GoVersion": "go1.26.3",
+          "KernelVersion": "6.12.111+deb13-cloud-arm64",
+          "BuildTime": "2026-05-20T14:40:07.000000000+00:00"
+        },
+        "docker_cli": "Docker version 29.5.2, build 79eb04c",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64",
+        "supplied_binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T14:13:41.500407+00:00"
+    },
+    {
+      "phase": "docker",
+      "started_at": "2026-10-16T14:14:34.177852+00:00",
+      "checks": [
+        {
+          "name": "real image remove/recreate preserves named-volume users/session/policy/repository/tasks/key",
+          "status": "passed",
+          "evidence": {
+            "first_container_id": "fedc1ceb08e584f188256b443fbe8d480d0e4c6656902b3db04b51a54ec81513",
+            "replacement_container_id": "b09dbebbbe8c40ffb09e61bdb8c77978cefab4012b69bba2cb80353fea31d14e",
+            "volume": "dm-platform-91385c9615a0c647-manager-data",
+            "image_id": "sha256:ccef2b2675ab6741db305b6941a07d4fd806be6b96415c949ff21697b9352131",
+            "image_architecture": "arm64",
+            "explicit_mappings": [
+              {
+                "host": "/var/lib/dm-platform-debian13-arm64/docker-fixture/source",
+                "local": "/source",
+                "read_only": true
+              },
+              {
+                "host": "/var/lib/dm-platform-debian13-arm64/docker-fixture/repository",
+                "local": "/repository",
+                "read_only": false
+              },
+              {
+                "host": "/var/lib/dm-platform-debian13-arm64/docker-fixture/restored",
+                "local": "/restored",
+                "read_only": false
+              }
+            ],
+            "master_key_sha256": "26e89605709a9e9cf3efe2b0117674d84452d1015d6fdeaaa6756973669d5cf3",
+            "tools": {
+              "compose": "2.40.3",
+              "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64"
+            },
+            "retained": {
+              "user_id": "a5a6d3a0a7055ad4b52ac295dd7154cc",
+              "repository_id": "7832f5fd196246d90616cbd33b99a311",
+              "policy_id": "b4564c85da354735918b49785744c23b",
+              "task_ids": [
+                "4fc50e379dc424f84d2102f4f3bec311",
+                "a84eddc96312932c7e555050fbbce903"
+              ],
+              "snapshot_id": "3c1dd82e1959b7ae1a5149dce3a6665722013219824b9aacce57c1bcf7cdfeeb",
+              "restored_payload": "/var/lib/dm-platform-debian13-arm64/docker-fixture/restored/sources/000/payload.bin",
+              "original_container_id": "6c0a1b80ef15d20aad27bfd3359fc74e94e1439e74913b7a6bf26a96c7fc0566",
+              "restored_sha256": "310364953e64f35d3ffd77f06cea31a4706fbbc715c6389c0cee46f4f10f25ed"
+            },
+            "host_root_mounted": false
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Debian GNU/Linux 13 (trixie)",
+          "NAME": "Debian GNU/Linux",
+          "VERSION_ID": "13",
+          "VERSION": "13 (trixie)",
+          "VERSION_CODENAME": "trixie",
+          "DEBIAN_VERSION_FULL": "13.7",
+          "ID": "debian",
+          "HOME_URL": "https://www.debian.org/",
+          "SUPPORT_URL": "https://www.debian.org/support",
+          "BUG_REPORT_URL": "https://bugs.debian.org/"
+        },
+        "machine": "aarch64",
+        "kernel": "6.12.111+deb13-cloud-arm64",
+        "environment": "vm",
+        "process": {
+          "boot_id": "69e11f10-3778-4689-a18c-7622d64b4c36",
+          "pid1_start_ticks": "0",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Version": "29.5.2",
+          "ApiVersion": "1.54",
+          "MinAPIVersion": "1.40",
+          "Os": "linux",
+          "Arch": "arm64",
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "29.5.2",
+              "Details": {
+                "ApiVersion": "1.54",
+                "Arch": "arm64",
+                "BuildTime": "Wed May 20 14:40:07 2026",
+                "Experimental": "false",
+                "GitCommit": "568f755e",
+                "GoVersion": "go1.26.3",
+                "KernelVersion": "6.12.111+deb13-cloud-arm64",
+                "MinAPIVersion": "1.40",
+                "Module": "github.com/moby/moby/v2",
+                "ModuleVersion": "v2.0.0+unknown",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v2.2.3",
+              "Details": {
+                "GitCommit": "77c84241c7cbdd9b4eca2591793e3d4f4317c590"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.5",
+              "Details": {
+                "GitCommit": "v1.3.5-0-g488fc13"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "GitCommit": "568f755e",
+          "GoVersion": "go1.26.3",
+          "KernelVersion": "6.12.111+deb13-cloud-arm64",
+          "BuildTime": "2026-05-20T14:40:07.000000000+00:00"
+        },
+        "docker_cli": "Docker version 29.5.2, build 79eb04c",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64",
+        "supplied_binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T14:14:53.490058+00:00"
+    },
+    {
+      "phase": "migration",
+      "started_at": "2026-10-16T14:15:39.927403+00:00",
+      "checks": [
+        {
+          "name": "actual migration SQL abort stops upgrade and preserves matching recovery material",
+          "status": "passed",
+          "evidence": {
+            "backup": {
+              "path": "/var/backups/docker-manager/20261016T141541Z",
+              "fingerprints": {
+                "database": "0c9a7ab6d78106c487ff4f064de5c41bbe3f7c949485da277cf558af95d247a6",
+                "master_key": "376d259df7c3cf5f41976f6a6b14cb978128514ac152dd0586a279276df622b1",
+                "config": "e05a5112053fc24221af737c5ed38591ece6e4bb91289fc3c4da01bbdd2f9706",
+                "binary": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79"
+              },
+              "exit_code": 1
+            },
+            "injection": "DM_ACCEPTANCE_MIGRATION_ABORT",
+            "applied_versions": [
+              1
+            ],
+            "unit": {
+              "MainPID": "0",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ActiveState": "inactive",
+              "SubState": "dead",
+              "FragmentPath": "/etc/systemd/system/docker-manager.service",
+              "UnitFileState": "enabled"
+            },
+            "limitation": "Explicit SQL fault injection on schema v1; not a cross-business-version migration claim."
+          }
+        },
+        {
+          "name": "matching-group recovery after removing injected SQL fault preserves all management data",
+          "status": "passed",
+          "evidence": {
+            "retained": {
+              "user_id": "f6ed87888edf865866c1a8553f25fc55",
+              "repository_id": "26f6ce637ad96e461136bead52e8c94b",
+              "policy_id": "cce345ac8bba1a448757dcfe5715630e",
+              "task_ids": [
+                "cd31a6f26ed815d5e81ddf6863613f36",
+                "6f079e05ca77ffccde11bec39743a1f7"
+              ],
+              "snapshot_id": "35b6feabd81679be9d1d1f0c70f2761f5deda22b01b5ed6ecb6788f622863557",
+              "restored_payload": "/var/lib/dm-platform-debian13-arm64/fixture/restored/var/lib/dm-platform-debian13-arm64/fixture/source/payload.bin",
+              "original_container_id": "92c0f8ab98509133d1c2190b690851e259f6ce281a8fe41390359ebf8c4427fe",
+              "restored_sha256": "8a10594619103693532c0bb68b52f0b4199fdc87851029f84d0a1a940640bf4b"
+            }
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Debian GNU/Linux 13 (trixie)",
+          "NAME": "Debian GNU/Linux",
+          "VERSION_ID": "13",
+          "VERSION": "13 (trixie)",
+          "VERSION_CODENAME": "trixie",
+          "DEBIAN_VERSION_FULL": "13.7",
+          "ID": "debian",
+          "HOME_URL": "https://www.debian.org/",
+          "SUPPORT_URL": "https://www.debian.org/support",
+          "BUG_REPORT_URL": "https://bugs.debian.org/"
+        },
+        "machine": "aarch64",
+        "kernel": "6.12.111+deb13-cloud-arm64",
+        "environment": "vm",
+        "process": {
+          "boot_id": "69e11f10-3778-4689-a18c-7622d64b4c36",
+          "pid1_start_ticks": "0",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Version": "29.5.2",
+          "ApiVersion": "1.54",
+          "MinAPIVersion": "1.40",
+          "Os": "linux",
+          "Arch": "arm64",
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "29.5.2",
+              "Details": {
+                "ApiVersion": "1.54",
+                "Arch": "arm64",
+                "BuildTime": "Wed May 20 14:40:07 2026",
+                "Experimental": "false",
+                "GitCommit": "568f755e",
+                "GoVersion": "go1.26.3",
+                "KernelVersion": "6.12.111+deb13-cloud-arm64",
+                "MinAPIVersion": "1.40",
+                "Module": "github.com/moby/moby/v2",
+                "ModuleVersion": "v2.0.0+unknown",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v2.2.3",
+              "Details": {
+                "GitCommit": "77c84241c7cbdd9b4eca2591793e3d4f4317c590"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.5",
+              "Details": {
+                "GitCommit": "v1.3.5-0-g488fc13"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "GitCommit": "568f755e",
+          "GoVersion": "go1.26.3",
+          "KernelVersion": "6.12.111+deb13-cloud-arm64",
+          "BuildTime": "2026-05-20T14:40:07.000000000+00:00"
+        },
+        "docker_cli": "Docker version 29.5.2, build 79eb04c",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64",
+        "supplied_binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T14:15:45.524383+00:00"
+    },
+    {
+      "phase": "cleanup",
+      "started_at": "2026-10-16T14:18:14.412451+00:00",
+      "checks": [
+        {
+          "name": "owned installation/resources/secret fixtures cleaned; report retained",
+          "status": "passed",
+          "evidence": {
+            "remaining_owned_containers": []
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Debian GNU/Linux 13 (trixie)",
+          "NAME": "Debian GNU/Linux",
+          "VERSION_ID": "13",
+          "VERSION": "13 (trixie)",
+          "VERSION_CODENAME": "trixie",
+          "DEBIAN_VERSION_FULL": "13.7",
+          "ID": "debian",
+          "HOME_URL": "https://www.debian.org/",
+          "SUPPORT_URL": "https://www.debian.org/support",
+          "BUG_REPORT_URL": "https://bugs.debian.org/"
+        },
+        "machine": "aarch64",
+        "kernel": "6.12.111+deb13-cloud-arm64",
+        "environment": "vm",
+        "process": {
+          "boot_id": "69e11f10-3778-4689-a18c-7622d64b4c36",
+          "pid1_start_ticks": "0",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Version": "29.5.2",
+          "ApiVersion": "1.54",
+          "MinAPIVersion": "1.40",
+          "Os": "linux",
+          "Arch": "arm64",
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "29.5.2",
+              "Details": {
+                "ApiVersion": "1.54",
+                "Arch": "arm64",
+                "BuildTime": "Wed May 20 14:40:07 2026",
+                "Experimental": "false",
+                "GitCommit": "568f755e",
+                "GoVersion": "go1.26.3",
+                "KernelVersion": "6.12.111+deb13-cloud-arm64",
+                "MinAPIVersion": "1.40",
+                "Module": "github.com/moby/moby/v2",
+                "ModuleVersion": "v2.0.0+unknown",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v2.2.3",
+              "Details": {
+                "GitCommit": "77c84241c7cbdd9b4eca2591793e3d4f4317c590"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.5",
+              "Details": {
+                "GitCommit": "v1.3.5-0-g488fc13"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "GitCommit": "568f755e",
+          "GoVersion": "go1.26.3",
+          "KernelVersion": "6.12.111+deb13-cloud-arm64",
+          "BuildTime": "2026-05-20T14:40:07.000000000+00:00"
+        },
+        "docker_cli": "Docker version 29.5.2, build 79eb04c",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64",
+        "supplied_binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T14:18:16.766353+00:00"
+    }
+  ],
+  "state": "/var/lib/dm-platform-debian13-arm64",
+  "namespace": "dm-platform-91385c9615a0c647"
+}

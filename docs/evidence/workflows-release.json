@@ -1,0 +1,316 @@
+{
+  "namespace": "dm-wf-0e45b01804b5e2",
+  "started_at": "2026-10-16T13:51:16.551108+00:00",
+  "binary_sha256": "ade403e342dcb33eb16abcaf796c98489815628fb6b8b0df0480a6790693faa3",
+  "platform": {
+    "system": "Linux",
+    "architecture": "aarch64",
+    "uid": 501
+  },
+  "checks": [
+    {
+      "name": "API rejects both source-containing-repository and repository-containing-source",
+      "status": "passed",
+      "acceptance": [
+        "AC-BKP-05"
+      ],
+      "evidence": {
+        "rejected_directions": 2
+      }
+    },
+    {
+      "name": "compose backup to selective new-project healthy recreation",
+      "status": "passed",
+      "acceptance": [
+        "AC-CMP-02",
+        "AC-BKP-06",
+        "AC-TASK-01"
+      ],
+      "evidence": {
+        "backup_task": "3b1ea13e20dd7a7a92476e3b586b147a",
+        "restore_task": "ac71a556f001cb4682df1fa5a22f6586",
+        "original_id": "7f1e6b1293af",
+        "restored_ids": [
+          "74b0b02ec974"
+        ],
+        "external_config_and_env_preserved": true,
+        "uncaptured_service_absent": true
+      }
+    },
+    {
+      "name": "real source EACCES compensates every originally running shared writer",
+      "status": "passed",
+      "acceptance": [
+        "AC-BKP-03",
+        "AC-TASK-03"
+      ],
+      "evidence": {
+        "task": {
+          "id": "5c97e0e14ee8650a80abf40abaad7434",
+          "status": "Failed",
+          "stage": "backup",
+          "error_code": "TASK_FAILED",
+          "error_message": "restic-fault-boundary failed: exit status 3 (inspect tool availability, permissions and configuration)",
+          "logs": [
+            {
+              "id": 3,
+              "task_id": "5c97e0e14ee8650a80abf40abaad7434",
+              "message": "restic-fault-boundary failed: exit status 3 (inspect tool availability, permissions and configuration)",
+              "created_at": "2026-10-16T13:52:32.906851887Z"
+            }
+          ]
+        },
+        "running_writers": [
+          "6d63c327cc7e4d669723628a16ce662ec42e2596526cf051056846c443ee094a",
+          "77e2f2470ffbb4a42fb681905f8ed7b1de6561994d07d10cfa50793484889bf6"
+        ],
+        "stopped_writer": "aab840bc1c4ca4f16d49d076b621a153387e1be3b292ba04d4129f412ae24ce5",
+        "baseline_snapshots_retained": true
+      }
+    },
+    {
+      "name": "wrong encrypted-repository password rejected",
+      "status": "passed",
+      "acceptance": [
+        "AC-BKP-03"
+      ],
+      "evidence": {
+        "error": "WORKFLOW_ERROR",
+        "repository_not_imported": true
+      }
+    },
+    {
+      "name": "real encrypted pack corruption cannot pass full data check or prune baseline",
+      "status": "passed",
+      "acceptance": [
+        "AC-BKP-03",
+        "AC-TASK-03"
+      ],
+      "evidence": {
+        "task": {
+          "id": "d9e035014eb04194d63f3b45ace3da36",
+          "status": "Failed",
+          "stage": "read_data_verification",
+          "error_code": "TASK_FAILED",
+          "error_message": "restic-fault-boundary failed: exit status 1 (inspect tool availability, permissions and configuration)",
+          "logs": [
+            {
+              "id": 4,
+              "task_id": "d9e035014eb04194d63f3b45ace3da36",
+              "message": "restic-fault-boundary failed: exit status 1 (inspect tool availability, permissions and configuration)",
+              "created_at": "2026-10-16T13:52:57.832689238Z"
+            }
+          ]
+        },
+        "corrupted_pack": "046b97162f1b7bcdd8b400e5dc61f799174b74dc08cdc04af375ec40e6640349"
+      }
+    },
+    {
+      "name": "actual private tmpfs ENOSPC after writer stop fails and preserves retention",
+      "status": "passed",
+      "acceptance": [
+        "AC-BKP-03",
+        "AC-TASK-03"
+      ],
+      "evidence": {
+        "task": {
+          "id": "38f21950e4ca5b0edffb2cb01268e048",
+          "status": "Failed",
+          "stage": "backup",
+          "error_code": "TASK_FAILED",
+          "error_message": "restic-fault-boundary failed: exit status 1 (inspect tool availability, permissions and configuration)",
+          "logs": [
+            {
+              "id": 5,
+              "task_id": "38f21950e4ca5b0edffb2cb01268e048",
+              "message": "restic-fault-boundary failed: exit status 1 (inspect tool availability, permissions and configuration)",
+              "created_at": "2026-10-16T13:53:46.902557439Z"
+            }
+          ]
+        },
+        "private_quota_bytes": 134217728,
+        "original_writers_recovered": true
+      }
+    },
+    {
+      "name": "original overwrite requires second confirmation and real EFBIG failure holds writers",
+      "status": "passed",
+      "acceptance": [
+        "AC-BKP-06",
+        "AC-TASK-03"
+      ],
+      "evidence": {
+        "task": {
+          "id": "12a0d03538f85bbb815b9cdfd8531dec",
+          "status": "Failed",
+          "stage": "restore_and_verify_content",
+          "error_code": "RESTORE_VALIDATION_REQUIRED",
+          "error_message": "original-location restore may contain partial data; original writers remain stopped. Inspect data and explicitly start services only after validation: restic-fault-boundary failed: exit status 1 (inspect tool availability, permissions and configuration)",
+          "logs": [
+            {
+              "id": 6,
+              "task_id": "12a0d03538f85bbb815b9cdfd8531dec",
+              "message": "original-location restore may contain partial data; original writers remain stopped. Inspect data and explicitly start services only after validation: restic-fault-boundary failed: exit status 1 (inspect tool availability, permissions and configuration)",
+              "created_at": "2026-10-16T13:54:17.181796103Z"
+            }
+          ]
+        },
+        "kernel_file_limit_bytes": 1024,
+        "all_writers_held": true,
+        "explicit_manual_start_available": true
+      }
+    },
+    {
+      "name": "actual offline UTC cron occurrence recorded without catch-up execution",
+      "status": "passed",
+      "acceptance": [
+        "AC-BKP-02",
+        "AC-TASK-02"
+      ],
+      "evidence": {
+        "instances": [
+          {
+            "error": "MISSED_OFFLINE: not executed automatically",
+            "policy_id": "55a47912a8d9c4d82ae5e2061a151e59",
+            "scheduled_at_utc": "2026-10-16T13:55:00Z",
+            "task_id": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "real cron DST repeated-minute UTC identity and offline dedup regression",
+      "status": "passed",
+      "acceptance": [
+        "AC-BKP-02"
+      ],
+      "evidence": {
+        "test_names": [
+          "TestDSTRepeatedMinuteHasDistinctUTCInstances",
+          "TestOfflineScheduleRecordsMissedWithoutExecuting"
+        ],
+        "distinct_utc_instances": [
+          "2026-11-01T05:30:00Z",
+          "2026-11-01T06:30:00Z"
+        ],
+        "raw_output_field": "scheduler_tests.stdout"
+      }
+    }
+  ],
+  "cleanup": {
+    "remaining_owned_containers": []
+  },
+  "engine": {
+    "Platform": {
+      "Name": "Docker Engine - Community"
+    },
+    "Version": "29.5.2",
+    "ApiVersion": "1.54",
+    "MinAPIVersion": "1.40",
+    "Os": "linux",
+    "Arch": "arm64",
+    "Components": [
+      {
+        "Name": "Engine",
+        "Version": "29.5.2",
+        "Details": {
+          "ApiVersion": "1.54",
+          "Arch": "arm64",
+          "BuildTime": "Wed May 20 14:39:25 2026",
+          "Experimental": "false",
+          "GitCommit": "568f755",
+          "GoVersion": "go1.26.3",
+          "KernelVersion": "6.8.0-117-generic",
+          "MinAPIVersion": "1.40",
+          "Module": "github.com/moby/moby/v2",
+          "ModuleVersion": "v2.0.0+unknown",
+          "Os": "linux"
+        }
+      },
+      {
+        "Name": "containerd",
+        "Version": "v2.2.4",
+        "Details": {
+          "GitCommit": "193637f7ee8ae5f5aa5248f49e7baa3e6164966e"
+        }
+      },
+      {
+        "Name": "runc",
+        "Version": "1.3.5",
+        "Details": {
+          "GitCommit": "v1.3.5-0-g488fc13e"
+        }
+      },
+      {
+        "Name": "docker-init",
+        "Version": "0.19.0",
+        "Details": {
+          "GitCommit": "de40ad0"
+        }
+      }
+    ],
+    "GitCommit": "568f755",
+    "GoVersion": "go1.26.3",
+    "KernelVersion": "6.8.0-117-generic",
+    "BuildTime": "2026-05-20T14:39:25.000000000+00:00"
+  },
+  "compose": "2.40.3",
+  "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64",
+  "worker_image_id": "sha256:3dbc6fb824d557ae14c0fe6ebc320d86284f5e24cfdb798003ad19e3887f8877",
+  "offline_interval": {
+    "start": "2026-10-16T13:54:17.317895+00:00",
+    "end": "2026-10-16T13:55:03.569421+00:00",
+    "real_boundary_verified": true
+  },
+  "status": "passed",
+  "finished_at": "2026-10-16T13:55:04.011292+00:00",
+  "scheduler_tests": {
+    "command": [
+      "/opt/homebrew/bin/colima",
+      "--profile",
+      "docker-manager-test",
+      "ssh",
+      "--",
+      "/tmp/docker-manager-linux-test/workflows-schedule-acceptance.test",
+      "-test.v",
+      "-test.run",
+      "TestDSTRepeatedMinuteHasDistinctUTCInstances|TestOfflineScheduleRecordsMissedWithoutExecuting"
+    ],
+    "binary_sha256": "4643220420e5496bc9c2fc3d3cbe881dc37b6f779dbdd514d031fd45b516ad4a",
+    "exit_code": 0,
+    "stdout": "=== RUN   TestDSTRepeatedMinuteHasDistinctUTCInstances\n    schedule_acceptance_test.go:39: actual cron occurrence: local=2026-11-01T01:30:00-04:00 UTC=2026-11-01T05:30:00Z\n    schedule_acceptance_test.go:39: actual cron occurrence: local=2026-11-01T01:30:00-05:00 UTC=2026-11-01T06:30:00Z\n--- PASS: TestDSTRepeatedMinuteHasDistinctUTCInstances (0.01s)\n=== RUN   TestOfflineScheduleRecordsMissedWithoutExecuting\n--- PASS: TestOfflineScheduleRecordsMissedWithoutExecuting (0.01s)\nPASS\n",
+    "stderr": ""
+  },
+  "verification": {
+    "go_race": {
+      "command": "DM_TEST_RESTIC=/tmp/docker-manager-restic-0.19.1/restic /tmp/docker-manager-toolchain/go/bin/go test -race ./internal/workflows",
+      "stdout": "ok  \tgithub.com/docker-manager/docker-manager/internal/workflows\t33.876s\n",
+      "exit_code": 0
+    },
+    "go_vet": {
+      "command": "/tmp/docker-manager-toolchain/go/bin/go vet ./internal/workflows",
+      "exit_code": 0
+    },
+    "python_compile": {
+      "command": "python3 -m py_compile scripts/workflows-acceptance.py",
+      "exit_code": 0
+    }
+  },
+  "reproduction": {
+    "environment": {
+      "DM_TEST_DOCKER": "/tmp/docker-manager-linux-test/tools/docker",
+      "DM_TEST_RESTIC": "/tmp/docker-manager-linux-test/tools/linux/restic",
+      "DM_TEST_WORKER_IMAGE": "sha256:3dbc6fb824d557ae14c0fe6ebc320d86284f5e24cfdb798003ad19e3887f8877",
+      "DM_TEST_REPORT": "/tmp/docker-manager-linux-test/workflows-release.json"
+    },
+    "command": "python3 /tmp/docker-manager-linux-test/workflows-acceptance.py /tmp/docker-manager-linux-test/workflows-acceptance-server",
+    "executed_script_sha256": "b8ce00cfbc6ac5abd5432690b3b1d1f94ab8b993b3a0a76dd782bdce7c193ae9",
+    "fault_injection": "Private 128 MiB tmpfs repository filled only after backup writer-stop preflight; chmod(000) on owned source at the real Restic execution boundary; encrypted pack byte corruption; wrong repository password; RLIMIT_FSIZE 1024 for actual Restic restore. No mocked success/failure task states, daemon changes or clock changes."
+  },
+  "limitations": [
+    "Executed on Ubuntu 24.04.4 arm64 / Docker 29.5.2; other distro/architecture/Engine evidence is maintained separately.",
+    "This report supplements the existing independent-SQLite recovery/foreign-UID Volume restore evidence; Compose recreation here uses the same SQLite installation.",
+    "A restored file tree may be partially replaced after overwrite failure; the verified behavior holds writers stopped for explicit manual validation.",
+    "The test server is a separate temporary build with the recorded SHA256; final release artifacts are rebuilt by the coordinating agent."
+  ]
+}

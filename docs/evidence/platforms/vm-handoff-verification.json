@@ -1,0 +1,104 @@
+{
+  "result": "passed",
+  "instance": "dm-release-debian13-amd64-kernel",
+  "verification": "Two complete VM start/stop cycles; each next start awaits prior stop command exit0 and verifies Stopped",
+  "events": [
+    {
+      "event": "start",
+      "command": [
+        "limactl",
+        "start",
+        "-y",
+        "--timeout=10m",
+        "dm-release-debian13-amd64-kernel"
+      ],
+      "time": "2026-10-16T15:50:05.254428+00:00"
+    },
+    {
+      "event": "returned_successfully",
+      "command": [
+        "limactl",
+        "start",
+        "-y",
+        "--timeout=10m",
+        "dm-release-debian13-amd64-kernel"
+      ],
+      "time": "2026-10-16T15:50:39.972584+00:00",
+      "exit_code": 0
+    },
+    {
+      "event": "start",
+      "command": [
+        "limactl",
+        "stop",
+        "dm-release-debian13-amd64-kernel"
+      ],
+      "time": "2026-10-16T15:50:40.002942+00:00"
+    },
+    {
+      "event": "returned_successfully",
+      "command": [
+        "limactl",
+        "stop",
+        "dm-release-debian13-amd64-kernel"
+      ],
+      "time": "2026-10-16T15:50:43.037462+00:00",
+      "exit_code": 0
+    },
+    {
+      "event": "successful-stop-exit-and-stopped-state-confirmed",
+      "cycle": 1,
+      "time": "2026-10-16T15:50:43.070313+00:00"
+    },
+    {
+      "event": "start",
+      "command": [
+        "limactl",
+        "start",
+        "-y",
+        "--timeout=10m",
+        "dm-release-debian13-amd64-kernel"
+      ],
+      "time": "2026-10-16T15:50:43.070329+00:00"
+    },
+    {
+      "event": "returned_successfully",
+      "command": [
+        "limactl",
+        "start",
+        "-y",
+        "--timeout=10m",
+        "dm-release-debian13-amd64-kernel"
+      ],
+      "time": "2026-10-16T15:51:15.548342+00:00",
+      "exit_code": 0
+    },
+    {
+      "event": "start",
+      "command": [
+        "limactl",
+        "stop",
+        "dm-release-debian13-amd64-kernel"
+      ],
+      "time": "2026-10-16T15:51:15.570748+00:00"
+    },
+    {
+      "event": "returned_successfully",
+      "command": [
+        "limactl",
+        "stop",
+        "dm-release-debian13-amd64-kernel"
+      ],
+      "time": "2026-10-16T15:51:19.951788+00:00",
+      "exit_code": 0
+    },
+    {
+      "event": "successful-stop-exit-and-stopped-state-confirmed",
+      "cycle": 2,
+      "time": "2026-10-16T15:51:19.987025+00:00"
+    }
+  ],
+  "final_state": "Stopped",
+  "application_tests_repeated": false,
+  "scope": "Control-plane orchestration only; application 30/30 platform and48/48 integration remain independently proven"
+}

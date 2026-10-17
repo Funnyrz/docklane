@@ -1,0 +1,191 @@
+{
+  "kind": "real embedded Go application, disposable database, deliberately unavailable Engine",
+  "results": [
+    {
+      "route": "dashboard",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "containers",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "compose",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "images",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "networks",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "volumes",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "backups",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "tasks",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "settings",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "dashboard",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "containers",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "compose",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "images",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "networks",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "volumes",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "backups",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "tasks",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "settings",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "dashboard",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "route": "containers",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "route": "compose",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "route": "images",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "route": "networks",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "route": "volumes",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "route": "backups",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "route": "tasks",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "route": "settings",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "route": "dashboard",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "containers",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "compose",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "images",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "networks",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "volumes",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "backups",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "tasks",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "settings",
+      "width": 1440,
+      "overflow": false
+    }
+  ],
+  "mobileNavigation": "pass",
+  "shortScreenNavigation": "pass",
+  "browserErrors": [],
+  "assets": [
+    "/assets/index-8bRJTueY.js"
+  ]
+}

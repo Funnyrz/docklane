@@ -1,0 +1,69 @@
+RUN limactl start -y --timeout=12m --name=dm-release-ubuntu24-amd64-kernel /tmp/docker-manager-release-platforms/ubuntu24-amd64-vm.yaml
+time="2026-10-16T23:30:10+08:00" level=info msg="Terminal is not available, proceeding without opening an editor"
+time="2026-10-16T23:30:10+08:00" level=info msg="Starting the instance `dm-release-ubuntu24-amd64-kernel` with internal VM driver `qemu`"
+time="2026-10-16T23:30:10+08:00" level=info msg="Attempting to download the image" arch=x86_64 digest="sha256:a8eb6570f87a941f3de2e000c046b9367f8ab1423756a94830d454fae8ad80ff" location=/tmp/docker-manager-release-platforms/ubuntu24-amd64.qcow2
+time="2026-10-16T23:30:10+08:00" level=info msg="Downloaded the image from `/tmp/docker-manager-release-platforms/ubuntu24-amd64.qcow2`"
+time="2026-10-16T23:30:10+08:00" level=info msg="Resize instance dm-release-ubuntu24-amd64-kernel's disk from 3.5GiB to 10GiB"
+time="2026-10-16T23:30:10+08:00" level=info msg="[hostagent] hostagent socket created at /Users/fuyangyang/.lima/dm-release-ubuntu24-amd64-kernel/ha.sock"
+time="2026-10-16T23:30:10+08:00" level=info msg="[hostagent] Using system firmware (`/opt/homebrew/share/qemu/edk2-x86_64-code.fd`)"
+time="2026-10-16T23:30:10+08:00" level=info msg="[hostagent] Starting QEMU (hint: to watch the boot progress, see `/Users/fuyangyang/.lima/dm-release-ubuntu24-amd64-kernel/serial*.log`)"
+time="2026-10-16T23:30:10+08:00" level=info msg="SSH Local Port: 55921"
+time="2026-10-16T23:30:10+08:00" level=info msg="[hostagent] Running in plain mode. Mounts, dynamic port forwarding, containerd, etc. will be ignored. Guest agent will not be running."
+time="2026-10-16T23:30:10+08:00" level=info msg="[hostagent] Waiting for the essential requirement 1 of 2: `ssh`"
+time="2026-10-16T23:31:02+08:00" level=info msg="[hostagent] The essential requirement 1 of 2 is satisfied"
+time="2026-10-16T23:31:02+08:00" level=info msg="[hostagent] Waiting for the essential requirement 2 of 2: `Explicitly start ssh ControlMaster`"
+time="2026-10-16T23:31:05+08:00" level=info msg="[hostagent] The essential requirement 2 of 2 is satisfied"
+time="2026-10-16T23:31:05+08:00" level=info msg="[hostagent] Waiting for the final requirement 1 of 1: `boot scripts must have finished`"
+time="2026-10-16T23:31:14+08:00" level=info msg="[hostagent] The final requirement 1 of 1 is satisfied"
+time="2026-10-16T23:31:14+08:00" level=info msg="READY. Run `ssh -F `/Users/fuyangyang/.lima/dm-release-ubuntu24-amd64-kernel/ssh.config` lima-dm-release-ubuntu24-amd64-kernel` to open the shell."
+RUN limactl copy --backend=scp /tmp/docker-manager-release-platforms/kernel-vm-13-assets.tar dm-release-ubuntu24-amd64-kernel:/tmp/dm-kernel-assets.tar
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo mkdir -p /opt/dm-kernel-acceptance
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo tar -xf /tmp/dm-kernel-assets.tar -C /opt/dm-kernel-acceptance
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- rm /tmp/dm-kernel-assets.tar
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 python3 /opt/dm-kernel-acceptance/bootstrap.py --root /opt/dm-kernel-acceptance --engine 29.5.2
+Traceback (most recent call last):
+  File "/opt/dm-kernel-acceptance/bootstrap.py", line 18, in <module>
+    subprocess.run(['apt-get','-o','DPkg::Lock::Timeout=180','update','-qq'],check=True,timeout=180)
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['apt-get', '-o', 'DPkg::Lock::Timeout=180', 'update', '-qq']' died with <Signals.SIGTERM: 15>.
+Traceback (most recent call last):
+  File "/tmp/docker-manager-release-platforms/run-kernel-ubuntu-vm.py", line 13, in <module>
+    shell('sudo','env','DM_PLATFORM_ISOLATED=1','python3',guest+'/bootstrap.py','--root',guest,'--engine','28.5.1' if v=='12' else '29.5.2',timeout=1200)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/docker-manager-release-platforms/run-kernel-ubuntu-vm.py", line 5, in shell
+    def shell(*args,timeout=900):return run('limactl','shell',name,'--',*args,timeout=timeout)
+                                        ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/docker-manager-release-platforms/run-kernel-ubuntu-vm.py", line 4, in run
+    print('RUN',*args,flush=True);return subprocess.run(list(args),check=True,timeout=timeout)
+                                         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['limactl', 'shell', 'dm-release-ubuntu24-amd64-kernel', '--', 'sudo', 'env', 'DM_PLATFORM_ISOLATED=1', 'python3', '/opt/dm-kernel-acceptance/bootstrap.py', '--root', '/opt/dm-kernel-acceptance', '--engine', '29.5.2']' returned non-zero exit status 1.
+RUN limactl shell dm-release-ubuntu24-amd64-kernel -- sudo chmod 0644 /var/lib/dm-platform-ubuntu24-amd64-kernel-report.json
+chmod: cannot access '/var/lib/dm-platform-ubuntu24-amd64-kernel-report.json': No such file or directory
+RUN limactl stop dm-release-ubuntu24-amd64-kernel
+time="2026-10-16T23:34:40+08:00" level=info msg="Sending SIGINT to hostagent process 29961"
+time="2026-10-16T23:34:40+08:00" level=info msg="Waiting for the host agent and the driver processes to shut down"
+time="2026-10-16T23:34:40+08:00" level=info msg="[hostagent] Received SIGINT, shutting down the host agent"
+time="2026-10-16T23:34:40+08:00" level=info msg="[hostagent] Shutting down the host agent"
+time="2026-10-16T23:34:40+08:00" level=info msg="[hostagent] Shutting down QEMU with the power button"
+time="2026-10-16T23:34:40+08:00" level=info msg="[hostagent] Sending QMP system_powerdown command"
+time="2026-10-16T23:34:45+08:00" level=info msg="[hostagent] QEMU has exited"
+time="2026-10-16T23:34:45+08:00" level=info msg="Waiting for the instance to shut down"
+time="2026-10-16T23:34:45+08:00" level=info msg="The instance dm-release-ubuntu24-amd64-kernel has shut down"
+Traceback (most recent call last):
+  File "/tmp/docker-manager-release-platforms/run-kernel-ubuntu-vm.py", line 13, in <module>
+    shell('sudo','env','DM_PLATFORM_ISOLATED=1','python3',guest+'/bootstrap.py','--root',guest,'--engine','28.5.1' if v=='12' else '29.5.2',timeout=1200)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/docker-manager-release-platforms/run-kernel-ubuntu-vm.py", line 5, in shell
+    def shell(*args,timeout=900):return run('limactl','shell',name,'--',*args,timeout=timeout)
+                                        ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/docker-manager-release-platforms/run-kernel-ubuntu-vm.py", line 4, in run
+    print('RUN',*args,flush=True);return subprocess.run(list(args),check=True,timeout=timeout)
+                                         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['limactl', 'shell', 'dm-release-ubuntu24-amd64-kernel', '--', 'sudo', 'env', 'DM_PLATFORM_ISOLATED=1', 'python3', '/opt/dm-kernel-acceptance/bootstrap.py', '--root', '/opt/dm-kernel-acceptance', '--engine', '29.5.2']' returned non-zero exit status 1.

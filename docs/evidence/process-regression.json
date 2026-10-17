@@ -1,0 +1,21 @@
+{
+  "command": [
+    "colima",
+    "--profile",
+    "docker-manager-test",
+    "ssh",
+    "--",
+    "/tmp/docker-manager-linux-test/workflows-process-regression.test",
+    "-test.run",
+    "TestLinuxControlledCommand|TestControlledCommand",
+    "-test.v",
+    "-test.count=1"
+  ],
+  "platform": "Linux 6.8.0-117-generic aarch64",
+  "binary": "/tmp/docker-manager-linux-test/workflows-process-regression.test",
+  "binary_sha256": "30d8197c79832b258cb639c48a9ce28248b6662e044a772adebca1c58d39792e",
+  "exit_code": 0,
+  "stdout": "=== RUN   TestControlledCommandCancellationKillsOwnedProcessGroup\n=== RUN   TestControlledCommandCancellationKillsOwnedProcessGroup/cancel\n=== RUN   TestControlledCommandCancellationKillsOwnedProcessGroup/deadline\n--- PASS: TestControlledCommandCancellationKillsOwnedProcessGroup (3.04s)\n    --- PASS: TestControlledCommandCancellationKillsOwnedProcessGroup/cancel (0.03s)\n    --- PASS: TestControlledCommandCancellationKillsOwnedProcessGroup/deadline (3.00s)\n=== RUN   TestControlledCommandHasBoundedPipeWait\n--- PASS: TestControlledCommandHasBoundedPipeWait (0.00s)\n=== RUN   TestLinuxControlledCommandDiesWhenParentIsKilled\n--- PASS: TestLinuxControlledCommandDiesWhenParentIsKilled (0.04s)\n=== RUN   TestLinuxControlledCommandDeathSignalAndGroup\n--- PASS: TestLinuxControlledCommandDeathSignalAndGroup (0.00s)\nPASS\n",
+  "stderr": "",
+  "scope": "owned process fixtures only; no Docker resources or daemon operations"
+}

@@ -1,0 +1,101 @@
+{
+  "version": "v0.3.0",
+  "rebuilt_at": "2026-10-16T16:35:39.150001+00:00",
+  "archive": "bin/release/docker-manager-v0.3.0-20261017.tar.gz",
+  "archive_bytes": 199320119,
+  "archive_sha256": "04016e17154d01a77b73ec633a9d39624f021e154f1aacd2d8089e01c08186f0",
+  "archive_content_checksums": "all 14 payload files and embedded checksum list passed",
+  "installation_archive": "paths and executable script modes verified",
+  "source_fingerprint": "d4091a82d0860ec25077bb28f43893af0aa958b23490256c3a6d49c24bf0cf57",
+  "artifact_files": [
+    {
+      "file": "docker-manager-linux-amd64",
+      "size_bytes": 28450976,
+      "sha256": "1672c92d8c77175643528934850ff94fd089f6aa16abf22c7243f375fbbc562f"
+    },
+    {
+      "file": "docker-manager-linux-arm64",
+      "size_bytes": 26542240,
+      "sha256": "1389d1a210c788f238541054d8cb0150453497d733cfa14e04a63cd38df10e86"
+    },
+    {
+      "file": "docker-manager-images.tar.gz",
+      "size_bytes": 179085546,
+      "sha256": "a5e88dbd2e013c39c247f2cc1ac5075ed06e256cd24d29e90419cea9c0a6b09d"
+    },
+    {
+      "file": "docker-manager-installation.tar.gz",
+      "size_bytes": 13350,
+      "sha256": "dc070aa45e9e726c4cdbc60b10d2f214a3a08282a7fe3c90a1bea42caa4db377"
+    },
+    {
+      "file": "SHA256SUMS",
+      "size_bytes": 186,
+      "sha256": "449068f0e9899efa2a4ca80fec6bef7dfd80b9160bef40f8289dfcea283ef89a"
+    },
+    {
+      "file": "IMAGE-SHA256SUMS",
+      "size_bytes": 95,
+      "sha256": "7b8dd1a7588f20414e2153fb3e0d235f146a7aeb03c888a706a7c7e44b08356b"
+    },
+    {
+      "file": "IMAGES.txt",
+      "size_bytes": 228,
+      "sha256": "f96e7165861a96bd2c53d55dc23080a22bf76e8a5787720380e64ed98ae56037"
+    },
+    {
+      "file": "TOOL-VERSIONS.txt",
+      "size_bytes": 42,
+      "sha256": "b8e043da65e3e39c919183fcb7e44472fe7d9d864fca23a3d95fca97e8a91222"
+    },
+    {
+      "file": "SECURITY-NOTES.md",
+      "size_bytes": 2598,
+      "sha256": "03ae170783c877ba2b99762479612972617b419880bd49b0038bb9d349c88847"
+    },
+    {
+      "file": "SOURCE-MANIFEST.json",
+      "size_bytes": 9144,
+      "sha256": "674031eb092779b4999eea3e1a4dd481bca106051bb3ab079956b905581426f2"
+    },
+    {
+      "file": "BINARY-VERIFICATION.json",
+      "size_bytes": 881,
+      "sha256": "77503826feea0b07e779dcfaaa9ec61855bb8240b2da8fc1667768af732c17ae"
+    },
+    {
+      "file": "IMAGE-VERIFICATION.json",
+      "size_bytes": 3603,
+      "sha256": "b87313857864e615cf64a5ebb9654ed5a4122f74a8b4d5dd54d386a602d7b2eb"
+    },
+    {
+      "file": "BUILD-INFO.json",
+      "size_bytes": 1293,
+      "sha256": "4f68b5726c9ccbb1a5cd19b4445e73587b46c4ca9d6e24971c12f5a6a39f68de"
+    },
+    {
+      "file": "RELEASE-NOTES.md",
+      "size_bytes": 2935,
+      "sha256": "710801492d8572f0cc3b5d0545373dab1922dccb38d399fe130a0cef6a8e7212"
+    }
+  ],
+  "checks": {
+    "make_check": "passed",
+    "frontend_tests": 20,
+    "go_tests": "passed",
+    "go_race": "passed",
+    "go_vet": "passed",
+    "frontend_typecheck": "passed",
+    "frontend_build": "passed",
+    "shell_python_and_acceptance_contract": "passed",
+    "binary_elf_and_full_embedded_ui_bytes": "passed",
+    "image_archive_gzip_checksum_and_both_architectures": "passed",
+    "image_http_smoke": {
+      "amd64": "passed under QEMU binfmt",
+      "arm64": "passed native"
+    }
+  },
+  "published": false,
+  "runtime_scope": "image startup and current UI HTTP smoke; no full business/platform acceptance rerun",
+  "previous_artifacts": "bin/release-history/before-20261017T003129"
+}

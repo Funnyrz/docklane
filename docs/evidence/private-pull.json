@@ -1,0 +1,523 @@
+{
+  "namespace": "dm-private-pull-15dae2edfeebda61bf6d",
+  "started_at": "2026-10-16T14:16:42.445752+00:00",
+  "binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79",
+  "harness_sha256": "f78ccf76445a3013ab6c4a0b5ddeb72219f2784a622d94f735fbc27e7289cd36",
+  "integration_helper_sha256": "0eb072e12faf830a8867a8d912af062335d46c7949a4fd8a88a43b27e18b8a66",
+  "platform": {
+    "system": "Linux",
+    "architecture": "aarch64",
+    "uid": 0
+  },
+  "daemon_configuration_changed": false,
+  "checks": [
+    {
+      "name": "encrypted saved credential authenticates against real private Registry v2",
+      "status": "passed",
+      "evidence": {
+        "credential_id": "85d12ca0cb222b108d7e7fc837fa423a",
+        "authenticated": true,
+        "challenge_seen": true,
+        "authorized_v2_seen": true
+      }
+    },
+    {
+      "name": "authenticated uncached 20 MiB image pull emits new-layer bytes and verified Digest",
+      "status": "passed",
+      "evidence": {
+        "task_id": "70c9df76491e61a113d1a39a5caed11b",
+        "status": "Succeeded",
+        "image_id": "sha256:96e9f5a14596c1d425672dbf02d3c2cc6449c8bb460462cc4e33fe4cbdfd1c51",
+        "repo_digest": "127.0.0.1:5000/dm-private-pull-15dae2edfeebda61bf6d/image@sha256:3bb8a1ecc95a77c623999fcd603b126048a5b55bcd2acb048587f3689fc6b0c1",
+        "layer_bytes_transferred": 20978177,
+        "download_progress_count": 46,
+        "download_progress": [
+          {
+            "current_bytes_approx": 229400,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [>                                                  ]  229.4kB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 688100,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=>                                                 ]  688.1kB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 1147000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [==>                                                ]  1.147MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 1606000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [===>                                               ]  1.606MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 2064000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [====>                                              ]  2.064MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 2523000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [======>                                            ]  2.523MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 2982000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=======>                                           ]  2.982MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 3441000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [========>                                          ]  3.441MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 3899000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=========>                                         ]  3.899MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 4358000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [==========>                                        ]  4.358MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 4817000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [===========>                                       ]  4.817MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 5276000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [============>                                      ]  5.276MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 5734000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=============>                                     ]  5.734MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 6193000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [==============>                                    ]  6.193MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 6652000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [===============>                                   ]  6.652MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 7111000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [================>                                  ]  7.111MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 7569000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [==================>                                ]  7.569MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 8028000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [===================>                               ]  8.028MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 8487000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [====================>                              ]  8.487MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 8946000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=====================>                             ]  8.946MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 9404000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [======================>                            ]  9.404MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 9863000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=======================>                           ]  9.863MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 10320000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [========================>                          ]  10.32MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 10780000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=========================>                         ]  10.78MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 11240000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [==========================>                        ]  11.24MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 11700000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [===========================>                       ]   11.7MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 12160000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [============================>                      ]  12.16MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 12620000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [==============================>                    ]  12.62MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 13070000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [===============================>                   ]  13.07MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 13530000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [================================>                  ]  13.53MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 13990000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=================================>                 ]  13.99MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 14450000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [==================================>                ]  14.45MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 14910000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [===================================>               ]  14.91MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 15370000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [====================================>              ]  15.37MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 15830000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=====================================>             ]  15.83MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 16290000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [======================================>            ]  16.29MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 16739999,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=======================================>           ]  16.74MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 17200000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=========================================>         ]   17.2MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 17660000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [==========================================>        ]  17.66MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 18120000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [===========================================>       ]  18.12MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 18580000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [============================================>      ]  18.58MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 19040000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=============================================>     ]  19.04MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 19500000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [==============================================>    ]   19.5MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 19960000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [===============================================>   ]  19.96MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 20410000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [================================================>  ]  20.41MB/20.98MB"
+          },
+          {
+            "current_bytes_approx": 20870000,
+            "total_bytes_approx": 20980000,
+            "message": "1ef0e373d891 Downloading [=================================================> ]  20.87MB/20.98MB"
+          }
+        ],
+        "extract_progress_observed": true,
+        "cached_layers": false,
+        "digest_verified_independently": true
+      }
+    },
+    {
+      "name": "missing tag, wrong credentials and remote secret echo fail safely",
+      "status": "passed",
+      "evidence": {
+        "missing_tag_task": "e476f6fc4e16a5fdc09ed41b728ff459",
+        "wrong_credential_task": "f8de40cff72c8f4ef2d01600496b4488",
+        "echoed_secret_task": "74caad496db983142a3bb62189e126ab",
+        "statuses": [
+          "Failed",
+          "Failed",
+          "Failed"
+        ],
+        "error_codes": [
+          "TASK_FAILED",
+          "TASK_FAILED",
+          "TASK_FAILED"
+        ],
+        "secret_plaintext_absent_in_responses_logs_sqlite_wal": true,
+        "echo_redacted": true
+      }
+    }
+  ],
+  "cleanup_errors": [],
+  "reproduction": {
+    "command": [
+      "/usr/bin/python3",
+      "/tmp/docker-manager-release-platforms/private-pull-acceptance.py",
+      "--binary",
+      "/tmp/docker-manager-release-platforms/docker-manager-linux-arm64",
+      "--report",
+      "/tmp/docker-manager-release-platforms/private-pull.json"
+    ],
+    "environment": {
+      "DM_TEST_DOCKER": "/usr/local/bin/docker",
+      "DM_TEST_RESTIC": "/usr/local/bin/restic",
+      "DM_TEST_DOCKER_ENDPOINT": "unix:///var/run/docker.sock",
+      "PYTHONPATH": "/tmp/docker-manager-release-platforms/source/scripts"
+    }
+  },
+  "limitations": [
+    "Private registry uses HTTP Basic only on guest loopback; this run does not claim TLS registry verification.",
+    "Native Debian 12 arm64 / the recorded Engine version only; broader platform evidence is maintained separately."
+  ],
+  "engine": {
+    "Platform": {
+      "Name": "Docker Engine - Community"
+    },
+    "Components": [
+      {
+        "Name": "Engine",
+        "Version": "28.5.1",
+        "Details": {
+          "ApiVersion": "1.51",
+          "Arch": "arm64",
+          "BuildTime": "Wed Oct  8 12:17:27 2025",
+          "Experimental": "false",
+          "GitCommit": "f8215cc",
+          "GoVersion": "go1.24.8",
+          "KernelVersion": "6.1.0-53-cloud-arm64",
+          "MinAPIVersion": "1.24",
+          "Os": "linux"
+        }
+      },
+      {
+        "Name": "containerd",
+        "Version": "v1.7.28",
+        "Details": {
+          "GitCommit": "b98a3aace656320842a23f4a392a33f46af97866"
+        }
+      },
+      {
+        "Name": "runc",
+        "Version": "1.3.0",
+        "Details": {
+          "GitCommit": "v1.3.0-0-g4ca628d"
+        }
+      },
+      {
+        "Name": "docker-init",
+        "Version": "0.19.0",
+        "Details": {
+          "GitCommit": "de40ad0"
+        }
+      }
+    ],
+    "Version": "28.5.1",
+    "ApiVersion": "1.51",
+    "MinAPIVersion": "1.24",
+    "GitCommit": "f8215cc",
+    "GoVersion": "go1.24.8",
+    "Os": "linux",
+    "Arch": "arm64",
+    "KernelVersion": "6.1.0-53-cloud-arm64",
+    "BuildTime": "2025-10-08T12:17:27.000000000+00:00"
+  },
+  "engine_driver": "overlay2",
+  "distribution": "PRETTY_NAME=\"Debian GNU/Linux 12 (bookworm)\"\nNAME=\"Debian GNU/Linux\"\nVERSION_ID=\"12\"\nVERSION=\"12 (bookworm)\"\nVERSION_CODENAME=bookworm\nID=debian\nHOME_URL=\"https://www.debian.org/\"\nSUPPORT_URL=\"https://www.debian.org/support\"\nBUG_REPORT_URL=\"https://bugs.debian.org/\"\n",
+  "fixture": {
+    "reference": "127.0.0.1:5000/dm-private-pull-15dae2edfeebda61bf6d/image:new-36ddf200d2d5f1aa",
+    "config_digest": "sha256:96e9f5a14596c1d425672dbf02d3c2cc6449c8bb460462cc4e33fe4cbdfd1c51",
+    "manifest_digest": "sha256:3bb8a1ecc95a77c623999fcd603b126048a5b55bcd2acb048587f3689fc6b0c1",
+    "layer_digest": "sha256:1ef0e373d891b39ecc7b1036199574e014876f48591401129462000336aa8c49",
+    "diff_id": "sha256:17d0949692fa438f4ecb054003257b74addc6868a52a0799e3e7b974465527fc",
+    "layer_compressed_bytes": 20978177,
+    "payload_bytes": 20971520,
+    "payload_sha256": "923b9bd88391199f102ea297322c347222cb14cc949c8f943794b4ef9c2b9efc",
+    "throttle_chunk_bytes": 65536,
+    "throttle_interval_seconds": 0.025,
+    "image_absent_before": true,
+    "cached_layers": false
+  },
+  "registry_requests": [
+    {
+      "method": "GET",
+      "path": "/v2/",
+      "status": 401,
+      "authenticated": false,
+      "response_bytes": 72,
+      "sent_bytes": 72
+    },
+    {
+      "method": "GET",
+      "path": "/v2/",
+      "status": 200,
+      "authenticated": true,
+      "response_bytes": 2,
+      "sent_bytes": 2
+    },
+    {
+      "method": "GET",
+      "path": "/v2/",
+      "status": 401,
+      "authenticated": false,
+      "response_bytes": 72,
+      "sent_bytes": 72
+    },
+    {
+      "method": "HEAD",
+      "path": "/v2/dm-private-pull-15dae2edfeebda61bf6d/image/manifests/new-36ddf200d2d5f1aa",
+      "status": 200,
+      "authenticated": true,
+      "response_bytes": 428,
+      "sent_bytes": 0
+    },
+    {
+      "method": "GET",
+      "path": "/v2/dm-private-pull-15dae2edfeebda61bf6d/image/manifests/sha256:3bb8a1ecc95a77c623999fcd603b126048a5b55bcd2acb048587f3689fc6b0c1",
+      "status": 200,
+      "authenticated": true,
+      "response_bytes": 428,
+      "sent_bytes": 428
+    },
+    {
+      "method": "GET",
+      "path": "/v2/dm-private-pull-15dae2edfeebda61bf6d/image/blobs/sha256:96e9f5a14596c1d425672dbf02d3c2cc6449c8bb460462cc4e33fe4cbdfd1c51",
+      "status": 200,
+      "authenticated": true,
+      "response_bytes": 410,
+      "sent_bytes": 410
+    },
+    {
+      "method": "GET",
+      "path": "/v2/dm-private-pull-15dae2edfeebda61bf6d/image/blobs/sha256:1ef0e373d891b39ecc7b1036199574e014876f48591401129462000336aa8c49",
+      "status": 200,
+      "authenticated": true,
+      "response_bytes": 20978177,
+      "sent_bytes": 20978177
+    },
+    {
+      "method": "GET",
+      "path": "/v2/",
+      "status": 401,
+      "authenticated": false,
+      "response_bytes": 72,
+      "sent_bytes": 72
+    },
+    {
+      "method": "HEAD",
+      "path": "/v2/dm-private-pull-15dae2edfeebda61bf6d/image/manifests/absent-a62f90fb194d94d2",
+      "status": 404,
+      "authenticated": true,
+      "response_bytes": 75,
+      "sent_bytes": 0
+    },
+    {
+      "method": "GET",
+      "path": "/v2/dm-private-pull-15dae2edfeebda61bf6d/image/manifests/absent-a62f90fb194d94d2",
+      "status": 404,
+      "authenticated": true,
+      "response_bytes": 75,
+      "sent_bytes": 75
+    },
+    {
+      "method": "GET",
+      "path": "/v2/",
+      "status": 401,
+      "authenticated": false,
+      "response_bytes": 72,
+      "sent_bytes": 72
+    },
+    {
+      "method": "HEAD",
+      "path": "/v2/dm-private-pull-15dae2edfeebda61bf6d/image/manifests/new-36ddf200d2d5f1aa",
+      "status": 401,
+      "authenticated": false,
+      "response_bytes": 72,
+      "sent_bytes": 0
+    },
+    {
+      "method": "GET",
+      "path": "/v2/dm-private-pull-15dae2edfeebda61bf6d/image/manifests/new-36ddf200d2d5f1aa",
+      "status": 401,
+      "authenticated": false,
+      "response_bytes": 72,
+      "sent_bytes": 72
+    },
+    {
+      "method": "GET",
+      "path": "/v2/",
+      "status": 401,
+      "authenticated": false,
+      "response_bytes": 72,
+      "sent_bytes": 72
+    },
+    {
+      "method": "HEAD",
+      "path": "/v2/dm-private-pull-15dae2edfeebda61bf6d/image/manifests/new-36ddf200d2d5f1aa",
+      "status": 403,
+      "authenticated": true,
+      "response_bytes": 105,
+      "sent_bytes": 0
+    },
+    {
+      "method": "GET",
+      "path": "/v2/dm-private-pull-15dae2edfeebda61bf6d/image/manifests/new-36ddf200d2d5f1aa",
+      "status": 403,
+      "authenticated": true,
+      "response_bytes": 105,
+      "sent_bytes": 105
+    }
+  ],
+  "acceptance": [
+    "AC-IMG-01",
+    "AC-SYS-02",
+    "AC-TASK-03"
+  ],
+  "owned_image_removed": true,
+  "temporary_installation_removed": true,
+  "daemon_config_before_sha256": "abacc8808a943796bd5bc54889e376c56e98461e7584ffc718bf5c3a9b0210db",
+  "daemon_config_after_sha256": "abacc8808a943796bd5bc54889e376c56e98461e7584ffc718bf5c3a9b0210db",
+  "finished_at": "2026-10-16T14:16:52.798818+00:00",
+  "result": "passed"
+}

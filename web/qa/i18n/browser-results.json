@@ -1,0 +1,358 @@
+{
+  "kind": "Vue application in Chrome; API/streams intercepted fixtures; no Docker operations",
+  "checks": [
+    {
+      "scenario": "zh-CN-initialization-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-initialization-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-login-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-login-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-dashboard-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-containers-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-compose-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-images-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-networks-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-volumes-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-backups-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-tasks-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-settings-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-dashboard-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-containers-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-compose-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-images-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-networks-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-volumes-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-backups-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-tasks-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-settings-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-image-form-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-container-risk-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-compose-editor-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-task-filter-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-task-detail-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-backup-policy-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-unverified-restore-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-container-risk-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-compose-editor-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-task-filter-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-task-detail-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-backup-policy-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "zh-CN-unverified-restore-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-initialization-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-initialization-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-login-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-login-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-dashboard-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-containers-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-compose-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-images-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-networks-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-volumes-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-backups-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-tasks-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-settings-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-dashboard-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-containers-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-compose-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-images-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-networks-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-volumes-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-backups-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-tasks-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-settings-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-image-form-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-container-risk-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-compose-editor-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-task-filter-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-task-detail-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-backup-policy-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-unverified-restore-390",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-container-risk-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-compose-editor-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-task-filter-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-task-detail-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-backup-policy-1440",
+      "overflow": false,
+      "clippedButtons": false
+    },
+    {
+      "scenario": "en-unverified-restore-1440",
+      "overflow": false,
+      "clippedButtons": false
+    }
+  ],
+  "browserErrors": [],
+  "i18nWarnings": [],
+  "writes": []
+}

@@ -1,0 +1,19 @@
+{
+  "checks": [
+    "CA certificate symlinks resolve and trust bundle exists",
+    "runtime tools execute",
+    "embedded frontend served",
+    "initialization without Docker socket",
+    "Docker unavailable shown without fake zero counts",
+    "container recreation retains administrator/session through named data volume"
+  ],
+  "binary_sha256": "785f0352c649c44087a33a7e30fc3bcf2f985088e080c56accbaf1852993e2e4",
+  "image_id": "sha256:50f5e4674efe0c80be725e90eba0c19aef65c043b3b3b120070c01ac2549825c",
+  "architecture": "arm64",
+  "image_reference": "docker-manager:v0.3.0",
+  "docker": "Docker version 28.5.1, build e180ab8",
+  "compose": "2.40.3",
+  "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64",
+  "image_binary_sha256": "a75cae45e58c6a930c533a474597ef6d9e3091d974e5be84745f2143d154e0c8",
+  "result": "passed"
+}

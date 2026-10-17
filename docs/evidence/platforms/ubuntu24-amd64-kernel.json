@@ -1,0 +1,718 @@
+{
+  "phases": [
+    {
+      "phase": "prepare",
+      "started_at": "2026-10-16T15:38:45.666476+00:00",
+      "checks": [
+        {
+          "name": "actual install preserves pre-existing fixture and seeds encrypted backup/restore",
+          "status": "passed",
+          "evidence": {
+            "expected": {
+              "user_id": "4732890f60289e8c0bfdc51230ee7dcf",
+              "repository_id": "7453a9d9bed13dca6b00d59689c1efc4",
+              "policy_id": "e6814545d97578eb28320cd188e8c308",
+              "task_ids": [
+                "a43de746edcdbc998c4becd40c90eacd",
+                "09c65e14fc98b9db7650904095678262"
+              ],
+              "snapshot_id": "af9dff546c7d56000308a6caf7e87c40d372982de9422c2291bab5b7da264f2a",
+              "restored_payload": "/var/lib/dm-platform-ubuntu24-amd64-kernel/fixture/restored/var/lib/dm-platform-ubuntu24-amd64-kernel/fixture/source/payload.bin"
+            },
+            "original_container_id": "eb0a08374c2612db92b7b78981d984638956db6a514a915dab71e220fdf027e5",
+            "unit": {
+              "MainPID": "1681",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ActiveState": "active",
+              "SubState": "running",
+              "FragmentPath": "/etc/systemd/system/docker-manager.service",
+              "UnitFileState": "enabled"
+            },
+            "master_key_sha256": "601d17a1ae6d9228011e032bd578a49497a7e50b9a52d0ee1dce419f1dedf4c8"
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
+          "NAME": "Ubuntu",
+          "VERSION_ID": "24.04",
+          "VERSION": "24.04.5 LTS (Noble Numbat)",
+          "VERSION_CODENAME": "noble",
+          "ID": "ubuntu",
+          "ID_LIKE": "debian",
+          "HOME_URL": "https://www.ubuntu.com/",
+          "SUPPORT_URL": "https://help.ubuntu.com/",
+          "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+          "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+          "UBUNTU_CODENAME": "noble",
+          "LOGO": "ubuntu-logo"
+        },
+        "machine": "x86_64",
+        "kernel": "6.8.0-146-generic",
+        "environment": "emulated-vm",
+        "process": {
+          "boot_id": "6803192e-46c7-4673-9987-0f8c3dec713b",
+          "pid1_start_ticks": "65",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Version": "29.5.2",
+          "ApiVersion": "1.54",
+          "MinAPIVersion": "1.40",
+          "Os": "linux",
+          "Arch": "amd64",
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "29.5.2",
+              "Details": {
+                "ApiVersion": "1.54",
+                "Arch": "amd64",
+                "BuildTime": "Wed May 20 14:39:32 2026",
+                "Experimental": "false",
+                "GitCommit": "568f755",
+                "GoVersion": "go1.26.3",
+                "KernelVersion": "6.8.0-146-generic",
+                "MinAPIVersion": "1.40",
+                "Module": "github.com/moby/moby/v2",
+                "ModuleVersion": "v2.0.0+unknown",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v2.2.3",
+              "Details": {
+                "GitCommit": "77c84241c7cbdd9b4eca2591793e3d4f4317c590"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.5",
+              "Details": {
+                "GitCommit": "v1.3.5-0-g488fc13"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "GitCommit": "568f755",
+          "GoVersion": "go1.26.3",
+          "KernelVersion": "6.8.0-146-generic",
+          "BuildTime": "2026-05-20T14:39:32.000000000+00:00"
+        },
+        "docker_cli": "Docker version 29.5.2, build 79eb04c",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/amd64",
+        "supplied_binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T15:39:19.005593+00:00"
+    },
+    {
+      "phase": "resume",
+      "started_at": "2026-10-16T15:40:22.684329+00:00",
+      "checks": [
+        {
+          "name": "actual guest restart preserves enabled service/container identity and all management data",
+          "status": "passed",
+          "evidence": {
+            "before": {
+              "boot_id": "6803192e-46c7-4673-9987-0f8c3dec713b",
+              "pid1_start_ticks": "65",
+              "pid1_comm": "systemd",
+              "pid1_command": "/sbin/init"
+            },
+            "after": {
+              "boot_id": "3930a67e-cc77-4d0f-b91a-c92e5d6b78c7",
+              "pid1_start_ticks": "49",
+              "pid1_comm": "systemd",
+              "pid1_command": "/sbin/init"
+            },
+            "retained": {
+              "user_id": "4732890f60289e8c0bfdc51230ee7dcf",
+              "repository_id": "7453a9d9bed13dca6b00d59689c1efc4",
+              "policy_id": "e6814545d97578eb28320cd188e8c308",
+              "task_ids": [
+                "a43de746edcdbc998c4becd40c90eacd",
+                "09c65e14fc98b9db7650904095678262"
+              ],
+              "snapshot_id": "af9dff546c7d56000308a6caf7e87c40d372982de9422c2291bab5b7da264f2a",
+              "restored_payload": "/var/lib/dm-platform-ubuntu24-amd64-kernel/fixture/restored/var/lib/dm-platform-ubuntu24-amd64-kernel/fixture/source/payload.bin",
+              "original_container_id": "eb0a08374c2612db92b7b78981d984638956db6a514a915dab71e220fdf027e5",
+              "restored_sha256": "f13a772f3b032c3478e24afef673560215448454e12ce28ce9f8f57f55fa6f3a"
+            },
+            "unit": {
+              "MainPID": "973",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ActiveState": "active",
+              "SubState": "running",
+              "FragmentPath": "/etc/systemd/system/docker-manager.service",
+              "UnitFileState": "enabled"
+            }
+          }
+        },
+        {
+          "name": "actual same-version upgrade creates matching backup and preserves management data",
+          "status": "passed",
+          "evidence": {
+            "backup": {
+              "path": "/var/backups/docker-manager/20261016T154029Z",
+              "fingerprints": {
+                "database": "71e47bf10a491e521129c91bc9bfa45a5341667b38dedd1cf3454d25e839ab4c",
+                "master_key": "601d17a1ae6d9228011e032bd578a49497a7e50b9a52d0ee1dce419f1dedf4c8",
+                "config": "bb3b15f079ce0acf3777bdb10f07401b3936d72b0d21ae642668c4e4a8615b0e",
+                "binary": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+              },
+              "exit_code": 0
+            },
+            "retained": {
+              "user_id": "4732890f60289e8c0bfdc51230ee7dcf",
+              "repository_id": "7453a9d9bed13dca6b00d59689c1efc4",
+              "policy_id": "e6814545d97578eb28320cd188e8c308",
+              "task_ids": [
+                "a43de746edcdbc998c4becd40c90eacd",
+                "09c65e14fc98b9db7650904095678262"
+              ],
+              "snapshot_id": "af9dff546c7d56000308a6caf7e87c40d372982de9422c2291bab5b7da264f2a",
+              "restored_payload": "/var/lib/dm-platform-ubuntu24-amd64-kernel/fixture/restored/var/lib/dm-platform-ubuntu24-amd64-kernel/fixture/source/payload.bin",
+              "original_container_id": "eb0a08374c2612db92b7b78981d984638956db6a514a915dab71e220fdf027e5",
+              "restored_sha256": "f13a772f3b032c3478e24afef673560215448454e12ce28ce9f8f57f55fa6f3a"
+            },
+            "limitation": "Same-version lifecycle check; no historical business release or migration result is fabricated."
+          }
+        },
+        {
+          "name": "actual invalid-binary upgrade fails and leaves service stopped",
+          "status": "passed",
+          "evidence": {
+            "backup": {
+              "path": "/var/backups/docker-manager/20261016T154035Z",
+              "fingerprints": {
+                "database": "cb895db2453e8aabbfd09987a6eb3bb4213c2883d77aaf7b71f4058e8973c59b",
+                "master_key": "601d17a1ae6d9228011e032bd578a49497a7e50b9a52d0ee1dce419f1dedf4c8",
+                "config": "bb3b15f079ce0acf3777bdb10f07401b3936d72b0d21ae642668c4e4a8615b0e",
+                "binary": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+              },
+              "exit_code": 1
+            },
+            "unit": {
+              "MainPID": "0",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ActiveState": "inactive",
+              "SubState": "dead",
+              "FragmentPath": "/etc/systemd/system/docker-manager.service",
+              "UnitFileState": "enabled"
+            }
+          }
+        },
+        {
+          "name": "documented matching binary/config/database/key rollback recovers service and data",
+          "status": "passed",
+          "evidence": {
+            "retained": {
+              "user_id": "4732890f60289e8c0bfdc51230ee7dcf",
+              "repository_id": "7453a9d9bed13dca6b00d59689c1efc4",
+              "policy_id": "e6814545d97578eb28320cd188e8c308",
+              "task_ids": [
+                "a43de746edcdbc998c4becd40c90eacd",
+                "09c65e14fc98b9db7650904095678262"
+              ],
+              "snapshot_id": "af9dff546c7d56000308a6caf7e87c40d372982de9422c2291bab5b7da264f2a",
+              "restored_payload": "/var/lib/dm-platform-ubuntu24-amd64-kernel/fixture/restored/var/lib/dm-platform-ubuntu24-amd64-kernel/fixture/source/payload.bin",
+              "original_container_id": "eb0a08374c2612db92b7b78981d984638956db6a514a915dab71e220fdf027e5",
+              "restored_sha256": "f13a772f3b032c3478e24afef673560215448454e12ce28ce9f8f57f55fa6f3a"
+            }
+          }
+        },
+        {
+          "name": "actual uninstall preserves database/key/config/account/repository and external container",
+          "status": "passed",
+          "evidence": {
+            "master_key_sha256": "601d17a1ae6d9228011e032bd578a49497a7e50b9a52d0ee1dce419f1dedf4c8"
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
+          "NAME": "Ubuntu",
+          "VERSION_ID": "24.04",
+          "VERSION": "24.04.5 LTS (Noble Numbat)",
+          "VERSION_CODENAME": "noble",
+          "ID": "ubuntu",
+          "ID_LIKE": "debian",
+          "HOME_URL": "https://www.ubuntu.com/",
+          "SUPPORT_URL": "https://help.ubuntu.com/",
+          "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+          "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+          "UBUNTU_CODENAME": "noble",
+          "LOGO": "ubuntu-logo"
+        },
+        "machine": "x86_64",
+        "kernel": "6.8.0-146-generic",
+        "environment": "emulated-vm",
+        "process": {
+          "boot_id": "3930a67e-cc77-4d0f-b91a-c92e5d6b78c7",
+          "pid1_start_ticks": "49",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Version": "29.5.2",
+          "ApiVersion": "1.54",
+          "MinAPIVersion": "1.40",
+          "Os": "linux",
+          "Arch": "amd64",
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "29.5.2",
+              "Details": {
+                "ApiVersion": "1.54",
+                "Arch": "amd64",
+                "BuildTime": "Wed May 20 14:39:32 2026",
+                "Experimental": "false",
+                "GitCommit": "568f755",
+                "GoVersion": "go1.26.3",
+                "KernelVersion": "6.8.0-146-generic",
+                "MinAPIVersion": "1.40",
+                "Module": "github.com/moby/moby/v2",
+                "ModuleVersion": "v2.0.0+unknown",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v2.2.3",
+              "Details": {
+                "GitCommit": "77c84241c7cbdd9b4eca2591793e3d4f4317c590"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.5",
+              "Details": {
+                "GitCommit": "v1.3.5-0-g488fc13"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "GitCommit": "568f755",
+          "GoVersion": "go1.26.3",
+          "KernelVersion": "6.8.0-146-generic",
+          "BuildTime": "2026-05-20T14:39:32.000000000+00:00"
+        },
+        "docker_cli": "Docker version 29.5.2, build 79eb04c",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/amd64",
+        "supplied_binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T15:40:45.876763+00:00"
+    },
+    {
+      "phase": "migration",
+      "started_at": "2026-10-16T15:40:48.052434+00:00",
+      "checks": [
+        {
+          "name": "actual migration SQL abort stops upgrade and preserves matching recovery material",
+          "status": "passed",
+          "evidence": {
+            "backup": {
+              "path": "/var/backups/docker-manager/20261016T154059Z",
+              "fingerprints": {
+                "database": "3e74a859fbf5fbc6364df586738c5299a02fe0fb8311cdab31c87d793025680b",
+                "master_key": "601d17a1ae6d9228011e032bd578a49497a7e50b9a52d0ee1dce419f1dedf4c8",
+                "config": "bb3b15f079ce0acf3777bdb10f07401b3936d72b0d21ae642668c4e4a8615b0e",
+                "binary": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+              },
+              "exit_code": 1
+            },
+            "injection": "DM_ACCEPTANCE_MIGRATION_ABORT",
+            "applied_versions": [
+              1
+            ],
+            "unit": {
+              "MainPID": "0",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ActiveState": "inactive",
+              "SubState": "dead",
+              "FragmentPath": "/etc/systemd/system/docker-manager.service",
+              "UnitFileState": "enabled"
+            },
+            "limitation": "Explicit SQL fault injection on schema v1; not a cross-business-version migration claim."
+          }
+        },
+        {
+          "name": "matching-group recovery after removing injected SQL fault preserves all management data",
+          "status": "passed",
+          "evidence": {
+            "retained": {
+              "user_id": "4732890f60289e8c0bfdc51230ee7dcf",
+              "repository_id": "7453a9d9bed13dca6b00d59689c1efc4",
+              "policy_id": "e6814545d97578eb28320cd188e8c308",
+              "task_ids": [
+                "a43de746edcdbc998c4becd40c90eacd",
+                "09c65e14fc98b9db7650904095678262"
+              ],
+              "snapshot_id": "af9dff546c7d56000308a6caf7e87c40d372982de9422c2291bab5b7da264f2a",
+              "restored_payload": "/var/lib/dm-platform-ubuntu24-amd64-kernel/fixture/restored/var/lib/dm-platform-ubuntu24-amd64-kernel/fixture/source/payload.bin",
+              "original_container_id": "eb0a08374c2612db92b7b78981d984638956db6a514a915dab71e220fdf027e5",
+              "restored_sha256": "f13a772f3b032c3478e24afef673560215448454e12ce28ce9f8f57f55fa6f3a"
+            }
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
+          "NAME": "Ubuntu",
+          "VERSION_ID": "24.04",
+          "VERSION": "24.04.5 LTS (Noble Numbat)",
+          "VERSION_CODENAME": "noble",
+          "ID": "ubuntu",
+          "ID_LIKE": "debian",
+          "HOME_URL": "https://www.ubuntu.com/",
+          "SUPPORT_URL": "https://help.ubuntu.com/",
+          "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+          "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+          "UBUNTU_CODENAME": "noble",
+          "LOGO": "ubuntu-logo"
+        },
+        "machine": "x86_64",
+        "kernel": "6.8.0-146-generic",
+        "environment": "emulated-vm",
+        "process": {
+          "boot_id": "3930a67e-cc77-4d0f-b91a-c92e5d6b78c7",
+          "pid1_start_ticks": "49",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Version": "29.5.2",
+          "ApiVersion": "1.54",
+          "MinAPIVersion": "1.40",
+          "Os": "linux",
+          "Arch": "amd64",
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "29.5.2",
+              "Details": {
+                "ApiVersion": "1.54",
+                "Arch": "amd64",
+                "BuildTime": "Wed May 20 14:39:32 2026",
+                "Experimental": "false",
+                "GitCommit": "568f755",
+                "GoVersion": "go1.26.3",
+                "KernelVersion": "6.8.0-146-generic",
+                "MinAPIVersion": "1.40",
+                "Module": "github.com/moby/moby/v2",
+                "ModuleVersion": "v2.0.0+unknown",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v2.2.3",
+              "Details": {
+                "GitCommit": "77c84241c7cbdd9b4eca2591793e3d4f4317c590"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.5",
+              "Details": {
+                "GitCommit": "v1.3.5-0-g488fc13"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "GitCommit": "568f755",
+          "GoVersion": "go1.26.3",
+          "KernelVersion": "6.8.0-146-generic",
+          "BuildTime": "2026-05-20T14:39:32.000000000+00:00"
+        },
+        "docker_cli": "Docker version 29.5.2, build 79eb04c",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/amd64",
+        "supplied_binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T15:41:10.683668+00:00"
+    },
+    {
+      "phase": "docker",
+      "started_at": "2026-10-16T15:41:11.874429+00:00",
+      "checks": [
+        {
+          "name": "real image remove/recreate preserves named-volume users/session/policy/repository/tasks/key",
+          "status": "passed",
+          "evidence": {
+            "first_container_id": "e8c1fa081c887281ee079900f9b75a57edf9c502680899919ee39de938eab293",
+            "replacement_container_id": "5494db6c47e3067c2bc7b8793edf6fe8bde6e0b9f3d1e5f0020a76d661e25a30",
+            "volume": "dm-platform-649ee28fdd01acde-manager-data",
+            "image_id": "sha256:45e1e289bb2e0900a7c6e62de3233f6db56023d6c2fdded2c0a97755f93726d7",
+            "image_architecture": "amd64",
+            "explicit_mappings": [
+              {
+                "host": "/var/lib/dm-platform-ubuntu24-amd64-kernel/docker-fixture/source",
+                "local": "/source",
+                "read_only": true
+              },
+              {
+                "host": "/var/lib/dm-platform-ubuntu24-amd64-kernel/docker-fixture/repository",
+                "local": "/repository",
+                "read_only": false
+              },
+              {
+                "host": "/var/lib/dm-platform-ubuntu24-amd64-kernel/docker-fixture/restored",
+                "local": "/restored",
+                "read_only": false
+              }
+            ],
+            "master_key_sha256": "db9219eed0ca12ef68c7f0f766ab210624fcde682ddec1fc14924c30951502df",
+            "tools": {
+              "compose": "2.40.3",
+              "restic": "restic 0.19.1 compiled with go1.26.4 on linux/amd64"
+            },
+            "retained": {
+              "user_id": "a543a775e9426072056b050d65a46ca2",
+              "repository_id": "3d0a7fc4d870df97fecd00a247e9220b",
+              "policy_id": "f9513eb85b42c0d555b4e119d205c5e0",
+              "task_ids": [
+                "f72040c500ee365ca8749b8392e4bdb9",
+                "b19657e11a098bc9ef6bf300001b77b6"
+              ],
+              "snapshot_id": "ae5501b758b03fc98a7522b9d96d3971842736651705b2fd53208e056535e0e1",
+              "restored_payload": "/var/lib/dm-platform-ubuntu24-amd64-kernel/docker-fixture/restored/sources/000/payload.bin",
+              "original_container_id": "6f492868dfd784cf260b20ea919f6bdcb377e4eaf1bf4401f3e61cb5bcab5114",
+              "restored_sha256": "15c93c796742784d7ab1aca594e540cd4ee36d55b6696df21d15700335aba7d7"
+            },
+            "host_root_mounted": false
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
+          "NAME": "Ubuntu",
+          "VERSION_ID": "24.04",
+          "VERSION": "24.04.5 LTS (Noble Numbat)",
+          "VERSION_CODENAME": "noble",
+          "ID": "ubuntu",
+          "ID_LIKE": "debian",
+          "HOME_URL": "https://www.ubuntu.com/",
+          "SUPPORT_URL": "https://help.ubuntu.com/",
+          "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+          "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+          "UBUNTU_CODENAME": "noble",
+          "LOGO": "ubuntu-logo"
+        },
+        "machine": "x86_64",
+        "kernel": "6.8.0-146-generic",
+        "environment": "emulated-vm",
+        "process": {
+          "boot_id": "3930a67e-cc77-4d0f-b91a-c92e5d6b78c7",
+          "pid1_start_ticks": "49",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Version": "29.5.2",
+          "ApiVersion": "1.54",
+          "MinAPIVersion": "1.40",
+          "Os": "linux",
+          "Arch": "amd64",
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "29.5.2",
+              "Details": {
+                "ApiVersion": "1.54",
+                "Arch": "amd64",
+                "BuildTime": "Wed May 20 14:39:32 2026",
+                "Experimental": "false",
+                "GitCommit": "568f755",
+                "GoVersion": "go1.26.3",
+                "KernelVersion": "6.8.0-146-generic",
+                "MinAPIVersion": "1.40",
+                "Module": "github.com/moby/moby/v2",
+                "ModuleVersion": "v2.0.0+unknown",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v2.2.3",
+              "Details": {
+                "GitCommit": "77c84241c7cbdd9b4eca2591793e3d4f4317c590"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.5",
+              "Details": {
+                "GitCommit": "v1.3.5-0-g488fc13"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "GitCommit": "568f755",
+          "GoVersion": "go1.26.3",
+          "KernelVersion": "6.8.0-146-generic",
+          "BuildTime": "2026-05-20T14:39:32.000000000+00:00"
+        },
+        "docker_cli": "Docker version 29.5.2, build 79eb04c",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/amd64",
+        "supplied_binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T15:41:41.051303+00:00"
+    },
+    {
+      "phase": "cleanup",
+      "started_at": "2026-10-16T15:41:42.142601+00:00",
+      "checks": [
+        {
+          "name": "owned installation/resources/secret fixtures cleaned; report retained",
+          "status": "passed",
+          "evidence": {
+            "remaining_owned_containers": []
+          }
+        }
+      ],
+      "environment": {
+        "os": {
+          "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
+          "NAME": "Ubuntu",
+          "VERSION_ID": "24.04",
+          "VERSION": "24.04.5 LTS (Noble Numbat)",
+          "VERSION_CODENAME": "noble",
+          "ID": "ubuntu",
+          "ID_LIKE": "debian",
+          "HOME_URL": "https://www.ubuntu.com/",
+          "SUPPORT_URL": "https://help.ubuntu.com/",
+          "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+          "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+          "UBUNTU_CODENAME": "noble",
+          "LOGO": "ubuntu-logo"
+        },
+        "machine": "x86_64",
+        "kernel": "6.8.0-146-generic",
+        "environment": "emulated-vm",
+        "process": {
+          "boot_id": "3930a67e-cc77-4d0f-b91a-c92e5d6b78c7",
+          "pid1_start_ticks": "49",
+          "pid1_comm": "systemd",
+          "pid1_command": "/sbin/init"
+        },
+        "engine": {
+          "Platform": {
+            "Name": "Docker Engine - Community"
+          },
+          "Version": "29.5.2",
+          "ApiVersion": "1.54",
+          "MinAPIVersion": "1.40",
+          "Os": "linux",
+          "Arch": "amd64",
+          "Components": [
+            {
+              "Name": "Engine",
+              "Version": "29.5.2",
+              "Details": {
+                "ApiVersion": "1.54",
+                "Arch": "amd64",
+                "BuildTime": "Wed May 20 14:39:32 2026",
+                "Experimental": "false",
+                "GitCommit": "568f755",
+                "GoVersion": "go1.26.3",
+                "KernelVersion": "6.8.0-146-generic",
+                "MinAPIVersion": "1.40",
+                "Module": "github.com/moby/moby/v2",
+                "ModuleVersion": "v2.0.0+unknown",
+                "Os": "linux"
+              }
+            },
+            {
+              "Name": "containerd",
+              "Version": "v2.2.3",
+              "Details": {
+                "GitCommit": "77c84241c7cbdd9b4eca2591793e3d4f4317c590"
+              }
+            },
+            {
+              "Name": "runc",
+              "Version": "1.3.5",
+              "Details": {
+                "GitCommit": "v1.3.5-0-g488fc13"
+              }
+            },
+            {
+              "Name": "docker-init",
+              "Version": "0.19.0",
+              "Details": {
+                "GitCommit": "de40ad0"
+              }
+            }
+          ],
+          "GitCommit": "568f755",
+          "GoVersion": "go1.26.3",
+          "KernelVersion": "6.8.0-146-generic",
+          "BuildTime": "2026-05-20T14:39:32.000000000+00:00"
+        },
+        "docker_cli": "Docker version 29.5.2, build 79eb04c",
+        "compose": "2.40.3",
+        "restic": "restic 0.19.1 compiled with go1.26.4 on linux/amd64",
+        "supplied_binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+      },
+      "status": "passed",
+      "finished_at": "2026-10-16T15:41:48.376620+00:00"
+    }
+  ],
+  "state": "/var/lib/dm-platform-ubuntu24-amd64-kernel",
+  "namespace": "dm-platform-649ee28fdd01acde"
+}

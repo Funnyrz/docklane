@@ -1,0 +1,23 @@
+[Unit]
+Description=Docklane
+After=network.target docker.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=docker-manager
+Group=docker-manager
+SupplementaryGroups=docker
+Environment=DM_CONFIG=/etc/docker-manager/config.json
+ExecStart=/usr/local/bin/docklane
+WorkingDirectory=/var/lib/docker-manager
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=180
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

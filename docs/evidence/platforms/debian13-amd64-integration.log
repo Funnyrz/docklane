@@ -1,0 +1,52 @@
+time="2026-10-16T23:32:17+08:00" level=info msg="Using the existing instance `dm-release-debian13-amd64-kernel`"
+time="2026-10-16T23:32:17+08:00" level=info msg="Starting the instance `dm-release-debian13-amd64-kernel` with internal VM driver `qemu`"
+time="2026-10-16T23:32:17+08:00" level=info msg="[hostagent] hostagent socket created at /Users/fuyangyang/.lima/dm-release-debian13-amd64-kernel/ha.sock"
+time="2026-10-16T23:32:17+08:00" level=info msg="[hostagent] Using system firmware (`/opt/homebrew/share/qemu/edk2-x86_64-code.fd`)"
+time="2026-10-16T23:32:17+08:00" level=info msg="[hostagent] Starting QEMU (hint: to watch the boot progress, see `/Users/fuyangyang/.lima/dm-release-debian13-amd64-kernel/serial*.log`)"
+time="2026-10-16T23:32:17+08:00" level=info msg="SSH Local Port: 56310"
+time="2026-10-16T23:32:17+08:00" level=info msg="[hostagent] Running in plain mode. Mounts, dynamic port forwarding, containerd, etc. will be ignored. Guest agent will not be running."
+time="2026-10-16T23:32:17+08:00" level=info msg="[hostagent] Waiting for the essential requirement 1 of 2: `ssh`"
+time="2026-10-16T23:33:05+08:00" level=info msg="[hostagent] The essential requirement 1 of 2 is satisfied"
+time="2026-10-16T23:33:05+08:00" level=info msg="[hostagent] Waiting for the essential requirement 2 of 2: `Explicitly start ssh ControlMaster`"
+time="2026-10-16T23:33:06+08:00" level=info msg="[hostagent] The essential requirement 2 of 2 is satisfied"
+time="2026-10-16T23:33:06+08:00" level=info msg="[hostagent] Waiting for the final requirement 1 of 1: `boot scripts must have finished`"
+time="2026-10-16T23:33:09+08:00" level=info msg="[hostagent] The final requirement 1 of 1 is satisfied"
+time="2026-10-16T23:33:09+08:00" level=info msg="READY. Run `ssh -F `/Users/fuyangyang/.lima/dm-release-debian13-amd64-kernel/ssh.config` lima-dm-release-debian13-amd64-kernel` to open the shell."
+1.37.0: Pulling from library/busybox
+68fe9bff2ad4: Pulling fs layer
+68fe9bff2ad4: Verifying Checksum
+68fe9bff2ad4: Download complete
+68fe9bff2ad4: Pull complete
+Digest: sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e
+Status: Downloaded newer image for busybox:1.37.0
+docker.io/library/busybox:1.37.0
+Real tools: Docker 29.5.2; Compose 2.40.3; restic 0.19.1 compiled with go1.26.4 on linux/amd64
+Owned test namespace: dm-e2e-90a25c0643c64348
+PASS installation preserves pre-existing container ID and running state
+PASS authentication, single setup, CSRF, API404 and daemon capability enforcement
+PASS dashboard counts match independent Engine inventory and repeated refresh preserves resources: independent CLI/Engine HTTP; running/stopped/paused fixtures; three refreshes; IDs/config/mounts/network/state unchanged
+PASS CLI discovery and Engine-verified lifecycle with task idempotency
+PASS healthy container rebuild creates new ID and failing replacement restores original ID/data
+PASS real streamed Docker image export and asynchronous tar import: 5242880-byte tar exceeds ordinary API body cap
+PASS real Compose multiconfig/env/profile import preserves IDs, ports and mounts
+PASS stop-writer directory backup, full Restic data read and content/mode/ownership restore
+PASS SIGKILL during real stopped-writer Restic backup terminates child and recovers writer on restart: 256MiB random source; direct child executable+PPID+starttime verified through /proc; task Failed/INTERRUPTED
+PASS container snapshot recreates a running service against verified recovered bind data: original ID remains running; new ID/name/bind path and in-container content independently verified
+PASS named Volume worker backup and verified restore: locally pinned worker image ID
+PASS worker ambient capability reads foreign UID mode0600 and preserves repository ownership: app UID 999, source UID 1001
+PASS non-root manager restores foreign UID/GID mode0600 through scoped worker: independent read-only Docker stat and content check
+Waiting for real Cron UTC minute trigger (at most 75 seconds)
+PASS real Cron Volume file backup commits snapshot and restart preserves unique UTC task instance: file consistency only; no database consistency claim; no clock or database manipulation
+PASS restart persists users, sessions, policies and completed tasks
+PASS fresh database imports encrypted repository and restores without original SQLite or source directory
+Real integration checks passed; skipped scenarios remain explicitly marked in the report.
+userdel: dm-kernel-integration mail spool (/var/mail/dm-kernel-integration) not found
+time="2026-10-16T23:38:41+08:00" level=info msg="Sending SIGINT to hostagent process 30304"
+time="2026-10-16T23:38:41+08:00" level=info msg="Waiting for the host agent and the driver processes to shut down"
+time="2026-10-16T23:38:41+08:00" level=info msg="[hostagent] Received SIGINT, shutting down the host agent"
+time="2026-10-16T23:38:41+08:00" level=info msg="[hostagent] Shutting down the host agent"
+time="2026-10-16T23:38:41+08:00" level=info msg="[hostagent] Shutting down QEMU with the power button"
+time="2026-10-16T23:38:41+08:00" level=info msg="[hostagent] Sending QMP system_powerdown command"
+time="2026-10-16T23:38:47+08:00" level=info msg="[hostagent] QEMU has exited"
+time="2026-10-16T23:38:47+08:00" level=info msg="Waiting for the instance to shut down"
+time="2026-10-16T23:38:48+08:00" level=info msg="The instance dm-release-debian13-amd64-kernel has shut down"

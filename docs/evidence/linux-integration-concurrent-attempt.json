@@ -1,0 +1,37 @@
+{
+  "namespace": "dm-e2e-249804443ef96756",
+  "engine": "29.5.2",
+  "compose": "2.40.3",
+  "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64",
+  "binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79",
+  "worker_image_id": "sha256:993e8705118179a3fdaba03f63f368138e14713fd584dd90f20f0e559d2235fa",
+  "host": {
+    "system": "Linux",
+    "architecture": "aarch64",
+    "uid": 501
+  },
+  "engine_os": "Ubuntu 24.04.4 LTS",
+  "started_at": "2026-10-16T14:13:25.149070+00:00",
+  "tests": [
+    {
+      "name": "installation preserves pre-existing container ID and running state",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "authentication, single setup, CSRF, API404 and daemon capability enforcement",
+      "status": "passed",
+      "detail": ""
+    }
+  ],
+  "limitations": [
+    "systemd/distro and dual-architecture runtime matrix are separate release checks",
+    "daemon configuration mutation/restart is a separate isolated release check"
+  ],
+  "failure": "dashboard container counts differ from independent Engine inventory",
+  "result": "failed",
+  "cleanup_errors": [],
+  "finished_at": "2026-10-16T14:13:27.181307+00:00",
+  "attempt_classification": "Preserved harness concurrency failure: another owned Compose workflow changed global Engine inventory during dashboard snapshot assertion. The unchanged script passed the identical dashboard check when rerun serially; see linux-integration-final.json.",
+  "stdout": "Real tools: Docker 29.5.2; Compose 2.40.3; restic 0.19.1 compiled with go1.26.4 on linux/arm64\nOwned test namespace: dm-e2e-249804443ef96756\nPASS installation preserves pre-existing container ID and running state\nPASS authentication, single setup, CSRF, API404 and daemon capability enforcement\nSERVER LOG (state): {\"time\":\"2026-10-16T22:13:25.377373027+08:00\",\"level\":\"INFO\",\"msg\":\"Docker Manager started\",\"listen\":\"127.0.0.1:53103\",\"mode\":\"binary\"}\n{\"time\":\"2026-10-16T22:13:25.379097052+08:00\",\"level\":\"INFO\",\"msg\":\"Docker connection changed\",\"status\":\"connected\"}\n\nERROR: dashboard container counts differ from independent Engine inventory\ntime=\"2026-10-16T22:13:27+08:00\" level=fatal msg=\"exit status 1\"\n"
+}

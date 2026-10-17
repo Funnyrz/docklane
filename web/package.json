@@ -1,0 +1,30 @@
+{
+  "name": "docklane-web",
+  "private": true,
+  "version": "0.3.0",
+  "type": "module",
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "lint": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "naive-ui": "2.43.2",
+    "pinia": "3.0.4",
+    "vue": "3.5.42",
+    "vue-i18n": "^11.4.14"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.7",
+    "@vitejs/plugin-vue": "6.0.3",
+    "@vue/test-utils": "2.4.6",
+    "jsdom": "26.1.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.1",
+    "vitest": "3.2.4",
+    "vue-tsc": "3.2.4"
+  }
+}

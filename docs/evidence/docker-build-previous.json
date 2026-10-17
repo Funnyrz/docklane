@@ -1,0 +1,49 @@
+{
+  "source_files_sha256": "5e489649c7045092cd2754545305079de86ca7efd91d58e662364658146edc1c",
+  "dockerfile_sha256": "7d11e60996440747f7144b4d7d517334be065fee385dd9ac6136c6c07ac89ed2",
+  "go_mod_sha256": "e2adf2b304a663db5191fcb53711fc83a56d5b00fd7ea0a48bc117878ee277a5",
+  "go_sum_sha256": "d81ff5654e68e69975d720f5b567e679d4a6de3d89de6bba5d735ba5cc497e43",
+  "frontend_lock_sha256": "998fbe2f8bfa257225c035eb0fbb57ccaa4db6d80d35b3ef4c8f0daf9f298093",
+  "file_count": 125,
+  "build_platform": "linux/arm64",
+  "qemu_used": false,
+  "binary_sha256": "785f0352c649c44087a33a7e30fc3bcf2f985088e080c56accbaf1852993e2e4",
+  "harness_sha256": "0eb072e12faf830a8867a8d912af062335d46c7949a4fd8a88a43b27e18b8a66",
+  "images": [
+    {
+      "Id": "sha256:50f5e4674efe0c80be725e90eba0c19aef65c043b3b3b120070c01ac2549825c",
+      "RepoTags": [
+        "docker-manager:v0.3.0",
+        "docker-manager:v0.3.0-arm64"
+      ],
+      "RepoDigests": [
+        "docker-manager@sha256:50f5e4674efe0c80be725e90eba0c19aef65c043b3b3b120070c01ac2549825c"
+      ],
+      "Architecture": "arm64",
+      "Os": "linux",
+      "Created": "2026-10-16T19:42:15.347990088+08:00",
+      "Descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:50f5e4674efe0c80be725e90eba0c19aef65c043b3b3b120070c01ac2549825c",
+        "size": 856
+      }
+    },
+    {
+      "Id": "sha256:2ffa32ca5c6ee7e2d3bf9fdd0ca2c95042bc107146ee7b51f7607abfb6dc7b27",
+      "RepoTags": [
+        "docker-manager:v0.3.0-amd64"
+      ],
+      "RepoDigests": [
+        "docker-manager@sha256:2ffa32ca5c6ee7e2d3bf9fdd0ca2c95042bc107146ee7b51f7607abfb6dc7b27"
+      ],
+      "Architecture": "amd64",
+      "Os": "linux",
+      "Created": "2026-10-16T19:42:13.866591717+08:00",
+      "Descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:2ffa32ca5c6ee7e2d3bf9fdd0ca2c95042bc107146ee7b51f7607abfb6dc7b27",
+        "size": 856
+      }
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "namespace": "dm-resource-2a12f6f15523b2e12d77",
+  "started_at": "2026-10-16T13:59:55.638587+00:00",
+  "binary_sha256": "13ba21ed40a4bd09827a66946ae5c079746c540520031840470e701d78590cd5",
+  "checks": [
+    {
+      "ac": [
+        "AC-CTR-03"
+      ],
+      "name": "real Engine Tail, timestamps, stdout/stderr, live SSE and reconnect",
+      "status": "passed",
+      "evidence": {
+        "tail_count": 5,
+        "initial_stdout_stderr_count": 16,
+        "follow_event_id": "2026-10-16T13:59:56.085387370Z",
+        "reconnect_count": 9,
+        "since_query_verified": true,
+        "hidden_timestamps_reconnect_gap": 8
+      }
+    },
+    {
+      "ac": [
+        "AC-CTR-04",
+        "AC-SYS-01"
+      ],
+      "name": "real WebSocket TTY execution, resize, missing shell and backend release",
+      "status": "passed",
+      "evidence": {
+        "sessions": 4,
+        "all_execs_stopped": true,
+        "process_fds_before": 12,
+        "process_fds_after": 12,
+        "missing_shell_code": "SHELL_UNAVAILABLE_AFTER_UPGRADE",
+        "origin_csrf_auth_enforced": true
+      }
+    },
+    {
+      "ac": [],
+      "name": "real Engine stats snapshot and SSE",
+      "status": "passed",
+      "evidence": {
+        "container_id": "9761fef5dd0aa7db1533da4cffb752ffb496f90793594e61708ebb7aeb893d0c"
+      }
+    },
+    {
+      "ac": [
+        "AC-STO-01"
+      ],
+      "name": "owned bridge network create, association, reference guard and delete",
+      "status": "passed",
+      "evidence": {
+        "network_id": "5c913cb75400567abb1db80e104e994b26e62bbdb8c5424726fcbca37b26f7b3",
+        "attached_delete_status": 409
+      }
+    },
+    {
+      "ac": [
+        "AC-CTR-07",
+        "AC-IMG-02",
+        "AC-STO-01",
+        "AC-STO-02"
+      ],
+      "name": "stopped references prevent image/Volume deletion; container deletion preserves Volume and bind data",
+      "status": "passed",
+      "evidence": {
+        "volume_reference_count": 1,
+        "image_reference_count": 5,
+        "bind_sha256": "0a23bdcf865ea7f00409665ad1ff8432682655ff36d09717d1dc6cbe303f01a8",
+        "volume_content_verified_after_container_delete": true
+      }
+    },
+    {
+      "ac": [
+        "AC-IMG-01",
+        "AC-SYS-02",
+        "AC-TASK-03"
+      ],
+      "name": "real HTTPS Engine pull reports cached-layer progress/Digest and missing-tag error; private registry login",
+      "status": "passed",
+      "evidence": {
+        "image_id": "sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e",
+        "manifest_digests": [
+          "sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e"
+        ],
+        "cached_layers": true,
+        "credential_registry_binding_enforced": true,
+        "task_id": "faa3587f39172d02be7d5b1c829780b5",
+        "progress_messages": [
+          "1.37.0 Pulling from library/busybox",
+          "Digest: sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e",
+          "Status: Image is up to date for busybox:1.37.0",
+          "Image ID: sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e",
+          "Digest: busybox@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e"
+        ],
+        "missing_tag_error_code": "TASK_FAILED",
+        "registry_requests": [
+          {
+            "method": "GET",
+            "path": "/v2/",
+            "status": 401
+          },
+          {
+            "method": "GET",
+            "path": "/v2/",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/v2/",
+            "status": 401
+          },
+          {
+            "method": "GET",
+            "path": "/v2/",
+            "status": 403
+          }
+        ],
+        "credential_plaintext_absent": true,
+        "sqlite_wal_checked": true,
+        "private_registry_denial_injected": true,
+        "inline_credential_urls_rejected": true
+      }
+    },
+    {
+      "ac": [
+        "AC-STO-03",
+        "AC-ARCH-08"
+      ],
+      "name": "large scans submit asynchronously, serialize, limit traversal and reject unauthorized/symlink paths",
+      "status": "passed",
+      "evidence": {
+        "files": 50000,
+        "bytes": 150000,
+        "directories": 101,
+        "submit_seconds": 0.009,
+        "first_scan_seconds": 1.996,
+        "second_starts_after_first_finishes": true,
+        "symlinks_not_followed": true,
+        "queued_ancestor_swap_rejected": true,
+        "outside_paths_denied": 4,
+        "pending_and_running_cancel_verified": true
+      }
+    },
+    {
+      "ac": [
+        "AC-ARCH-08"
+      ],
+      "name": "Docker mode requires explicit mapping and rejects the unmapped local path",
+      "status": "passed",
+      "evidence": {
+        "unmapped_status": 403,
+        "error_code": "PATH_NOT_AUTHORIZED",
+        "mapped_task_succeeded": true,
+        "local_path_bypass_denied": true
+      }
+    }
+  ],
+  "host": {
+    "uid": 501,
+    "system": "Linux",
+    "architecture": "aarch64"
+  },
+  "registry_protocol": "https://distribution.github.io/distribution/spec/api/",
+  "engine": "29.5.2",
+  "engine_os": "Ubuntu 24.04.4 LTS",
+  "result": "passed",
+  "cleanup_errors": [],
+  "finished_at": "2026-10-16T14:00:29.580253+00:00",
+  "regression_verification": {
+    "commands": [
+      "go test -race ./internal/resources",
+      "go vet ./internal/resources"
+    ],
+    "tests": [
+      "TestLogsDemultiplexAndSinceReconnect",
+      "TestHiddenTimestampsRetainReconnectCursor",
+      "TestQueuedScanRejectsReplacedAncestor",
+      "TestScanRootStaysBoundDuringAncestorSwap",
+      "TestRegistryLoginRedactsEchoedCredential",
+      "TestImagePullRedactsEchoedCredentialBeforeTaskPersistence",
+      "TestImageProgressRedactsEchoedCredential",
+      "TestPullCanceledBeforeRegistryHeadersStaysCanceled",
+      "TestRegistryURLCannotPersistInlineCredentials"
+    ],
+    "result": "passed"
+  },
+  "source_sha256": {
+    "internal/resources/config.go": "73a989fbc0186c401371ca1de3e5cb33eb955c1a0c11189a272d61f64b8a81d5",
+    "internal/resources/images_storage.go": "0ed96c30717d083bc0bc89c4d0b5009ca1ae310a258eadf68735595d778f830e",
+    "internal/resources/resources.go": "6dbabb088b13154f6fcbff5991799b3ec34f3fa0ba29dc9c9df533b8c5c1bc6a",
+    "internal/resources/resources_test.go": "cfa205e2b9d0f4571f27cf576c91765a6c7b32b56c3e97c01b9a9344184628ec",
+    "internal/resources/streams.go": "0348ba75281db8d86771d78d2b0710d6a3f2a336beae179220d66e566431a567"
+  },
+  "harness_sha256": "692378ed92261cdfe60998823391250d01ee9746f37fb417b23e2b56e6ed3eee"
+}

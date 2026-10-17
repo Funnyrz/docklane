@@ -1,0 +1,9 @@
+{
+  "kind": "Real Go application embedding production build; isolated temporary database; missing Docker socket",
+  "checks": [
+    "zh-CN: real authentication, embedded assets, unavailable Engine, preference persistence",
+    "English authentication error localization",
+    "en: real authentication, embedded assets, unavailable Engine, preference persistence"
+  ],
+  "browserErrors": []
+}

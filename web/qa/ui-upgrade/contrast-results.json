@@ -1,0 +1,58 @@
+[
+  {
+    "name": "body",
+    "foreground": "#17243B",
+    "background": "#FFFFFF",
+    "ratio": 15.53,
+    "AA": true
+  },
+  {
+    "name": "muted",
+    "foreground": "#5C6B82",
+    "background": "#F5F7FB",
+    "ratio": 5.05,
+    "AA": true
+  },
+  {
+    "name": "primary button",
+    "foreground": "#FFFFFF",
+    "background": "#2563EB",
+    "ratio": 5.17,
+    "AA": true
+  },
+  {
+    "name": "success",
+    "foreground": "#16704A",
+    "background": "#ECF9F1",
+    "ratio": 5.62,
+    "AA": true
+  },
+  {
+    "name": "warning",
+    "foreground": "#925B0A",
+    "background": "#FFF8E8",
+    "ratio": 5.33,
+    "AA": true
+  },
+  {
+    "name": "danger",
+    "foreground": "#B42337",
+    "background": "#FFF1F3",
+    "ratio": 5.91,
+    "AA": true
+  },
+  {
+    "name": "sidebar",
+    "foreground": "#B4C2DA",
+    "background": "#101B30",
+    "ratio": 9.55,
+    "AA": true
+  },
+  {
+    "name": "active nav secondary",
+    "foreground": "#BFD4FF",
+    "background": "#243F70",
+    "ratio": 6.97,
+    "AA": true
+  }
+]

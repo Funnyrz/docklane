@@ -1,0 +1,65 @@
+{
+  "verified_at": "2026-10-16T14:19:34.728402+00:00",
+  "checks": [
+    "binary SHA256SUMS verified",
+    "image archive SHA256SUMS verified",
+    "gzip integrity verified",
+    "archive contains both architecture configs"
+  ],
+  "artifacts": [
+    {
+      "file": "docker-manager-linux-amd64",
+      "size_bytes": 28434592,
+      "sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66"
+    },
+    {
+      "file": "docker-manager-linux-arm64",
+      "size_bytes": 26542240,
+      "sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79"
+    },
+    {
+      "file": "docker-manager-images.tar.gz",
+      "size_bytes": 179082640,
+      "sha256": "2662212584cbd6c23e437760a0dea1a2e5e65f67ae25275169e4fc3af7f280ee"
+    }
+  ],
+  "archive_configs": [
+    {
+      "architecture": "amd64",
+      "os": "linux",
+      "config_digest": "45e1e289bb2e0900a7c6e62de3233f6db56023d6c2fdded2c0a97755f93726d7",
+      "repo_tags": [
+        "docker-manager:v0.3.0-amd64"
+      ]
+    },
+    {
+      "architecture": "arm64",
+      "os": "linux",
+      "config_digest": "ccef2b2675ab6741db305b6941a07d4fd806be6b96415c949ff21697b9352131",
+      "repo_tags": [
+        "docker-manager:v0.3.0-arm64"
+      ]
+    }
+  ],
+  "runtime_evidence": "platforms/*.json",
+  "published": false,
+  "image_embedded_binaries": [
+    {
+      "architecture": "amd64",
+      "embedded_binary_sha256": "46b606638a4fc8e45411038366ec5fbb8953ac217905513b083295b4e138b326",
+      "standalone_binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66",
+      "matches_standalone_release_binary": false,
+      "independent_rebuild_without_vcs_sha256": "46b606638a4fc8e45411038366ec5fbb8953ac217905513b083295b4e138b326",
+      "reproduces_image_binary_without_vcs_metadata": true
+    },
+    {
+      "architecture": "arm64",
+      "embedded_binary_sha256": "f4644c8243efddf36ac0ae92422d36cc74cc465db42e7340f5f0efc4ad6ca3b9",
+      "standalone_binary_sha256": "4d008a31bb96074dde455ebf0e087a5fb1d324b36c25ee27c77b74a07fa57b79",
+      "matches_standalone_release_binary": false,
+      "independent_rebuild_without_vcs_sha256": "f4644c8243efddf36ac0ae92422d36cc74cc465db42e7340f5f0efc4ad6ca3b9",
+      "reproduces_image_binary_without_vcs_metadata": true
+    }
+  ],
+  "binary_difference_explanation": "Standalone release records vcs=git/vcs.modified=true for the uncommitted repository; Docker build context excludes .git. Independent same-source rebuild with -buildvcs=false exactly reproduces both image binaries. Both install formats have their own recorded runtime evidence and checksums."
+}

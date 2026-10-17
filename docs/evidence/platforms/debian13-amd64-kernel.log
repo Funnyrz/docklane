@@ -1,0 +1,100 @@
+RUN limactl start -y --timeout=12m --name=dm-release-debian13-amd64-kernel /tmp/docker-manager-release-platforms/debian13-amd64-vm.yaml
+time="2026-10-16T23:27:43+08:00" level=info msg="Terminal is not available, proceeding without opening an editor"
+time="2026-10-16T23:27:43+08:00" level=info msg="Starting the instance `dm-release-debian13-amd64-kernel` with internal VM driver `qemu`"
+time="2026-10-16T23:27:43+08:00" level=info msg="Attempting to download the image" arch=x86_64 digest="sha512:f46f0671a6e5bdec5291ab8972bae2f10e5408c2f64a74078f11efc2f06a436a9d0313ed50e0472542eeabf780e9f7c792ac0a314c6c20507fcd9fd81b468c3d" location=/tmp/docker-manager-release-platforms/debian13-amd64.qcow2
+time="2026-10-16T23:27:43+08:00" level=info msg="Downloaded the image from `/tmp/docker-manager-release-platforms/debian13-amd64.qcow2`"
+time="2026-10-16T23:27:43+08:00" level=info msg="Resize instance dm-release-debian13-amd64-kernel's disk from 3GiB to 10GiB"
+time="2026-10-16T23:27:43+08:00" level=info msg="[hostagent] hostagent socket created at /Users/fuyangyang/.lima/dm-release-debian13-amd64-kernel/ha.sock"
+time="2026-10-16T23:27:44+08:00" level=info msg="[hostagent] Using system firmware (`/opt/homebrew/share/qemu/edk2-x86_64-code.fd`)"
+time="2026-10-16T23:27:44+08:00" level=info msg="[hostagent] Starting QEMU (hint: to watch the boot progress, see `/Users/fuyangyang/.lima/dm-release-debian13-amd64-kernel/serial*.log`)"
+time="2026-10-16T23:27:44+08:00" level=info msg="SSH Local Port: 55431"
+time="2026-10-16T23:27:44+08:00" level=info msg="[hostagent] Running in plain mode. Mounts, dynamic port forwarding, containerd, etc. will be ignored. Guest agent will not be running."
+time="2026-10-16T23:27:44+08:00" level=info msg="[hostagent] Waiting for the essential requirement 1 of 2: `ssh`"
+time="2026-10-16T23:28:18+08:00" level=info msg="[hostagent] The essential requirement 1 of 2 is satisfied"
+time="2026-10-16T23:28:18+08:00" level=info msg="[hostagent] Waiting for the essential requirement 2 of 2: `Explicitly start ssh ControlMaster`"
+time="2026-10-16T23:28:18+08:00" level=info msg="[hostagent] The essential requirement 2 of 2 is satisfied"
+time="2026-10-16T23:28:18+08:00" level=info msg="[hostagent] Waiting for the final requirement 1 of 1: `boot scripts must have finished`"
+time="2026-10-16T23:28:18+08:00" level=info msg="[hostagent] The final requirement 1 of 1 is satisfied"
+time="2026-10-16T23:28:18+08:00" level=info msg="READY. Run `ssh -F `/Users/fuyangyang/.lima/dm-release-debian13-amd64-kernel/ssh.config` lima-dm-release-debian13-amd64-kernel` to open the shell."
+RUN limactl copy --backend=scp /tmp/docker-manager-release-platforms/kernel-vm-13-assets.tar dm-release-debian13-amd64-kernel:/tmp/dm-kernel-assets.tar
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo mkdir -p /opt/dm-kernel-acceptance
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo tar -xf /tmp/dm-kernel-assets.tar -C /opt/dm-kernel-acceptance
+RUN limactl shell dm-release-debian13-amd64-kernel -- rm /tmp/dm-kernel-assets.tar
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 python3 /opt/dm-kernel-acceptance/bootstrap.py --root /opt/dm-kernel-acceptance --engine 29.5.2
+Created symlink '/etc/systemd/system/multi-user.target.wants/docker.service' → '/etc/systemd/system/docker.service'.
+Loaded image: docker-manager:v0.3.0-amd64
+29.5.2
+2.40.3
+restic 0.19.1 compiled with go1.26.4 on linux/amd64
+BOOTSTRAP PASS Linux-6.12.111+deb13-cloud-amd64-x86_64-with-glibc2.41
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 DM_PLATFORM_ENVIRONMENT=emulated-vm python3 /opt/dm-kernel-acceptance/source/scripts/platform-acceptance.py --phase prepare --state /var/lib/dm-platform-debian13-amd64-kernel --source /opt/dm-kernel-acceptance/source --binary /opt/dm-kernel-acceptance/docker-manager-linux-amd64 --image docker-manager:v0.3.0 --fixture-image docker-manager:v0.3.0 --report /var/lib/dm-platform-debian13-amd64-kernel-report.json
+PASS actual install preserves pre-existing fixture and seeds encrypted backup/restore
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo chmod 0644 /var/lib/dm-platform-debian13-amd64-kernel-report.json
+RUN limactl copy --backend=scp dm-release-debian13-amd64-kernel:/var/lib/dm-platform-debian13-amd64-kernel-report.json /Users/fuyangyang/Projects/Private/docker-manager/docs/evidence/platforms/debian13-amd64-kernel.json
+RUN limactl stop dm-release-debian13-amd64-kernel
+time="2026-10-16T23:29:29+08:00" level=info msg="Sending SIGINT to hostagent process 29628"
+time="2026-10-16T23:29:29+08:00" level=info msg="Waiting for the host agent and the driver processes to shut down"
+time="2026-10-16T23:29:29+08:00" level=info msg="[hostagent] Received SIGINT, shutting down the host agent"
+time="2026-10-16T23:29:29+08:00" level=info msg="[hostagent] Shutting down the host agent"
+time="2026-10-16T23:29:29+08:00" level=info msg="[hostagent] Shutting down QEMU with the power button"
+time="2026-10-16T23:29:29+08:00" level=info msg="[hostagent] Sending QMP system_powerdown command"
+time="2026-10-16T23:29:36+08:00" level=info msg="[hostagent] QEMU has exited"
+time="2026-10-16T23:29:36+08:00" level=info msg="Waiting for the instance to shut down"
+time="2026-10-16T23:29:37+08:00" level=info msg="The instance dm-release-debian13-amd64-kernel has shut down"
+RUN limactl start -y --timeout=10m dm-release-debian13-amd64-kernel
+time="2026-10-16T23:29:37+08:00" level=info msg="Using the existing instance `dm-release-debian13-amd64-kernel`"
+time="2026-10-16T23:29:37+08:00" level=info msg="Starting the instance `dm-release-debian13-amd64-kernel` with internal VM driver `qemu`"
+time="2026-10-16T23:29:37+08:00" level=info msg="[hostagent] hostagent socket created at /Users/fuyangyang/.lima/dm-release-debian13-amd64-kernel/ha.sock"
+time="2026-10-16T23:29:37+08:00" level=info msg="[hostagent] Using system firmware (`/opt/homebrew/share/qemu/edk2-x86_64-code.fd`)"
+time="2026-10-16T23:29:37+08:00" level=info msg="[hostagent] Starting QEMU (hint: to watch the boot progress, see `/Users/fuyangyang/.lima/dm-release-debian13-amd64-kernel/serial*.log`)"
+time="2026-10-16T23:29:37+08:00" level=info msg="SSH Local Port: 55810"
+time="2026-10-16T23:29:37+08:00" level=info msg="[hostagent] Running in plain mode. Mounts, dynamic port forwarding, containerd, etc. will be ignored. Guest agent will not be running."
+time="2026-10-16T23:29:37+08:00" level=info msg="[hostagent] Waiting for the essential requirement 1 of 2: `ssh`"
+time="2026-10-16T23:30:13+08:00" level=info msg="[hostagent] The essential requirement 1 of 2 is satisfied"
+time="2026-10-16T23:30:13+08:00" level=info msg="[hostagent] Waiting for the essential requirement 2 of 2: `Explicitly start ssh ControlMaster`"
+time="2026-10-16T23:30:14+08:00" level=info msg="[hostagent] The essential requirement 2 of 2 is satisfied"
+time="2026-10-16T23:30:14+08:00" level=info msg="[hostagent] Waiting for the final requirement 1 of 1: `boot scripts must have finished`"
+time="2026-10-16T23:30:20+08:00" level=info msg="READY. Run `ssh -F `/Users/fuyangyang/.lima/dm-release-debian13-amd64-kernel/ssh.config` lima-dm-release-debian13-amd64-kernel` to open the shell."
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 DM_PLATFORM_ENVIRONMENT=emulated-vm python3 /opt/dm-kernel-acceptance/source/scripts/platform-acceptance.py --phase resume --state /var/lib/dm-platform-debian13-amd64-kernel --source /opt/dm-kernel-acceptance/source --binary /opt/dm-kernel-acceptance/docker-manager-linux-amd64 --image docker-manager:v0.3.0 --fixture-image docker-manager:v0.3.0 --report /var/lib/dm-platform-debian13-amd64-kernel-report.json
+PASS actual guest restart preserves enabled service/container identity and all management data
+PASS actual same-version upgrade creates matching backup and preserves management data
+PASS actual invalid-binary upgrade fails and leaves service stopped
+PASS documented matching binary/config/database/key rollback recovers service and data
+PASS actual uninstall preserves database/key/config/account/repository and external container
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo chmod 0644 /var/lib/dm-platform-debian13-amd64-kernel-report.json
+RUN limactl copy --backend=scp dm-release-debian13-amd64-kernel:/var/lib/dm-platform-debian13-amd64-kernel-report.json /Users/fuyangyang/Projects/Private/docker-manager/docs/evidence/platforms/debian13-amd64-kernel.json
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 DM_PLATFORM_ENVIRONMENT=emulated-vm python3 /opt/dm-kernel-acceptance/source/scripts/platform-acceptance.py --phase migration --state /var/lib/dm-platform-debian13-amd64-kernel --source /opt/dm-kernel-acceptance/source --binary /opt/dm-kernel-acceptance/docker-manager-linux-amd64 --image docker-manager:v0.3.0 --fixture-image docker-manager:v0.3.0 --report /var/lib/dm-platform-debian13-amd64-kernel-report.json
+PASS actual migration SQL abort stops upgrade and preserves matching recovery material
+PASS matching-group recovery after removing injected SQL fault preserves all management data
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo chmod 0644 /var/lib/dm-platform-debian13-amd64-kernel-report.json
+RUN limactl copy --backend=scp dm-release-debian13-amd64-kernel:/var/lib/dm-platform-debian13-amd64-kernel-report.json /Users/fuyangyang/Projects/Private/docker-manager/docs/evidence/platforms/debian13-amd64-kernel.json
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 DM_PLATFORM_ENVIRONMENT=emulated-vm python3 /opt/dm-kernel-acceptance/source/scripts/platform-acceptance.py --phase docker --state /var/lib/dm-platform-debian13-amd64-kernel --source /opt/dm-kernel-acceptance/source --binary /opt/dm-kernel-acceptance/docker-manager-linux-amd64 --image docker-manager:v0.3.0 --fixture-image docker-manager:v0.3.0 --report /var/lib/dm-platform-debian13-amd64-kernel-report.json
+PASS real image remove/recreate preserves named-volume users/session/policy/repository/tasks/key
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo chmod 0644 /var/lib/dm-platform-debian13-amd64-kernel-report.json
+RUN limactl copy --backend=scp dm-release-debian13-amd64-kernel:/var/lib/dm-platform-debian13-amd64-kernel-report.json /Users/fuyangyang/Projects/Private/docker-manager/docs/evidence/platforms/debian13-amd64-kernel.json
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo env DM_PLATFORM_ISOLATED=1 DM_PLATFORM_ENVIRONMENT=emulated-vm python3 /opt/dm-kernel-acceptance/source/scripts/platform-acceptance.py --phase cleanup --state /var/lib/dm-platform-debian13-amd64-kernel --source /opt/dm-kernel-acceptance/source --binary /opt/dm-kernel-acceptance/docker-manager-linux-amd64 --image docker-manager:v0.3.0 --fixture-image docker-manager:v0.3.0 --report /var/lib/dm-platform-debian13-amd64-kernel-report.json
+PASS owned installation/resources/secret fixtures cleaned; report retained
+RUN limactl shell dm-release-debian13-amd64-kernel -- sudo chmod 0644 /var/lib/dm-platform-debian13-amd64-kernel-report.json
+RUN limactl copy --backend=scp dm-release-debian13-amd64-kernel:/var/lib/dm-platform-debian13-amd64-kernel-report.json /Users/fuyangyang/Projects/Private/docker-manager/docs/evidence/platforms/debian13-amd64-kernel.json
+ALL PHASES PASSED 13
+RUN limactl stop dm-release-debian13-amd64-kernel
+time="2026-10-16T23:32:10+08:00" level=info msg="Sending SIGINT to hostagent process 29866"
+time="2026-10-16T23:32:10+08:00" level=info msg="Waiting for the host agent and the driver processes to shut down"
+time="2026-10-16T23:32:10+08:00" level=info msg="[hostagent] Received SIGINT, shutting down the host agent"
+time="2026-10-16T23:32:10+08:00" level=info msg="[hostagent] Shutting down the host agent"
+time="2026-10-16T23:32:10+08:00" level=info msg="[hostagent] Shutting down QEMU with the power button"
+time="2026-10-16T23:32:10+08:00" level=info msg="[hostagent] Sending QMP system_powerdown command"
+time="2026-10-16T23:32:16+08:00" level=info msg="[hostagent] QEMU has exited"
+time="2026-10-16T23:32:16+08:00" level=info msg="Waiting for the instance to shut down"
+time="2026-10-16T23:35:16+08:00" level=fatal msg="timed out waiting for instance to shut down after 3 minutes"
+Traceback (most recent call last):
+  File "/tmp/docker-manager-release-platforms/run-kernel-vm.py", line 24, in <module>
+    run('limactl','stop',name,timeout=300)
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/docker-manager-release-platforms/run-kernel-vm.py", line 4, in run
+    print('RUN',*args,flush=True);return subprocess.run(list(args),check=True,timeout=timeout)
+                                         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['limactl', 'stop', 'dm-release-debian13-amd64-kernel']' returned non-zero exit status 1.

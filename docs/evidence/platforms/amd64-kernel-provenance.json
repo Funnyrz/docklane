@@ -1,0 +1,152 @@
+{
+  "recorded_at": "2026-10-16T15:35:26.073476+00:00",
+  "host_architecture": "aarch64",
+  "lima_version": "2.2.1",
+  "qemu_version": "11.1.2",
+  "purpose": "Independent distribution kernel functional acceptance using full-system x86_64 TCG; no native hardware performance claim",
+  "images": [
+    {
+      "platform": "debian12-amd64",
+      "image_url": "https://cloud.debian.org/images/cloud/bookworm/20260923-2610/debian-12-genericcloud-amd64-20260923-2610.qcow2",
+      "algorithm": "sha512",
+      "expected_digest": "3d94c9dd66d8a283fde060b8810373b7ae04038b956ee00d553d1ae564f6fbdeaa2fd6e7404e87e53348b5a9509170f3ea7c0731ba737590c5c4cb8d559a47f8",
+      "observed_digest": "3d94c9dd66d8a283fde060b8810373b7ae04038b956ee00d553d1ae564f6fbdeaa2fd6e7404e87e53348b5a9509170f3ea7c0731ba737590c5c4cb8d559a47f8",
+      "vm": {
+        "vmType": "qemu",
+        "arch": "x86_64",
+        "cpus": 2,
+        "memory": "2GiB",
+        "disk": "10GiB",
+        "plain": true,
+        "mounts": [],
+        "containerd": {
+          "system": false,
+          "user": false
+        }
+      }
+    },
+    {
+      "platform": "debian13-amd64",
+      "image_url": "https://cloud.debian.org/images/cloud/trixie/20261001-2618/debian-13-genericcloud-amd64-20261001-2618.qcow2",
+      "algorithm": "sha512",
+      "expected_digest": "f46f0671a6e5bdec5291ab8972bae2f10e5408c2f64a74078f11efc2f06a436a9d0313ed50e0472542eeabf780e9f7c792ac0a314c6c20507fcd9fd81b468c3d",
+      "observed_digest": "f46f0671a6e5bdec5291ab8972bae2f10e5408c2f64a74078f11efc2f06a436a9d0313ed50e0472542eeabf780e9f7c792ac0a314c6c20507fcd9fd81b468c3d",
+      "vm": {
+        "vmType": "qemu",
+        "arch": "x86_64",
+        "cpus": 2,
+        "memory": "2GiB",
+        "disk": "10GiB",
+        "plain": true,
+        "mounts": [],
+        "containerd": {
+          "system": false,
+          "user": false
+        }
+      }
+    },
+    {
+      "platform": "ubuntu24-amd64",
+      "image_url": "https://cloud-images.ubuntu.com/minimal/releases/noble/release-20261001/ubuntu-24.04-minimal-cloudimg-amd64.img",
+      "algorithm": "sha256",
+      "expected_digest": "a8eb6570f87a941f3de2e000c046b9367f8ab1423756a94830d454fae8ad80ff",
+      "observed_digest": "a8eb6570f87a941f3de2e000c046b9367f8ab1423756a94830d454fae8ad80ff",
+      "vm": {
+        "vmType": "qemu",
+        "arch": "x86_64",
+        "cpus": 2,
+        "memory": "2GiB",
+        "disk": "10GiB",
+        "plain": true,
+        "mounts": [],
+        "containerd": {
+          "system": false,
+          "user": false
+        }
+      }
+    }
+  ],
+  "qemu_runtime_observations": [
+    {
+      "instance": "dm-release-debian13-amd64-kernel",
+      "pid": 29642,
+      "executable": "qemu-system-x86_64",
+      "acceleration": "tcg,thread=multi,tb-size=512",
+      "cpu": "max,-avx512vl,-pdpe1gb",
+      "observed_at": "2026-10-16T15:28:22.821821+00:00"
+    },
+    {
+      "instance": "dm-release-debian12-amd64-kernel",
+      "pid": 29820,
+      "executable": "qemu-system-x86_64",
+      "acceleration": "tcg,thread=multi,tb-size=512",
+      "cpu": "max,-avx512vl,-pdpe1gb",
+      "observed_at": "2026-10-16T15:29:50.630802+00:00"
+    },
+    {
+      "instance": "dm-release-debian13-amd64-kernel",
+      "pid": 29879,
+      "executable": "qemu-system-x86_64",
+      "acceleration": "tcg,thread=multi,tb-size=512",
+      "cpu": "max,-avx512vl,-pdpe1gb",
+      "observed_at": "2026-10-16T15:29:50.631019+00:00"
+    },
+    {
+      "instance": "dm-release-debian12-amd64-kernel",
+      "pid": 30616,
+      "executable": "qemu-system-x86_64",
+      "acceleration": "tcg,thread=multi,tb-size=512",
+      "cpu": "max,-avx512vl,-pdpe1gb",
+      "observed_at": "2026-10-16T15:39:43.253464+00:00"
+    },
+    {
+      "instance": "dm-release-ubuntu24-amd64-kernel",
+      "pid": 31152,
+      "executable": "qemu-system-x86_64",
+      "acceleration": "tcg,thread=multi,tb-size=512",
+      "cpu": "max,-avx512vl,-pdpe1gb",
+      "observed_at": "2026-10-16T15:39:43.253735+00:00"
+    }
+  ],
+  "network": "Ordinary guest Docker bridge/firewall and random published application port; QEMU user networking outside guest",
+  "native_fixture_filesystem": "guest native Linux filesystem; no macOS shared mounts",
+  "application_binary_sha256": "fadb2178791fa2b43cf53ddd48ee3eb8d59e2cd1e78d3eccf70e427466f3ad66",
+  "platform_harness_sha256": "84950922457963d1691eacb0190fe37d8bd9a7b9993932bd06a64b0265d6168b",
+  "integration_harness_sha256": "0eb072e12faf830a8867a8d912af062335d46c7949a4fd8a88a43b27e18b8a66",
+  "environment_corrections": [
+    {
+      "platform": "ubuntu24-amd64",
+      "stage": "pre-application bootstrap",
+      "issue": "Minimal image lacks iptables; full apt metadata download/decompression is slow under TCG",
+      "action": "Initial owned apt update interrupted and bootstrap retried. Attempted HTTPS/main-only source edits were overwritten by cloud-init at restart; retry uses the image official default sources.",
+      "product_failure": false,
+      "initial_attempt_log": "platforms/ubuntu24-amd64-bootstrap-attempt.log",
+      "resolution": "Retry completed official default apt metadata and installed iptables 1.8.10-3ubuntu2; platform acceptance passed 10/10."
+    },
+    {
+      "stage": "host-side transition from platform checks to full integration",
+      "issue": "Consumer restarted Debian13 and Ubuntu VM when list reported Stopped, before producer limactl stop returned; producer then timed out although all platform checks passed",
+      "scope": "One-off host orchestration, not product runtime or repository platform harness",
+      "action": "Wait for successful stop command exit and a fresh completion marker before starting next suite; preserve complete timeout logs",
+      "affected_controller_exit_codes": {
+        "debian13": 1,
+        "ubuntu24": 1
+      },
+      "application_platform_checks": "30/30 passed",
+      "application_integration_checks": "48/48 passed",
+      "final_vm_states": "Stopped",
+      "verification": "platforms/vm-handoff-verification.json",
+      "verification_result": "passed: two sequential full VM control cycles; every stop returned exit0 before next start"
+    }
+  ],
+  "execution_logs": [
+    "platforms/debian12-amd64-kernel.log",
+    "platforms/debian13-amd64-kernel.log",
+    "platforms/ubuntu24-amd64-kernel.log"
+  ],
+  "integration_execution_logs": [
+    "platforms/debian12-amd64-integration.log",
+    "platforms/debian13-amd64-integration.log",
+    "platforms/ubuntu24-amd64-integration.log"
+  ]
+}

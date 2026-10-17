@@ -1,0 +1,16 @@
+{
+  "platform": "Ubuntu 24.04.4 ARM64 kernel + explicit qemu-x86_64-static emulation",
+  "binary_architecture": "linux/amd64",
+  "binary_sha256": "90deaec197a8bb2d7199911ade5730eb43bd9bfc28eaab92121c625e8c6533d3",
+  "started_at": "2026-10-16T11:43:08.010832+00:00",
+  "steps": [
+    "amd64 release binary serves embedded Web, initializes, authenticates and negotiates actual ARM64 Engine API",
+    "reachable TCP and successful Registry API remain distinct from actual failing Engine image pull",
+    "emulated amd64 process restart preserves database/session"
+  ],
+  "limitations": [
+    "does not prove native amd64 hardware or complete distro matrix"
+  ],
+  "result": "passed",
+  "finished_at": "2026-10-16T11:43:09.857548+00:00"
+}
