@@ -6,28 +6,34 @@ A single-host Docker management and local backup platform. Manage containers, Co
 
 The Go service embeds the Vue interface and runs as a Linux binary or Docker container. Docker Engine provides live resource state; SQLite stores management metadata only.
 
-[简体中文](README.md) · [Features](#features) · [Screenshots](#screenshots) · [Deployment](#deployment) · [Development](#development-and-verification) · [Documentation](#documentation)
+[简体中文](README.md) · [Features](#features) · [Screenshots](#screenshots) · [Deployment](#deployment) · [Development](#development-and-verification) · [Documentation](#documentation) · [MIT License](LICENSE)
 
-![Docklane English overview](docs/images/en/overview.jpg)
+![Docklane English promotional image](docs/images/en/promo.png)
+
+> Promotional concept image. Refer to the text and actual screenshots for the current interface and supported features.
 
 ## Features
 
 | Area | Available today |
 | --- | --- |
 | Overview | Local host connection status, resource counts, backup summary and recent tasks |
-| Containers | Lifecycle actions, details, logs, terminal, configuration previews and controlled rebuilds |
-| Compose | Import existing projects, edit multiple configuration files, validate and deploy with checks |
-| Docker resources | Manage images, networks, volumes and mounted directories; encrypted registry credentials |
-| Local backups | Restic repositories; directory/local-volume/container/Compose backups; schedules and retention |
+| Containers | Start, stop, restart, delete, details, logs, terminal, statistics, configuration preflight and controlled rebuilds |
+| Images | Filter local lists, inspect, pull, import/export tar archives and delete individual images; encrypted registry credentials and authentication tests |
+| Networks and storage | Create, inspect and delete networks and volumes; view container references and mounts; scan authorized directories for capacity |
+| Compose | Discover and import existing projects, edit multiple indexed Compose configuration files, validate and deploy with checks; environment files and profiles supported |
+| Local backups | Create/import local Restic repositories; file/directory, local-volume, container and Compose backups; Cron schedules with time zones and retention of the latest N snapshots |
 | Restore | Snapshot preflight, new-directory restore by default, explicitly confirmed overwrite and controlled service reconstruction |
-| Operations | Task progress and logs, audit records, host diagnostics and registry mirror diagnostics |
+| Image acceleration | TCP/Registry connectivity diagnostics and explicit image pull tests; preview and apply mirror configuration when authorization requirements are met |
+| Operations | Task progress, logs and cancellation, audit records and host diagnostics |
 | Bilingual interface | Simplified Chinese `zh-CN` and English `en`, instant switching and a saved browser preference |
 
-Docklane currently manages a single host. Multi-host management, RBAC, remote backup repositories, Host Helper and logical database exports are not yet delivered.
+Docklane currently manages a single host. See [Current limitations](#current-limitations) for feature boundaries.
 
 ## Screenshots
 
 These screenshots use the latest local Docklane frontend connected to the test environment’s real APIs through a read-only proxy; the frontend was not deployed to the test server. Empty lists show actual empty states. Logs, terminal output, raw configuration and audit details are excluded.
+
+![Docklane English overview](docs/images/en/overview.jpg)
 
 <details>
 <summary>View containers, Compose, images, backups and settings</summary>
@@ -54,6 +60,14 @@ These screenshots use the latest local Docklane frontend connected to the test e
 
 </details>
 
+## Current limitations
+
+- Multi-host management, RBAC, remote backup repositories, Host Helper and logical database exports are not yet delivered.
+- Standalone container creation, registry search, image builds/tagging/bulk cleanup, network connection management/topology and volume file browsing/editing shown in the promotional image are not implemented. Image search filters the local list; directory scans report capacity rather than providing a file manager.
+- Compose editing is limited to indexed configuration files, rather than arbitrary project files or `.env` files. Compose deployments in container mode require identical host/container project paths.
+- Backups do not include image archives or provide arbitrary point-in-time recovery or logical database consistency guarantees. Schedules missed while offline are recorded without automatic catch-up. Local-volume backups support only the `local` driver without extra driver options.
+- Automatic mirror configuration requires explicitly authorized Linux binary mode with the necessary local Socket, tools and permissions. Docker mode provides manual instructions. Connectivity tests do not establish that a pull used a particular mirror or guarantee faster downloads.
+
 ## Supported environments
 
 | Component | Requirements or pinned versions |
@@ -74,13 +88,15 @@ The Docker image includes Docker CLI, Compose and Restic. Binary installations n
 
 ### Choose a download
 
+As of 2026-10-17, no version has been published on [GitHub Releases](https://github.com/Funnyrz/docklane/releases). The package-based instructions below require a matching release bundle from the maintainer. If you do not have one, use the source build instructions below. The listed filenames are not live download links.
+
 | Download | Use case |
 | --- | --- |
 | `docklane-v0.3.0-<timestamp>.tar.gz` | Complete bundle: offline Docker images, both binary architectures, installation scripts, deployment examples and bilingual documentation/screenshots; extracts to `docklane-v0.3.0/` |
 | `docklane-v0.3.0-linux-amd64.tar.gz` | Slim binary package for x86-64 Linux |
 | `docklane-v0.3.0-linux-arm64.tar.gz` | Slim binary package for ARM64 Linux |
 
-Each slim package has a matching `.tar.gz.sha256` sidecar and contains only the `docklane` executable. The frontend is embedded, so no separate frontend installation is needed. Choose the complete bundle for offline images, systemd installation materials or bundled documentation.
+Each slim package has a matching `.tar.gz.sha256` sidecar. Newly built packages contain the `docklane` executable and the MIT `LICENSE` file. The frontend is embedded, so no separate frontend installation is needed. Choose the complete bundle for offline images, systemd installation materials or bundled documentation.
 
 ### Slim binary package: run directly
 
@@ -115,10 +131,16 @@ The archive contains both architectures. Tag only the matching architecture with
 
 ### Docker: build from source
 
-Run this command at the repository root, then export both directory variables, create the directories and start Compose as shown above:
+Install Git, Docker Engine, Docker Buildx (for BuildKit builds) and Compose v2, then run on a Linux host:
 
 ```sh
+git clone https://github.com/Funnyrz/docklane.git
+cd docklane
 docker build -t docker-manager:v0.3.0 .
+export DM_BACKUP_HOST_DIR=/srv/docker-manager/backups
+export DM_RESTORE_HOST_DIR=/srv/docker-manager/restores
+mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
+docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
 The example Compose file binds only to `127.0.0.1:8080`. Access it locally, through a restricted network tunnel or an HTTPS reverse proxy. The image needs no `--privileged` flag and does not mount the host root by default. Docker mode cannot write host daemon configuration or restart systemd directly.
@@ -157,7 +179,11 @@ Switch languages on the initialization page, login page or console header. The f
 
 ## Development and verification
 
+Install the build tools listed above, Git and Make. These steps build and run from source on a Linux host. Docker, Compose and backup features also require their respective runtime tools and access permissions:
+
 ```sh
+git clone https://github.com/Funnyrz/docklane.git
+cd docklane
 make setup
 make build
 DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:8080 ./bin/docklane
@@ -187,3 +213,9 @@ Detailed guides are currently primarily in Chinese; the resource API and interna
 - [Verification report](docs/verification.md) · [Development plan](docs/development-plan-v0.3.md)
 
 These records define the scope of testing and static checks. They do not establish a complete penetration test, permission validation across every distribution or acceptance under every failure condition.
+
+## License
+
+Docklane is licensed under the [MIT License](LICENSE), with `Copyright (c) 2026 Funnyrz`. Retain the copyright and permission notices when distributing copies.
+
+Newly built slim binary packages, installation materials and release candidate directories include `LICENSE`. Docker images include it at `/usr/share/licenses/docklane/LICENSE`. Third-party dependencies and tools distributed with the image remain subject to their respective licenses.

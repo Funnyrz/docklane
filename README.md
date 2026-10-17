@@ -6,28 +6,34 @@
 
 Go 服务嵌入 Vue 界面，支持 Linux 二进制和 Docker 部署。Docker Engine 是资源实时状态来源，SQLite 仅保存管理元数据。
 
-[English](README.en.md) · [功能](#功能概览) · [截图](#界面预览) · [部署](#部署) · [开发](#开发与验证) · [文档](#详细文档)
+[English](README.en.md) · [功能](#功能概览) · [截图](#界面预览) · [部署](#部署) · [开发](#开发与验证) · [文档](#详细文档) · [MIT 协议](LICENSE)
 
-![Docklane 中文工作台](docs/images/zh/overview.jpg)
+![Docklane 中文宣传图](docs/images/zh/promo.png)
+
+> 项目宣传概念图，实际界面与功能以正文和真实截图为准。
 
 ## 功能概览
 
 | 能力 | 当前提供 |
 | --- | --- |
 | 工作台 | 本地主机连接状态、资源统计、备份概况和最近任务 |
-| 容器管理 | 生命周期操作、详情、日志、终端、配置预览与受控重建 |
-| Compose | 现有项目导入、多文件配置编辑、校验与受控部署 |
-| Docker 资源 | 镜像、网络、卷及挂载目录管理，镜像仓库凭据加密保存 |
-| 本地备份 | Restic 仓库、目录/本地卷/容器/Compose 备份、计划与保留策略 |
+| 容器管理 | 启动、停止、重启、删除、详情、日志、终端、统计、配置预检与受控重建 |
+| 镜像管理 | 本地列表筛选、详情、拉取、tar 导入/导出、单项删除，镜像仓库凭据加密保存与认证测试 |
+| 网络与存储 | 网络和卷的创建、查看、删除，容器引用与挂载关系查看，授权目录容量扫描 |
+| Compose | 发现与导入已有项目，编辑已索引的多个 Compose 配置文件，校验与受控部署；支持环境文件与 profiles |
+| 本地备份 | 本地 Restic 仓库创建/导入，文件或目录、本地卷、容器及 Compose 备份，Cron/时区计划与最近 N 份保留策略 |
 | 恢复 | 快照预检、默认恢复到新目录、显式确认的原位置覆盖与受控服务重建 |
-| 运维记录 | 任务进度与日志、审计记录、主机诊断和镜像加速诊断 |
+| 镜像加速 | TCP/Registry 连通性诊断、显式镜像拉取测试；满足授权条件时预览和应用镜像源配置 |
+| 运维记录 | 任务进度、日志与取消，审计记录及主机诊断 |
 | 中英文界面 | 简体中文 `zh-CN` 与英语 `en`，即时切换并记住浏览器选择 |
 
-当前面向单机管理。多机、RBAC、远程备份仓库、Host Helper 和数据库逻辑导出尚未交付。
+当前面向单机管理，具体功能边界见下方[当前限制](#当前限制)。
 
 ## 界面预览
 
 以下截图使用本地最新 Docklane 前端，通过只读代理连接测试环境的真实 API；未向测试服务器部署前端。部分列表为空，展示实际空状态；未收录日志、终端、原始配置和审计详情。
+
+![Docklane 中文工作台](docs/images/zh/overview.jpg)
 
 <details>
 <summary>查看容器、Compose、镜像、备份与设置</summary>
@@ -54,6 +60,14 @@ Go 服务嵌入 Vue 界面，支持 Linux 二进制和 Docker 部署。Docker En
 
 </details>
 
+## 当前限制
+
+- 多机管理、RBAC、远程备份仓库、Host Helper 和数据库逻辑导出尚未交付。
+- 宣传图中的独立新建容器、镜像仓库搜索/构建/打标/批量清理、网络连接管理与拓扑、卷文件浏览与编辑尚未实现。镜像搜索框仅筛选本地列表；目录扫描统计容量，不提供文件管理器。
+- Compose 在线编辑仅面向已索引的配置文件，不支持任意项目文件或 `.env` 文件编辑；容器模式下部署 Compose 需要宿主机与容器内项目路径一致。
+- 备份不包含镜像归档，不提供任意时间点恢复或数据库逻辑一致性保证；离线期间错过的计划仅记为漏执行，不自动补跑。本地卷备份限不带额外驱动选项的 `local` 卷。
+- 镜像源自动配置仅适用于显式授权且满足本地 Socket、工具和权限要求的 Linux 二进制模式；Docker 模式提供手工配置指南。连通性测试不代表拉取必经某镜像源，也不保证速度提升。
+
 ## 支持环境
 
 | 项目 | 要求或已锁定版本 |
@@ -74,13 +88,15 @@ Docker 镜像包含 Docker CLI、Compose 和 Restic；二进制部署需自行�
 
 ### 选择下载包
 
+截至 2026-10-17，[GitHub Releases](https://github.com/Funnyrz/docklane/releases) 尚未发布版本。以下安装方式要求先取得维护者提供的对应发布包；没有发布包时，请使用下方的源码构建步骤。这里列出的文件名不是已上线的下载链接。
+
 | 下载文件 | 适用场景 |
 | --- | --- |
 | `docklane-v0.3.0-<时间戳>.tar.gz` | 完整包：离线 Docker 镜像、双架构二进制、安装脚本、部署示例与双语文档/截图；解压目录为 `docklane-v0.3.0/` |
 | `docklane-v0.3.0-linux-amd64.tar.gz` | x86-64 Linux 精简二进制包 |
 | `docklane-v0.3.0-linux-arm64.tar.gz` | ARM64 Linux 精简二进制包 |
 
-每个精简包都配有同名 `.tar.gz.sha256` 校验文件，包内仅有可执行文件 `docklane`，已嵌入前端，无需单独安装前端。需要离线镜像、systemd 安装材料或随包文档时选择完整包。
+每个精简包都配有同名 `.tar.gz.sha256` 校验文件，后续构建的包内包含可执行文件 `docklane` 和 MIT 协议文件 `LICENSE`。程序已嵌入前端，无需单独安装前端。需要离线镜像、systemd 安装材料或随包文档时选择完整包。
 
 ### 精简二进制包：直接运行
 
@@ -115,10 +131,16 @@ docker compose -f deployments/docker-compose.yml up -d --no-build
 
 ### Docker：从源码构建
 
-在仓库根目录执行以下命令，再按上节导出两个目录变量、创建目录并启动 Compose：
+准备 Git、Docker Engine、Docker Buildx（使用 BuildKit 构建）和 Compose v2，在 Linux 主机执行：
 
 ```sh
+git clone https://github.com/Funnyrz/docklane.git
+cd docklane
 docker build -t docker-manager:v0.3.0 .
+export DM_BACKUP_HOST_DIR=/srv/docker-manager/backups
+export DM_RESTORE_HOST_DIR=/srv/docker-manager/restores
+mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
+docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
 示例 Compose 仅绑定 `127.0.0.1:8080`，通过本机浏览器、受限网络隧道或 HTTPS 反向代理访问。镜像无需 `--privileged`，也不默认挂载宿主机根目录。Docker 模式不允许直接写入宿主机 daemon 配置或重启 systemd。
@@ -157,7 +179,11 @@ sudo journalctl -u docker-manager -f
 
 ## 开发与验证
 
+安装上表中的构建工具、Git 和 Make。以下步骤在 Linux 主机从源码构建并运行；运行 Docker、Compose 或备份功能时，还需相应运行工具及访问权限：
+
 ```sh
+git clone https://github.com/Funnyrz/docklane.git
+cd docklane
 make setup
 make build
 DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:8080 ./bin/docklane
@@ -185,3 +211,9 @@ make release-images # 双架构镜像及离线归档，需要 Docker Buildx
 - [验证报告](docs/verification.md) · [开发计划](docs/development-plan-v0.3.md)
 
 测试与静态检查的覆盖范围以这些记录为准，不代表完整渗透测试、所有发行版权限验证或全部故障条件验收。
+
+## 开源协议
+
+Docklane 使用 [MIT 协议](LICENSE)，版权署名为 `Copyright (c) 2026 Funnyrz`。分发副本时请保留协议中的版权和许可声明。
+
+后续构建的精简二进制包、安装材料及候选发布目录携带 `LICENSE`；Docker 镜像内路径为 `/usr/share/licenses/docklane/LICENSE`。第三方依赖与随镜像分发的工具仍适用各自的许可。

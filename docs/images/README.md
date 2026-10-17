@@ -1,4 +1,15 @@
-# Docklane screenshots / 界面截图
+# Docklane images / 项目图片
+
+## Promotional images / 宣传图
+
+- `zh/promo.png`: Chinese promotional image supplied by the project maintainer on 2026-10-17.
+- `en/promo.png`: English promotional image supplied by the project maintainer on 2026-10-17.
+- Both PNG originals are retained byte-for-byte at 1536 × 1024 pixels, without image edits.
+- These are promotional concept images, not application screenshots or evidence of implemented features. Refer to the README feature descriptions and real screenshots for current capabilities.
+
+两张宣传图由项目维护者于 2026-10-17 提供，按语言分别收录，原始 PNG 未经修改。图片包含部分尚未实现的功能展示，不能作为功能验收依据；当前能力以双语 README 正文及真实截图为准。
+
+## Actual screenshots / 真实界面截图
 
 Captured on 2026-10-17 from the current production frontend build using a local read-only API proxy to the real test environment. No mock resources or metrics were added. The test server was not redeployed.
 

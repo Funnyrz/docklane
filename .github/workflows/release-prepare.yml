@@ -83,12 +83,13 @@ jobs:
           cp "$RUNNER_TEMP/release-ci-evidence.json" bin/release/
           cp .tool-versions bin/release/TOOL-VERSIONS.txt
           cp docs/security-notes.md bin/release/SECURITY-NOTES.md
-          tar -czf bin/release/docker-manager-installation.tar.gz scripts/install.sh scripts/upgrade.sh scripts/uninstall.sh deployments/ README.md README.en.md docker-manager-prd-v0.3.md docs/ web/qa/release-browser-results.json
+          cp LICENSE bin/release/LICENSE
+          tar -czf bin/release/docker-manager-installation.tar.gz scripts/install.sh scripts/upgrade.sh scripts/uninstall.sh deployments/ README.md README.en.md LICENSE docker-manager-prd-v0.3.md docs/ web/qa/release-browser-results.json
           cd bin/release
           sha256sum --check SHA256SUMS
           sha256sum --check IMAGE-SHA256SUMS
           for checksum in docklane-v0.3.0-linux-*.tar.gz.sha256; do sha256sum --check "$checksum"; done
-          sha256sum docklane-linux-* docklane-v0.3.0-linux-*.tar.gz docker-manager-images.tar.gz docker-manager-installation.tar.gz IMAGES.txt TOOL-VERSIONS.txt SECURITY-NOTES.md release-ci-evidence.json > RELEASE-SHA256SUMS
+          sha256sum docklane-linux-* docklane-v0.3.0-linux-*.tar.gz docker-manager-images.tar.gz docker-manager-installation.tar.gz IMAGES.txt TOOL-VERSIONS.txt SECURITY-NOTES.md LICENSE release-ci-evidence.json > RELEASE-SHA256SUMS
       - name: Upload reviewable artifacts only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
