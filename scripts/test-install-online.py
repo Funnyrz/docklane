@@ -81,6 +81,7 @@ class InstallerTest(unittest.TestCase):
 source {quote(self.script)}
 work={quote(self.work)}
 version=; arch=amd64; docker_arch=x86_64; ID=ubuntu; VERSION_ID=24.04; VERSION_CODENAME=noble
+download_source=direct
 trace={quote(self.trace)}
 assets={quote(self.assets)}
 uname() {{ case "$1" in -s) echo Linux ;; -m) echo x86_64 ;; esac; }}
@@ -178,7 +179,8 @@ fetch() {{
     def test_help_and_invalid_arguments_do_not_touch_system(self):
         self.assertIn('--migrate-from', self.bash('main --help').stdout)
         for args in ['--unknown', '--version', '--version latest', '--version v0.3.0-rc1',
-                     '--migrate-from relative', '--config relative', '--listen --dry-run']:
+                     '--migrate-from relative', '--config relative', '--listen --dry-run',
+                     '--download-source', '--download-source https://evil.invalid']:
             with self.subTest(args=args):
                 self.bash('main ' + args, ok=False)
         self.assertFalse(self.trace.exists())
@@ -191,6 +193,91 @@ fetch() {{
         self.assertIn('No changes made', result.stdout)
         self.assertFalse(self.trace.exists())
         self.assertEqual(list(self.work.iterdir()), [])
+
+    def test_download_source_dry_run_and_default(self):
+        self.assertIn('source: mirror', self.bash('main --dry-run').stdout)
+        self.assertIn('source: direct', self.bash('main --dry-run --download-source direct').stdout)
+        self.assertFalse(self.trace.exists())
+
+    def transport_mock(self, failures=0, effective=''):
+        return f'''
+download_source=mirror
+attempt=0
+curl() {{
+  local output= url=${{!#}}
+  printf '%s\\n' "$url" >> "$trace"
+  while (($#)); do
+    if [[ $1 == --output ]]; then output=$2; shift; fi
+    shift
+  done
+  # Count via the trace: curl runs in a command substitution subshell.
+  attempt=$(wc -l < "$trace")
+  printf 'partial' > "$output"
+  (( attempt > {failures} )) || return 22
+  printf 'complete' > "$output"
+  printf '%s' {quote(effective) if effective else '"$url"'}
+}}
+'''
+
+    def test_release_compose_restic_and_raw_use_mirror(self):
+        for url in [
+            f'https://github.com/Funnyrz/docklane/releases/download/{TAG}/LICENSE',
+            'https://github.com/docker/compose/releases/download/v2.40.3/checksums.txt',
+            'https://github.com/restic/restic/releases/download/v0.19.1/SHA256SUMS',
+            'https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh',
+        ]:
+            with self.subTest(url=url):
+                self.trace.unlink(missing_ok=True)
+                self.bash(f'fetch_url {quote(url)} "$work/payload"', prelude=self.transport_mock())
+                self.assertEqual(self.trace.read_text().splitlines(), ['https://gh-proxy.com/' + url])
+                self.assertEqual((self.work / 'payload').read_text(), 'complete')
+                self.assertFalse((self.work / 'payload.part').exists())
+
+    def test_mirror_fallback_replaces_partial_then_uses_direct(self):
+        url = f'https://github.com/Funnyrz/docklane/releases/download/{TAG}/LICENSE'
+        self.bash(f'fetch_url {quote(url)} "$work/payload"', prelude=self.transport_mock(failures=2))
+        self.assertEqual(self.trace.read_text().splitlines(),
+                         ['https://gh-proxy.com/' + url, 'https://ghfast.top/' + url, url])
+        self.assertEqual((self.work / 'payload').read_text(), 'complete')
+        self.assertFalse((self.work / 'payload.part').exists())
+
+    def test_all_transport_failures_remove_partial_and_return_nonzero(self):
+        self.bash('fetch_url https://github.com/a/b/releases/download/v1/file "$work/payload"',
+                  prelude=self.transport_mock(failures=3), ok=False)
+        self.assertEqual(len(self.trace.read_text().splitlines()), 3)
+        self.assertFalse((self.work / 'payload').exists())
+        self.assertFalse((self.work / 'payload.part').exists())
+
+    def test_api_fallback_skips_unsupported_secondary_proxy(self):
+        url = 'https://api.github.com/repos/Funnyrz/docklane/releases/latest'
+        self.bash(f'fetch_url {quote(url)} "$work/payload"', prelude=self.transport_mock(failures=1))
+        self.assertEqual(self.trace.read_text().splitlines(), ['https://gh-proxy.com/' + url, url])
+
+    def test_direct_and_other_hosts_bypass_mirrors(self):
+        for url, setting in [
+            ('https://github.com/a/b/file', 'direct'),
+            ('https://download.docker.com/linux/ubuntu/gpg', 'mirror'),
+            ('https://github.com.evil.invalid/file', 'mirror'),
+        ]:
+            with self.subTest(url=url):
+                self.trace.unlink(missing_ok=True)
+                self.bash(f'download_source={setting}; fetch_url {quote(url)} "$work/payload"',
+                          prelude=self.transport_mock())
+                self.assertEqual(self.trace.read_text().splitlines(), [url])
+
+    def test_mirror_latest_redirect_is_normalized_then_validated(self):
+        redirect = f'https://ghfast.top/https://github.com/Funnyrz/docklane/releases/tag/{TAG}'
+        prelude = self.transport_mock(failures=1, effective=redirect)
+        self.bash('resolve_release_web; verify_release', prelude=prelude)
+        self.assertEqual((self.work / 'release-page-url').read_text(),
+                         f'https://github.com/Funnyrz/docklane/releases/tag/{TAG}')
+        self.assertEqual((self.work / 'binary/docklane').read_bytes(), self.binary)
+
+    def test_mirror_redirect_cannot_smuggle_external_release_host(self):
+        result = self.bash('resolve_release_web', prelude=self.transport_mock(
+            effective=f'https://gh-proxy.com/https://evil.invalid/Funnyrz/docklane/releases/tag/{TAG}'), ok=False)
+        self.assertIn('did not resolve to a stable Docklane release', result.stderr)
+        self.assertFalse((self.work / 'binary').exists())
 
     def test_nested_install_failure_has_clear_error_message(self):
         result = self.bash('main', prelude='platform() { :; }; bootstrap_tools() { false; }', ok=False)
@@ -228,7 +315,12 @@ curl() {{
   printf 'web-curl %s\\n' "$*" >> "$trace"
   [[ ${{!#}} == https://github.com/Funnyrz/docklane/releases/latest ]] || return 91
   {'return 22' if web_failure else ':'}
-  printf '<html>untrusted v9.9.9 prerelease draft</html>' > "$work/release-page.html"
+  local output=
+  while (($#)); do
+    if [[ $1 == --output ]]; then output=$2; shift; fi
+    shift
+  done
+  printf '<html>untrusted v9.9.9 prerelease draft</html>' > "$output"
   printf '%s' {quote(redirect)}
 }}
 '''

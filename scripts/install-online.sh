@@ -4,10 +4,39 @@ set -Eeuo pipefail
 
 die() { printf 'Docklane: %s\n' "$*" >&2; exit 1; }
 log() { printf 'Docklane: %s\n' "$*"; }
-fetch() {
-  curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
-    --connect-timeout 20 --max-time 1800 --retry 3 "$1" --output "$2"
+fetch_url() {
+  local url=$1 output=$2 effective_file=${3:-} timeout=${4:-1800}
+  local prefix effective status=1
+  local prefixes=('')
+  if [[ ${download_source:-mirror} == mirror ]]; then
+    case "$url" in
+      https://api.github.com/*) prefixes=('https://gh-proxy.com/' '') ;;
+      https://github.com/*|https://raw.githubusercontent.com/*)
+        prefixes=('https://gh-proxy.com/' 'https://ghfast.top/' '') ;;
+    esac
+  fi
+  for prefix in "${prefixes[@]}"; do
+    # Never expose a partial download to validation or a subsequent installation.
+    rm -f -- "$output.part"
+    if effective=$(curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+      --connect-timeout 10 --max-time "$timeout" --speed-limit 1024 --speed-time 30 --retry 1 \
+      --output "$output.part" --write-out '%{url_effective}' "$prefix$url"); then
+      mv -- "$output.part" "$output" || return $?
+      if [[ -n $effective_file ]]; then
+        # Only remove the exact transport prefix used for this request. Release
+        # selection still validates the canonical repository and stable tag.
+        printf '%s' "${effective#"$prefix"}" > "$effective_file" || return $?
+      fi
+      return 0
+    else
+      status=$?
+    fi
+    rm -f -- "$output.part"
+    printf 'Docklane: download attempt failed via %s.\n' "${prefix:-direct HTTPS}" >&2
+  done
+  return "$status"
 }
+fetch() { fetch_url "$1" "$2"; }
 local_docker() {
   env -u DOCKER_HOST -u DOCKER_CONTEXT -u DOCKER_TLS_VERIFY -u DOCKER_CERT_PATH \
     docker --host unix:///var/run/docker.sock "$@"
@@ -16,9 +45,10 @@ usage() {
   cat <<'EOF'
 Usage: install-online.sh [--version vX.Y.Z] [--listen :8080]
                          [--migrate-from /absolute/data] [--config /absolute/config.json]
-                         [--dry-run] [--help]
+                         [--download-source mirror|direct] [--dry-run] [--help]
 Requires root, systemd, Ubuntu 24.04 or Debian 12/13, amd64 or arm64.
 Defaults to the latest stable GitHub Release. Existing Docker is never upgraded.
+GitHub downloads use public mirrors with direct fallback; use --download-source direct to bypass mirrors.
 Unknown manual deployments require explicit --migrate-from. Source data is retained.
 EOF
 }
@@ -86,9 +116,7 @@ download_release_assets() {
   done < <(tail -n +2 "$work/release-selection")
 }
 fetch_release_page() {
-  curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
-    --connect-timeout 20 --max-time 120 --retry 3 --output "$work/release-page.html" \
-    --write-out '%{url_effective}' 'https://github.com/Funnyrz/docklane/releases/latest' > "$work/release-page-url"
+  fetch_url 'https://github.com/Funnyrz/docklane/releases/latest' "$work/release-page.html" "$work/release-page-url" 120
 }
 resolve_release_web() {
   # GitHub documents /releases/latest independently of REST API quotas:
@@ -290,24 +318,26 @@ PY
   local_docker tag "$native" "docker-manager:$version"
 }
 main() {
-  version=; listen=; migrate=; config=; dry_run=false
+  version=; listen=; migrate=; config=; dry_run=false; download_source=mirror
   while (($#)); do
     case "$1" in
       --help|-h) usage; return ;;
       --dry-run) dry_run=true; shift ;;
-      --version|--listen|--migrate-from|--config)
+      --version|--listen|--migrate-from|--config|--download-source)
         (($#>=2)) && [[ -n $2 && $2 != --* ]] || die "Missing value for $1."
-        case "$1" in --version) version=$2 ;; --listen) listen=$2 ;; --migrate-from) migrate=$2 ;; --config) config=$2 ;; esac
+        case "$1" in --version) version=$2 ;; --listen) listen=$2 ;; --migrate-from) migrate=$2 ;; --config) config=$2 ;; --download-source) download_source=$2 ;; esac
         shift 2 ;;
       *) die "Unknown argument: $1" ;;
     esac
   done
+  [[ $download_source == mirror || $download_source == direct ]] || die '--download-source must be mirror or direct.'
   [[ -z $version || $version =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || die 'Use a stable version such as v0.3.0.'
   [[ -z $migrate || $migrate == /* ]] || die '--migrate-from must be an absolute path.'
   [[ -z $config || $config == /* ]] || die '--config must be an absolute path.'
   platform
   if $dry_run; then
     log "Plan: $ID $VERSION_ID $arch; release ${version:-latest stable}; listen ${listen:-preserve existing or :8080}; migration ${migrate:-none}."
+    log "GitHub download source: $download_source; Docker apt repository: official (unchanged)."
     log 'Verify release assets; prepare missing dependencies; load matching worker; install/upgrade systemd service; enable and check /healthz. No changes made.'
     return
   fi

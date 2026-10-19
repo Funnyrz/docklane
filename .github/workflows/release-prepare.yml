@@ -203,7 +203,7 @@ jobs:
           Supports Ubuntu 24.04, Debian 12/13, amd64 and arm64.
 
           ```sh
-          curl -fsSL https://raw.githubusercontent.com/{repo}/main/scripts/install-online.sh | sudo bash -s --
+          curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/{repo}/main/scripts/install-online.sh | sudo bash -s --
           ```
 
           Download assets from this same release and verify `RELEASE-SHA256SUMS` before offline use.

@@ -91,8 +91,16 @@ The Docker image includes Docker CLI, Compose and Restic. The online installer p
 Run on an `amd64` / `arm64` host with Ubuntu 24.04 or Debian 12/13. Root privileges and a running systemd are required:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
 ```
+
+If this entrypoint is unreachable, use the backup public mirror:
+
+```sh
+curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+```
+
+These entrypoints use public third-party services and cannot guarantee access from every region or network. A project-owned short-domain entrypoint is deferred. The installer defaults to `--download-source mirror`: GitHub API requests try `gh-proxy.com`, then the official direct endpoint; GitHub pages, Release assets, and files such as Compose / Restic try `gh-proxy.com`, `ghfast.top`, then the official direct endpoint ([public mirror documentation](https://gh-proxy.com/docs/github-accelerator)). Append `--download-source direct` to bypass all mirrors for subsequent installer downloads; use the [original script URL](https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh) if the entrypoint must also be fetched directly. Release, version, SHA-256 and archive checks remain unchanged. Docker's apt repository remains the official source, so access to every dependency from mainland China is not guaranteed.
 
 The script resolves the latest stable [GitHub Release](https://github.com/Funnyrz/docklane/releases/latest) once, pins that version, and verifies asset SHA-256 checksums, architecture and archive paths. It installs `/usr/local/bin/docklane`, creates a dedicated account and `docker-manager.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. The default listener is `:8080`; the script does not change firewall rules.
 
@@ -103,14 +111,14 @@ If Docker is absent, the script installs stable 29.x from the official repositor
 Choose a version and listener, or preview the actions first:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
   | sudo bash -s -- --version v0.3.0 --listen :8080 --dry-run
 ```
 
 Remove `--dry-run` to install; use `--help` for parameters. Repeated execution preserves configuration and data, and skips replacing an identical binary with the same version and checksum. A version change stops the service and creates a backup before upgrading. Explicitly migrate an existing manually started instance rather than treating it as a fresh installation:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
   | sudo bash -s -- --migrate-from /home/ubuntu/docklane/data
 ```
 

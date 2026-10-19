@@ -91,8 +91,16 @@ Docker 镜像包含 Docker CLI、Compose 和 Restic；在线安装脚本自动�
 在 Ubuntu 24.04 或 Debian 12/13 的 `amd64` / `arm64` 主机运行，要求 root 权限和正在运行的 systemd：
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
 ```
+
+若上述入口无法连接，可使用备用公共镜像：
+
+```sh
+curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+```
+
+这两个入口由第三方公共服务提供，不保证所有地区或网络均可访问；项目自有短域名入口暂缓提供。安装器默认使用 `--download-source mirror`：GitHub API 依次尝试 `gh-proxy.com`、官方直连；GitHub 网页、Release 资产及 Compose / Restic 等文件依次尝试 `gh-proxy.com`、`ghfast.top`、官方直连（[公共镜像服务文档](https://gh-proxy.com/docs/github-accelerator)）；可在命令末尾追加 `--download-source direct`，让安装器后续下载完全绕过镜像。入口本身也需直连时，使用[原始脚本地址](https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh)。Release、版本、SHA-256 和归档校验保持不变；Docker apt 软件源仍使用官方地址，不保证所有依赖都可通过国内网络下载。
 
 脚本解析一次最新正式 [GitHub Release](https://github.com/Funnyrz/docklane/releases/latest)，固定版本并校验下载资产的 SHA-256、架构和归档路径，安装 `/usr/local/bin/docklane`，创建专用账号及 `docker-manager.service`，自动后台启动并设置开机自启。结束时检查服务状态、自启和 `/healthz`，输出访问地址；首次打开页面创建管理员。默认监听 `:8080`，不自动修改防火墙。
 
@@ -103,14 +111,14 @@ curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/insta
 指定版本、监听地址，或先查看执行计划：
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
   | sudo bash -s -- --version v0.3.0 --listen :8080 --dry-run
 ```
 
 去掉 `--dry-run` 执行安装；`--help` 查看参数。再次执行会保留现有配置与数据，同版本且校验和相同则跳过二进制替换；版本变化先停机备份再升级。已有手动运行实例必须显式迁移，不能直接当作全新安装：
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
   | sudo bash -s -- --migrate-from /home/ubuntu/docklane/data
 ```
 

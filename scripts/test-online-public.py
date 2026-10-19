@@ -14,7 +14,7 @@ import sys
 import urllib.request
 
 
-URL = 'https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh'
+URL = 'https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh'
 COMMAND = 'set -o pipefail; curl -fsSL ' + URL + ' | sudo bash -s --'
 
 

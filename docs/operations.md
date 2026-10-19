@@ -5,14 +5,23 @@
 支持 Ubuntu 24.04、Debian 12/13，架构为 `amd64` / `arm64`，要求 root 和正在运行的 systemd。在线入口位于公开仓库，默认安装最新正式 GitHub Release；解析版本后固定该版本的下载地址，所有安装材料与 worker 镜像必须来自同一 Release。匿名 GitHub API 限流时，可通过公开的最新正式 Release 链接完成 latest 或同版本安装；明确指定旧版本仍需 API 元数据，限流时安全停止并提示稍后重试。
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
 ```
+
+主入口不可达时，可使用备用公共镜像：
+
+```sh
+curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+```
+
+两者都是第三方公共服务，不保证所有地区或网络均可达；项目自有短域名入口暂缓提供。安装器默认 `--download-source mirror`：GitHub API 依次尝试 `gh-proxy.com`、官方直连；GitHub 网页、Release 资产及 Compose / Restic 等文件依次尝试 `gh-proxy.com`、`ghfast.top`、官方直连。服务能力参见 [公共镜像服务文档](https://gh-proxy.com/docs/github-accelerator)。追加 `--download-source direct` 可使安装器后续下载完全绕过镜像；入口本身也需直连时，使用[原始脚本地址](https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh)。镜像只改变传输路径，仍使用同一 Release 的版本、SHA-256、架构与归档校验。Docker apt 软件源保持官方地址，不保证整个依赖安装流程都在国内网络可达。
 
 脚本在修改前检查系统与架构，下载后检查 SHA-256、架构及归档路径；缺少资产、下载中断、校验不符或不安全归档时停止。检查和安装过程不依赖交互输入，可用于 `curl | sudo bash`。首次访问页面仍需自行创建管理员，不创建默认密码。
 
 | 参数 | 行为 |
 | --- | --- |
 | `--version v0.3.0` | 安装指定正式版本；省略时使用一次解析得到的最新正式版本 |
+| `--download-source mirror` / `direct` | 默认镜像优先并回退直连；`direct` 使安装器后续下载完全直连 |
 | `--listen :8080` | 设置监听地址；新装默认 `:8080`，已有安装保留原值，显式指定时覆盖 |
 | `--migrate-from /绝对路径/data` | 显式迁移手动实例的完整应用数据；保留源目录 |
 | `--config /绝对路径/config.json` | 提供配置；迁移时用于无法可靠还原旧启动配置的情况 |
@@ -38,7 +47,7 @@ sudo systemctl disable docker-manager
 已有手动部署不要直接执行全新安装。先预览迁移，再使用相同参数去掉 `--dry-run` 执行：
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
   | sudo bash -s -- --migrate-from /home/ubuntu/docklane/data --dry-run
 ```
 
@@ -55,7 +64,7 @@ curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/insta
 使用原命令可安装最新正式版本，也可固定版本：
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
   | sudo bash -s -- --version v0.3.0
 ```
 
