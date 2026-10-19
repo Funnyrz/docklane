@@ -4,9 +4,10 @@ services:
     build: ..
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:9999:9999"
     environment:
       DM_MODE: docker
+      DM_LISTEN: ":9999"
       DM_DATA_DIR: /data
       DM_ALLOWED_PATHS: /backups,/restore
       DM_PATH_MAPPINGS: '[{"host":"${DM_BACKUP_HOST_DIR:?Set an absolute backup directory}","local":"/backups"},{"host":"${DM_RESTORE_HOST_DIR:?Set an absolute restore directory}","local":"/restore"}]'

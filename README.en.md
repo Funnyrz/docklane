@@ -108,7 +108,7 @@ These entrypoints use public third-party services and cannot guarantee access fr
 
 Installation shows eight stages and the current download, source and retry attempt. Interactive terminals also show a real download progress bar; redirected logs use plain text.
 
-These commands select the newest published beta, or pin a version with `--version` (currently [v0.3.1-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)), using release metadata and verify asset SHA-256 checksums, architecture and archive paths. The installer installs `/usr/local/bin/docklane`, creates a dedicated account and `docker-manager.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. The default listener is `:8080`; the script does not change firewall rules.
+These commands select the newest published beta, or pin a version with `--version` (currently [v0.3.1-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)), using release metadata and verify asset SHA-256 checksums, architecture and archive paths. The installer installs `/usr/local/bin/docklane`, creates a dedicated account and `docker-manager.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. New installations listen on `:9999` by default; the script does not change firewall rules. Existing configurations retain their listener. Append `--listen :9999` to the installation command to change an existing installation to port 9999.
 
 Beta installation requires available GitHub API metadata. If the API is unreachable or rate-limited, installation stops safely and asks you to retry later; beta status is never inferred from HTML. No Release is currently available for the stable channel.
 
@@ -118,17 +118,17 @@ Choose a version and listener, or preview the actions first:
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --channel beta --version v0.3.1-beta.1 --listen :8080 --dry-run
+  | sudo bash -s -- --channel beta --version v0.3.1-beta.1 --listen :9999 --dry-run
 ```
 
-Remove `--dry-run` to install; use `--help` for parameters. Repeated execution preserves configuration and data, and skips replacing an identical binary with the same version and checksum. A version change stops the service and creates a backup before upgrading. Explicitly migrate an existing manually started instance rather than treating it as a fresh installation:
+A configuration supplied with `--config` that sets `listen` retains that address unless `--listen` overrides it. Remove `--dry-run` to install; use `--help` for parameters. Repeated execution preserves configuration and data, and skips replacing an identical binary with the same version and checksum. A version change stops the service and creates a backup before upgrading. Explicitly migrate an existing manually started instance rather than treating it as a fresh installation:
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
   | sudo bash -s -- --channel beta --migrate-from /home/ubuntu/docklane/data
 ```
 
-Add `--config /absolute/path/config.json` if the old startup configuration cannot be established reliably. Migration needs downtime and retains both the complete source data and a matching database/key backup. External business paths still need access for the dedicated account. The service retains `ProtectHome=true`; move Compose projects, repositories or backup sources under home directories to suitable authorized locations first. See [migration and recovery](docs/operations.md#手动实例迁移).
+Add `--config /absolute/path/config.json` if the old startup configuration or listener cannot be established reliably. Set `listen` to the old instance’s effective address; migration does not automatically change it to port 9999. Migration needs downtime and retains both the complete source data and a matching database/key backup. External business paths still need access for the dedicated account. The service retains `ProtectHome=true`; move Compose projects, repositories or backup sources under home directories to suitable authorized locations first. See [migration and recovery](docs/operations.md#手动实例迁移).
 
 ```sh
 sudo systemctl status docker-manager       # Inspect service state
@@ -170,7 +170,7 @@ sudo docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
 sudo ./scripts/install.sh ./docklane
 ```
 
-The online commands above use the current `main` entrypoint. Published v0.3.1-beta.1 assets retain their release-time snapshot; when running the attached `install-online.sh` separately, pass `--channel beta` explicitly.
+The online commands above use the current `main` entrypoint. Published v0.3.1-beta.1 assets retain their release-time snapshot; when running the attached `install-online.sh` separately, pass `--channel beta` explicitly. Those assets still default to port 8080. Before using the packaged offline installer, set `listen` to `:9999` in `deployments/config.example.json`; for an existing installation, edit `/etc/docker-manager/config.json` and restart the service.
 
 The materials archive's root-level `VERSION` contains `0.3.1-beta.1` without a `v` prefix. The application version changes while configuration and database schemas remain v1. Raw binaries, `.sha256` sidecars, `IMAGES.txt` and the license are no longer separate beta attachments; these materials remain inside the installation archive. Evidence for withdrawn versions remains historical and is not a current download entrypoint.
 
@@ -181,7 +181,7 @@ Download the native package and `RELEASE-SHA256SUMS` from the [v0.3.1-beta.1 Rel
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
 tar -xzf docklane-v0.3.1-beta.1-linux-amd64.tar.gz
-DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:8080 ./docklane
+DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:9999 ./docklane
 ```
 
 The frontend is embedded. The package contains only `docklane` and `LICENSE`, without Docker CLI, Compose or Restic. Direct execution requires preparing the relevant tools and access permissions; volume backup/restore also requires loading the matching worker. On macOS, use `shasum -a 256 -c` for verification; the executable still requires Linux.
@@ -202,7 +202,7 @@ mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
-The archive includes both architectures. Set the common tag for the native architecture before starting; temporary backup/restore containers use the same version of the local worker.
+The archive includes both architectures. Set the common tag for the native architecture before starting; temporary backup/restore containers use the same version of the local worker. The Compose file inside v0.3.1-beta.1 maps `127.0.0.1:8080:8080`. For port 9999, change the mapping to `127.0.0.1:9999:9999` and add `DM_LISTEN: ":9999"` to the service environment. The current source Compose example includes both settings.
 
 ### Docker: build from source
 
@@ -218,7 +218,7 @@ mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
-The example Compose file binds only to `127.0.0.1:8080`. Access it locally, through a restricted network tunnel or an HTTPS reverse proxy. The image needs no `--privileged` flag and does not mount the host root by default. Docker mode cannot write host daemon configuration or restart systemd directly.
+The example Compose file binds only to `127.0.0.1:9999`. Access it locally, through a restricted network tunnel or an HTTPS reverse proxy. The image needs no `--privileged` flag and does not mount the host root by default. Docker mode cannot write host daemon configuration or restart systemd directly.
 
 ### Linux binary and systemd
 
@@ -255,10 +255,10 @@ git clone https://github.com/Funnyrz/docklane.git
 cd docklane
 make setup
 make build
-DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:8080 ./bin/docklane
+DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:9999 ./bin/docklane
 ```
 
-For frontend development, run `pnpm --dir web dev`. Vite proxies `/api` to local port `:8080`. The interface uses real APIs and provides no simulated business data.
+For frontend development, run `pnpm --dir web dev`. Vite proxies `/api` to local port `:9999`. The interface uses real APIs and provides no simulated business data.
 
 ```sh
 make check          # Formatting, static checks, Go/frontend tests and race checks

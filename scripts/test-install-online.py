@@ -64,6 +64,10 @@ class InstallerTest(unittest.TestCase):
         source = SOURCE.read_text()
         replacements = {
             '/etc/os-release': str(self.os_release),
+            '/etc/docker-manager/config.json': str(self.root / 'installed-config.json'),
+            '/usr/local/bin/docklane': str(self.root / 'installed-docklane'),
+            '/usr/local/bin/docker-manager': str(self.root / 'installed-docker-manager'),
+            '/etc/systemd/system/docker-manager.service': str(self.root / 'installed-service'),
             '/var/lib/docklane-installer': str(self.root / 'receipt'),
             '/run/systemd/system': str(self.systemd),
             '/usr/local/lib/docker': str(self.root / 'docker-tools'),
@@ -82,7 +86,7 @@ class InstallerTest(unittest.TestCase):
         common = f'''
 source {quote(self.script)}
 work={quote(self.work)}
-version=; channel=stable; arch=amd64; docker_arch=x86_64; ID=ubuntu; VERSION_ID=24.04; VERSION_CODENAME=noble
+version=; listen=; migrate=; config=; channel=stable; arch=amd64; docker_arch=x86_64; ID=ubuntu; VERSION_ID=24.04; VERSION_CODENAME=noble
 download_source=direct
 trace={quote(self.trace)}
 assets={quote(self.assets)}
@@ -224,6 +228,49 @@ install_docker() { echo "selected:$version:$channel"; exit 0; }
         self.assertIn('release latest stable', self.bash('main --channel stable --dry-run').stdout)
         self.assertFalse(self.trace.exists())
 
+    def test_fresh_install_default_port_is_passed_to_legacy_release_helper(self):
+        result = self.bash('main', prelude=self.progress_prelude().replace(
+            'echo deployment-complete;', 'echo "deployment-complete $*";'))
+        self.assertIn('--listen :9999', result.stdout)
+        self.assertIn('preserve existing or :9999', self.bash('main --dry-run').stdout)
+
+    def test_port_default_preserves_explicit_listener_config_and_migration(self):
+        config = self.root / 'custom.json'
+        config.write_text('{"listen":":8080"}')
+        cases = [('listen=:8443', ':8443'), ('migrate=/old/data', ''),
+                 (f'config={quote(config)}', '')]
+        for setup, expected in cases:
+            with self.subTest(setup=setup):
+                result = self.bash(setup + '; default_install_listen; printf "%s" "$listen"')
+                self.assertEqual(result.stdout, expected)
+        config.write_text('{}')
+        self.assertEqual(self.bash(f'config={quote(config)}; default_install_listen; printf "%s" "$listen"').stdout, ':9999')
+
+    def test_port_default_never_overrides_existing_installation_footprints(self):
+        paths = ['installed-config.json', 'receipt/release.json', 'installed-docklane',
+                 'installed-docker-manager', 'installed-service']
+        for name in paths:
+            for symlink in (False, True):
+                with self.subTest(path=name, symlink=symlink):
+                    path = self.root / name
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    if symlink:
+                        path.symlink_to(self.root / 'missing-target')
+                    else:
+                        path.write_text('retained')
+                    try:
+                        result = self.bash('default_install_listen; printf "%s" "$listen"')
+                        self.assertEqual(result.stdout, '')
+                    finally:
+                        path.unlink()
+
+    def test_port_default_rejects_invalid_custom_configuration(self):
+        config = self.root / 'invalid.json'
+        for value in ('invalid', '[]'):
+            config.write_text(value)
+            result = self.bash(f'config={quote(config)}; default_install_listen', ok=False)
+            self.assertIn('Cannot read --config', result.stderr)
+
     def progress_prelude(self, fail_worker=False):
         return '''
 bootstrap_tools() { :; }
@@ -236,7 +283,7 @@ verify_release() { :; }
 check_selected_downgrade() { :; }
 install_docker() { :; }
 install_tools() { :; }
-python3() { echo deployment-complete; }
+python3() { if [[ $1 == */materials/scripts/install-support.py ]]; then echo deployment-complete; else command python3 "$@"; fi; }
 ''' + ('install_worker() { return 23; }' if fail_worker else 'install_worker() { :; }')
 
     def test_installation_progress_stages_are_ordered_and_complete_after_deployment(self):

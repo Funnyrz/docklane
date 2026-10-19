@@ -47,9 +47,30 @@ local_docker() {
   env -u DOCKER_HOST -u DOCKER_CONTEXT -u DOCKER_TLS_VERIFY -u DOCKER_CERT_PATH \
     docker --host unix:///var/run/docker.sock "$@"
 }
+default_install_listen() {
+  # The verified release payload may predate the current online default. Pass
+  # the default only to a fresh installation, never to an existing deployment.
+  [[ -z $listen && -z $migrate ]] || return 0
+  local path configured
+  for path in /etc/docker-manager/config.json /var/lib/docklane-installer/release.json \
+    /usr/local/bin/docklane /usr/local/bin/docker-manager /etc/systemd/system/docker-manager.service; do
+    [[ ! -e $path && ! -L $path ]] || return 0
+  done
+  if [[ -n $config ]]; then
+    configured=$(python3 - "$config" <<'PY'
+import json,sys
+with open(sys.argv[1]) as stream: value=json.load(stream)
+if not isinstance(value,dict):raise SystemExit('Configuration must be a JSON object')
+print('yes' if 'listen' in value else 'no')
+PY
+) || die 'Cannot read --config; supply a valid JSON object.'
+    [[ $configured == no ]] || return 0
+  fi
+  listen=:9999
+}
 usage() {
   cat <<'EOF'
-Usage: install-online.sh [--channel stable|beta] [--version vX.Y.Z[-beta.N]] [--listen :8080]
+Usage: install-online.sh [--channel stable|beta] [--version vX.Y.Z[-beta.N]] [--listen :9999]
                          [--migrate-from /absolute/data] [--config /absolute/config.json]
                          [--download-source mirror|direct] [--dry-run] [--help]
 Requires root, systemd, Ubuntu 24.04 or Debian 12/13, amd64 or arm64.
@@ -442,7 +463,7 @@ main() {
   log 'This program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use.'
   export DOCKLANE_NOTICE_SHOWN=1
   if $dry_run; then
-    log "Plan: $ID $VERSION_ID $arch; release ${version:-latest $channel}; listen ${listen:-preserve existing or :8080}; migration ${migrate:-none}."
+    log "Plan: $ID $VERSION_ID $arch; release ${version:-latest $channel}; listen ${listen:-preserve existing or :9999}; migration ${migrate:-none}."
     log "GitHub download source: $download_source; Docker apt repository: official (unchanged)."
     log 'Verify release assets; prepare missing dependencies; load matching worker; install/upgrade systemd service; enable and check /healthz. No changes made.'
     return
@@ -468,6 +489,7 @@ main() {
   export DOCKER_HOST=unix:///var/run/docker.sock
   export DOCKER_CONFIG="$work/docker-config"
   unset DOCKER_CONTEXT DOCKER_TLS_VERIFY DOCKER_CERT_PATH
+  default_install_listen
   local args=(deploy --binary "$work/binary/docklane" --source-dir "$work/materials" --version "$version" --sha256 "$(cat "$work/binary.sha256")")
   if $explicit_version && [[ $(cat "$work/layout") == slim ]]; then args+=(--explicit-version); fi
   [[ -z $listen ]] || args+=(--listen "$listen")

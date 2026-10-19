@@ -36,6 +36,6 @@ COPY --from=backend /out/docklane /usr/local/bin/docklane
 COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
 COPY --from=compose /docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
 COPY --from=restic /usr/bin/restic /usr/local/bin/restic
-ENV DM_MODE=docker DM_DATA_DIR=/data DM_LISTEN=:8080 DM_BACKUP_WORKER_IMAGE=docker-manager:v${DOCKLANE_VERSION}
-EXPOSE 8080
+ENV DM_MODE=docker DM_DATA_DIR=/data DM_LISTEN=:9999 DM_BACKUP_WORKER_IMAGE=docker-manager:v${DOCKLANE_VERSION}
+EXPOSE 9999
 ENTRYPOINT ["/usr/local/bin/docklane"]

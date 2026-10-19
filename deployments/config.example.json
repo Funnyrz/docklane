@@ -2,7 +2,7 @@
   "version": 1,
   "log_level": "info",
   "backup_temp_dir": "/var/lib/docker-manager/tmp",
-  "listen": ":8080",
+  "listen": ":9999",
   "data_dir": "/var/lib/docker-manager",
   "docker_endpoint": "unix:///var/run/docker.sock",
   "mode": "binary",

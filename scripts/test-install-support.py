@@ -30,7 +30,7 @@ class LifecycleTests(unittest.TestCase):
         self.material = self.root / 'material'
         (self.material / 'deployments').mkdir(parents=True)
         (self.material / 'VERSION').write_text('0.3.0\n')
-        self.example = {'version': 1, 'data_dir': str(self.root / 'managed-data'), 'listen': ':8080', 'mode': 'binary', 'allowed_paths': [], 'path_mappings': [], 'backup_temp_dir': '', 'restic_path': 'restic', 'compose_path': 'docker'}
+        self.example = {'version': 1, 'data_dir': str(self.root / 'managed-data'), 'listen': ':9999', 'mode': 'binary', 'allowed_paths': [], 'path_mappings': [], 'backup_temp_dir': '', 'restic_path': 'restic', 'compose_path': 'docker'}
         (self.material / 'deployments/config.example.json').write_text(json.dumps(self.example))
         (self.material / 'deployments/docker-manager.service').write_text('test unit')
         (self.material / 'LICENSE').write_text('MIT')
@@ -113,7 +113,7 @@ class LifecycleTests(unittest.TestCase):
         self.assertEqual(m.BINARY.read_bytes(), b'candidate')
         self.assertEqual(json.loads(m.STATE.read_text())['version'], 'v0.3.0')
         self.assertIn(unittest.mock.call(['systemctl', 'enable', '--now', 'docker-manager']), self.run.call_args_list)
-        m.health_check.assert_called_once_with(':8080')
+        m.health_check.assert_called_once_with(':9999')
         self.assertEqual(m.LICENSE.read_text(), 'MIT')
 
     def test_environment_and_relative_paths(self):
@@ -130,6 +130,21 @@ class LifecycleTests(unittest.TestCase):
         with self.assertRaisesRegex(m.InstallError, 'old startup configuration'):
             m.effective_config(self.material, {}, self.root, migration=True)
 
+    def test_existing_implicit_listener_is_not_guessed_after_default_change(self):
+        with self.assertRaisesRegex(m.InstallError, 'old listen address'):
+            m.effective_config(self.material, {}, self.root, migration=True, live_context=True)
+        config = self.root / 'old.json'
+        config.write_text('{"data_dir":"data"}')
+        with self.assertRaisesRegex(m.InstallError, 'old listen address'):
+            m.effective_config(self.material, {'DM_CONFIG': str(config)}, self.root, migration=True)
+
+    def test_existing_explicit_8080_is_preserved_with_new_default_9999(self):
+        config = self.root / 'old.json'
+        config.write_text('{"listen":":8080","data_dir":"data"}')
+        result, _ = m.effective_config(self.material, {'DM_CONFIG': str(config)}, self.root, migration=True)
+        self.assertEqual(result['listen'], ':8080')
+        self.assertEqual(m.GO_DEFAULTS['listen'], ':9999')
+
     def test_live_source_without_config_uses_go_defaults_and_proc_environment(self):
         result, original = m.effective_config(self.material, {'DM_LISTEN': ':9999', 'DM_DATA_DIR': './state', 'DM_BACKUP_TEMP_DIR': './cache'}, self.root, migration=True, live_context=True)
         self.assertIsNone(original)
@@ -141,7 +156,7 @@ class LifecycleTests(unittest.TestCase):
         self.assertFalse(result['enable_daemon_write'])
 
     def test_live_default_data_is_resolved_against_verified_process_cwd(self):
-        result, _ = m.effective_config(self.material, {}, self.root, migration=True, live_context=True)
+        result, _ = m.effective_config(self.material, {'DM_LISTEN': ':8080'}, self.root, migration=True, live_context=True)
         self.assertEqual(result['data_dir'], str(self.root / 'data'))
         self.assertEqual(result['backup_temp_dir'], str(self.root / 'data/tmp'))
 
@@ -316,7 +331,7 @@ class LifecycleTests(unittest.TestCase):
         self.db(old).close()
         self.args.migrate_from = str(old)
         patch.object(m.DataLock, 'inspect', return_value=1234).start()
-        patch.object(m, 'process_context', return_value=({'DM_DOCKER_ENDPOINT': 'tcp://other-host:2375'}, self.root)).start()
+        patch.object(m, 'process_context', return_value=({'DM_DOCKER_ENDPOINT': 'tcp://other-host:2375', 'DM_LISTEN': ':8080'}, self.root)).start()
         stop = patch.object(m, 'stop_process').start()
         with self.assertRaisesRegex(m.InstallError, 'different docker_endpoint is unsupported'):
             self.deploy()

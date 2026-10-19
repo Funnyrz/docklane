@@ -45,7 +45,7 @@ ENV_FIELDS = {
     'DM_BACKUP_TEMP_DIR': 'backup_temp_dir',
 }
 GO_DEFAULTS = {
-    'version': 1, 'log_level': 'info', 'listen': ':8080', 'data_dir': './data',
+    'version': 1, 'log_level': 'info', 'listen': ':9999', 'data_dir': './data',
     'docker_endpoint': 'unix:///var/run/docker.sock', 'mode': 'binary',
     'daemon_config_path': '/etc/docker/daemon.json', 'compose_path': 'docker',
     'restic_path': 'restic', 'backup_worker_image': 'docker-manager:v0.3.1-beta.1',
@@ -239,10 +239,14 @@ def effective_config(source_dir, env, cwd, explicit=None, migration=False, live_
     if migration:
         config['backup_worker_image'] = 'docker-manager:' + material_version(source_dir)
     selected = explicit or env.get('DM_CONFIG')
+    startup = {}
     if selected:
-        config.update(read_json(absolute(selected, cwd)))
+        startup = read_json(absolute(selected, cwd))
+        config.update(startup)
     elif migration and not live_context:
         raise InstallError('Cannot recover the old startup configuration. Supply --config with the old effective JSON configuration.')
+    if migration and 'listen' not in startup and not env.get('DM_LISTEN'):
+        raise InstallError('Cannot recover the old listen address after the default port change. Supply --config containing the old effective listen value.')
     for key, field in ENV_FIELDS.items():
         if env.get(key):
             config[field] = env[key]

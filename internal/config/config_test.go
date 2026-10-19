@@ -55,3 +55,37 @@ func TestApplicationReleaseDoesNotChangeConfigurationSchema(t *testing.T) {
 		t.Fatal(c.BackupWorkerImage)
 	}
 }
+
+func TestListenDefaultsAndOverrides(t *testing.T) {
+	for _, test := range []struct {
+		name   string
+		config string
+		env    string
+		want   string
+	}{
+		{name: "default", want: ":9999"},
+		{name: "configuration omits listener", config: `{}`, want: ":9999"},
+		{name: "configured legacy port", config: `{"listen":":8080"}`, want: ":8080"},
+		{name: "environment legacy port", config: `{}`, env: "127.0.0.1:8080", want: "127.0.0.1:8080"},
+		{name: "environment overrides configuration", config: `{"listen":":9999"}`, env: ":8080", want: ":8080"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			p := ""
+			if test.config != "" {
+				p = filepath.Join(t.TempDir(), "config.json")
+				if err := os.WriteFile(p, []byte(test.config), 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			t.Setenv("DM_CONFIG", p)
+			t.Setenv("DM_LISTEN", test.env)
+			c, err := Load()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if c.Listen != test.want {
+				t.Fatalf("listener = %q, want %q", c.Listen, test.want)
+			}
+		})
+	}
+}

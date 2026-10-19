@@ -29,7 +29,7 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 | `--channel stable` / `beta` | 默认 `beta`，选择最新已发布 Beta；显式 `stable` 请求正式版，目前无正式版会停止 |
 | `--version v0.3.1-beta.1` | 固定当前 Beta，优先于渠道参数；示例同时显式传入 `--channel beta` |
 | `--download-source mirror` / `direct` | 默认镜像优先并回退直连；`direct` 使安装器后续下载完全直连 |
-| `--listen :8080` | 设置监听地址；新装默认 `:8080`，已有安装保留原值，显式指定时覆盖 |
+| `--listen :9999` | 设置监听地址；新装默认 `:9999`，已有安装保留原值，显式指定时覆盖 |
 | `--migrate-from /绝对路径/data` | 显式迁移手动实例的完整应用数据；保留源目录 |
 | `--config /绝对路径/config.json` | 提供配置；迁移时用于无法可靠还原旧启动配置的情况 |
 | `--dry-run` | 预览检查结果与计划，不安装工具、写配置、停止实例或注册服务 |
@@ -39,7 +39,7 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 
 安装路径为 `/usr/local/bin/docklane`，账号和服务名为 `docker-manager`，默认配置为 `/etc/docker-manager/config.json`，默认数据目录为 `/var/lib/docker-manager`。服务以专用账号运行，保留 `ProtectHome=true` 等限制；不授予 daemon 配置写权限，不改防火墙，不递归修改外部业务目录的所有者。使用外部 Compose、备份源、仓库和恢复目录前仍需显式授权路径与文件权限。
 
-结束时脚本检查 `systemctl is-active`、`systemctl is-enabled` 和有界 `/healthz` 请求，成功后显示访问地址、配置位置及日志命令。`:8080` 监听所有网卡，请通过可信网络或 HTTPS 反向代理访问。服务器重新启动后由 systemd 自动启动，无需再次运行脚本。
+结束时脚本检查 `systemctl is-active`、`systemctl is-enabled` 和有界 `/healthz` 请求，成功后显示访问地址、配置位置及日志命令。`:9999` 监听所有网卡，请通过可信网络或 HTTPS 反向代理访问。服务器重新启动后由 systemd 自动启动，无需再次运行脚本。
 
 ```sh
 sudo systemctl status docker-manager
@@ -67,7 +67,7 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
   | sudo bash -s -- --channel beta --migrate-from /home/ubuntu/docklane/data --dry-run
 ```
 
-若无法可靠取得旧实例配置，追加 `--config /绝对路径/config.json`。配置中的相对路径按旧工作目录转换为绝对路径，应用数据和临时目录按受管安装调整；有效配置、数据库内保存的设置及密钥继续保留。不要为了通过路径检查，把旧配置替换成空白示例。
+若无法可靠取得旧实例配置或确认旧监听地址，追加 `--config /绝对路径/config.json`，其中 `listen` 必须明确写出旧实例实际生效的监听地址；同一 Beta 版本可能来自默认 8080 的旧发布包或默认 9999 的新源码，不能按版本号猜测。迁移保留该监听地址，只有显式 `--listen` 才覆盖。配置中的相对路径按旧工作目录转换为绝对路径，应用数据和临时目录按受管安装调整；有效配置、数据库内保存的设置及密钥继续保留。不要为了通过路径检查，把旧配置替换成空白示例。
 
 迁移前检查外部 Compose 项目、备份源与仓库是否能被专用账号访问。`ProtectHome=true` 会屏蔽 home 下的业务路径，即使 Unix 权限允许也无法访问；先安排迁移到 `/srv` 等适当的授权目录。脚本不会自动放宽隔离或对这些路径递归 `chown`。非空目标数据目录、未知进程或无法还原的配置会使迁移停止。
 
@@ -84,7 +84,7 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
   | sudo bash -s -- --channel beta --version v0.3.1-beta.1
 ```
 
-标准受管安装会保留现有配置和实际生效的数据目录；同版本且二进制 SHA-256 一致时跳过替换。版本变化先停服务，再备份实际数据目录、配置、服务单元和旧二进制，之后安装同版本材料并检查健康。显式指定 `--listen` 才更改已有监听地址。需要降级时应按下方回退说明恢复配套备份，不能用旧程序直接打开升级后的数据库。
+标准受管安装会保留现有配置和实际生效的数据目录；同版本且二进制 SHA-256 一致时跳过替换。版本变化先停服务，再备份实际数据目录、配置、服务单元和旧二进制，之后安装同版本材料并检查健康。显式指定 `--listen` 才更改已有监听地址。要将既有 8080 监听改为 9999，在上述在线命令末尾追加 `--listen :9999`；无参数重跑会继续保留 8080。需要降级时应按下方回退说明恢复配套备份，不能用旧程序直接打开升级后的数据库。
 
 安装或升级失败返回非零退出码，停止未通过健康检查的新服务，并保留源数据及备份。先阅读错误输出与日志，不反复重启或混合恢复数据库和密钥。管理员按下方[升级和回退](#升级和回退)区分受管升级与首次手动迁移恢复；首次迁移可能没有旧服务单元或旧二进制备份，不能直接套用 systemd 回退步骤。失败前已停机的来源不会被强行启动；恢复由管理员确认。
 
@@ -103,6 +103,8 @@ sudo docker load -i docker-manager-images.tar.gz
 sudo docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
 sudo ./scripts/install.sh ./docklane
 ```
+
+已发布的 v0.3.1-beta.1 附件保留发布时的 8080 默认端口。包内离线安装脚本新装前，可将 `deployments/config.example.json` 的 `listen` 改为 `:9999`；已有安装则修改 `/etc/docker-manager/config.json` 后重启服务。直接运行旧二进制可用 `DM_LISTEN=:9999` 覆盖。Docker 部署还需将端口映射改为 `127.0.0.1:9999:9999`，并设置 `DM_LISTEN=:9999`；当前源码已包含这些设置。
 
 arm64 将包名和镜像标签中的 `amd64` 改为 `arm64`。原生包仅含 `docklane` 和 `LICENSE`，安装时还需要同版本材料，不应混用 `main` 的配置或服务文件。源码构建的原始二进制在 `bin/release-internal/`（`RELEASE_BUILD_DIR`），最终附件在 `bin/release/`（`RELEASE_OUTPUT_DIR`）；源码安装使用 `sudo ./scripts/install.sh ./bin/release-internal/docklane-linux-amd64`。已撤回版本不再提供当前下载命令，旧验收记录仅作历史留存。
 

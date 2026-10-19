@@ -77,7 +77,7 @@ class Acceptance:
         self.helper.SECRETS.extend(self.credentials.values())
         self.report = json.loads(args.report.read_text()) if args.report.exists() else {'phases': []}
         self.phase = {'phase': args.phase, 'started_at': self.stamp(), 'checks': []}
-        self.base = 'http://127.0.0.1:8080'
+        self.base = 'http://127.0.0.1:9999'
         self.env = {key: value for key, value in os.environ.items()
                     if not key.startswith('DM_') and key not in
                     ('DOCKER_HOST', 'DOCKER_CONTEXT', 'DOCKER_CERT_PATH', 'DOCKER_TLS_VERIFY', 'DOCKER_CONFIG')}
@@ -241,7 +241,7 @@ main "$@"
             self.check(not path.exists() and not path.is_symlink(), 'refusing existing installation path: ' + str(path))
         self.check(self.unit().get('LoadState') == 'not-found', 'refusing an existing docker-manager service')
         with socket.socket() as probe:
-            probe.bind(('127.0.0.1', 8080))
+            probe.bind(('127.0.0.1', 9999))
         self.check((self.args.assets / 'install-online.sh').read_bytes() ==
                    (self.args.source / 'scripts/install-online.sh').read_bytes(),
                    'candidate online entrypoint differs from the supplied source')

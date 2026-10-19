@@ -34,7 +34,7 @@ type Config struct {
 }
 
 func Load() (Config, error) {
-	c := Config{Version: 1, LogLevel: "info", Listen: ":8080", DataDir: "./data", DockerEndpoint: "unix:///var/run/docker.sock", Mode: "binary", DaemonConfigPath: "/etc/docker/daemon.json", ComposePath: "docker", ResticPath: "restic", BackupWorkerImage: "docker-manager:v" + buildinfo.Version}
+	c := Config{Version: 1, LogLevel: "info", Listen: ":9999", DataDir: "./data", DockerEndpoint: "unix:///var/run/docker.sock", Mode: "binary", DaemonConfigPath: "/etc/docker/daemon.json", ComposePath: "docker", ResticPath: "restic", BackupWorkerImage: "docker-manager:v" + buildinfo.Version}
 	if p := os.Getenv("DM_CONFIG"); p != "" {
 		b, e := os.ReadFile(p)
 		if e != nil {

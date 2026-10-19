@@ -108,7 +108,7 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 
 安装过程显示 8 个阶段及当前下载文件、来源和尝试序号；交互式终端还会显示真实下载进度条，重定向日志时使用普通文本。
 
-本页命令从已发布元数据选择最新 Beta，或通过 `--version` 固定版本（当前为 [v0.3.1-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)），并校验下载资产的 SHA-256、架构和归档路径，安装 `/usr/local/bin/docklane`，创建专用账号及 `docker-manager.service`，自动后台启动并设置开机自启。结束时检查服务状态、自启和 `/healthz`，输出访问地址；首次打开页面创建管理员。默认监听 `:8080`，不自动修改防火墙。
+本页命令从已发布元数据选择最新 Beta，或通过 `--version` 固定版本（当前为 [v0.3.1-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)），并校验下载资产的 SHA-256、架构和归档路径，安装 `/usr/local/bin/docklane`，创建专用账号及 `docker-manager.service`，自动后台启动并设置开机自启。结束时检查服务状态、自启和 `/healthz`，输出访问地址；首次打开页面创建管理员。新装默认监听 `:9999`，不自动修改防火墙。已有配置保留原监听地址；需要改为 9999 时，在安装命令末尾显式追加 `--listen :9999`。
 
 Beta 安装需要可用的 GitHub API 元数据；API 不可达或限流时安全停止并提示稍后重试，不从网页推断 Beta 状态。当前没有可供正式通道使用的 Release。
 
@@ -118,17 +118,17 @@ Beta 安装需要可用的 GitHub API 元数据；API 不可达或限流时安�
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --channel beta --version v0.3.1-beta.1 --listen :8080 --dry-run
+  | sudo bash -s -- --channel beta --version v0.3.1-beta.1 --listen :9999 --dry-run
 ```
 
-去掉 `--dry-run` 执行安装；`--help` 查看参数。再次执行会保留现有配置与数据，同版本且校验和相同则跳过二进制替换；版本变化先停机备份再升级。已有手动运行实例必须显式迁移，不能直接当作全新安装：
+若通过 `--config` 提供的配置中已设置 `listen`，未指定 `--listen` 时会保留该地址。去掉 `--dry-run` 执行安装；`--help` 查看参数。再次执行会保留现有配置与数据，同版本且校验和相同则跳过二进制替换；版本变化先停机备份再升级。已有手动运行实例必须显式迁移，不能直接当作全新安装：
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
   | sudo bash -s -- --channel beta --migrate-from /home/ubuntu/docklane/data
 ```
 
-脚本无法可靠取得旧启动配置时，增加 `--config /绝对路径/config.json`。迁移需要短暂停机，保留完整源数据和数据库/密钥配套备份；外部业务路径仍需专用账号可访问。服务保留 `ProtectHome=true`，位于 home 下的 Compose、仓库或备份源需先迁移到适当的授权目录。详见[迁移与恢复说明](docs/operations.md#手动实例迁移)。
+脚本无法可靠取得旧启动配置或无法确认旧监听地址时，增加 `--config /绝对路径/config.json`，其中 `listen` 必须填写旧实例实际生效的监听地址；迁移不会自动改为 9999。迁移需要短暂停机，保留完整源数据和数据库/密钥配套备份；外部业务路径仍需专用账号可访问。服务保留 `ProtectHome=true`，位于 home 下的 Compose、仓库或备份源需先迁移到适当的授权目录。详见[迁移与恢复说明](docs/operations.md#手动实例迁移)。
 
 ```sh
 sudo systemctl status docker-manager       # 查看服务状态
@@ -170,7 +170,7 @@ sudo docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
 sudo ./scripts/install.sh ./docklane
 ```
 
-上述在线命令使用 `main` 的最新入口。已发布的 v0.3.1-beta.1 附件保留发布时快照；单独运行附件中的 `install-online.sh` 时，仍需传入 `--channel beta`。
+上述在线命令使用 `main` 的最新入口。已发布的 v0.3.1-beta.1 附件保留发布时快照；单独运行附件中的 `install-online.sh` 时，仍需传入 `--channel beta`。该版本附件的默认端口仍为 8080；使用包内离线安装脚本前，可将 `deployments/config.example.json` 中的 `listen` 改为 `:9999`，已有安装则修改 `/etc/docker-manager/config.json` 后重启服务。
 
 安装材料根目录的 `VERSION` 为 `0.3.1-beta.1`（无 `v` 前缀）；应用版本变化不改变配置或数据库的 schema v1。Beta 不再单独发布原始二进制、`.sha256`、`IMAGES.txt` 或许可附件；这些材料保留在安装归档内。已撤回版本的验收记录仅作历史留存，不提供当前下载入口。
 
@@ -181,7 +181,7 @@ sudo ./scripts/install.sh ./docklane
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
 tar -xzf docklane-v0.3.1-beta.1-linux-amd64.tar.gz
-DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:8080 ./docklane
+DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:9999 ./docklane
 ```
 
 程序已嵌入前端；包内仅有 `docklane` 和 `LICENSE`，不包含 Docker CLI、Compose 或 Restic。直接运行需要自行准备相应工具与访问权限；Volume 备份/恢复还需加载同版本 worker。macOS 可用 `shasum -a 256 -c` 校验，程序仍需在 Linux 运行。
@@ -202,7 +202,7 @@ mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
-归档提供两种架构镜像，启动前为本机架构设置通用标签；临时备份/恢复容器使用相同版本的本地 worker。
+归档提供两种架构镜像，启动前为本机架构设置通用标签；临时备份/恢复容器使用相同版本的本地 worker。v0.3.1-beta.1 包内 Compose 使用 `127.0.0.1:8080:8080`；若需 9999，将端口映射改为 `127.0.0.1:9999:9999`，并在服务的 `environment` 中加入 `DM_LISTEN: ":9999"`。当前源码的 Compose 示例已包含这两项设置。
 
 ### Docker：从源码构建
 
@@ -218,7 +218,7 @@ mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
-示例 Compose 仅绑定 `127.0.0.1:8080`，通过本机浏览器、受限网络隧道或 HTTPS 反向代理访问。镜像无需 `--privileged`，也不默认挂载宿主机根目录。Docker 模式不允许直接写入宿主机 daemon 配置或重启 systemd。
+示例 Compose 仅绑定 `127.0.0.1:9999`，通过本机浏览器、受限网络隧道或 HTTPS 反向代理访问。镜像无需 `--privileged`，也不默认挂载宿主机根目录。Docker 模式不允许直接写入宿主机 daemon 配置或重启 systemd。
 
 ### Linux 二进制与 systemd
 
@@ -255,10 +255,10 @@ git clone https://github.com/Funnyrz/docklane.git
 cd docklane
 make setup
 make build
-DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:8080 ./bin/docklane
+DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:9999 ./bin/docklane
 ```
 
-前端独立开发运行 `pnpm --dir web dev`，Vite 将 `/api` 代理到本地 `:8080`；页面使用真实 API，不提供模拟业务数据。
+前端独立开发运行 `pnpm --dir web dev`，Vite 将 `/api` 代理到本地 `:9999`；页面使用真实 API，不提供模拟业务数据。
 
 ```sh
 make check          # 格式、静态检查、Go/前端测试及 race 检查
