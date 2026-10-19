@@ -2,7 +2,7 @@
 
 ## 当前发布状态
 
-目前唯一可下载版本为 [v0.3.1-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)。原 v0.3.0 Release 已撤回，当前没有正式 Release，也没有可用的正式版 latest 入口；正式通道需等待未来正式发布。当前安装请使用 [README 的显式 Beta 命令](../README.md#一键在线安装推荐)。当前源码为 `0.3.1-beta.1`，安装示例显式使用 `--channel beta`，安装器默认仍为 `stable`，当前无参数安装会停止并提示显式选择 Beta。
+目前唯一可下载版本为 [v0.3.1-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)。原 v0.3.0 Release 已撤回，当前没有正式 Release，也没有可用的正式版 latest 入口；正式通道需等待未来正式发布。当前安装请使用 [README 的一键安装命令](../README.md#一键在线安装推荐)。当前源码为 `0.3.1-beta.1`；无参数安装默认选择最新 Beta，并在修改系统前显示测试版警告。显式 `--channel stable` 仍请求正式版，当前会因暂无正式版而停止。
 
 当前发布工作流支持仅有预发布版：正式版 latest 查询的实际 HTTP 404 表示尚无正式版；鉴权、限流和服务器错误仍中止。Beta 发布保持 `prerelease=true`、`latest=false`，不要求事先存在正式 Release。未来发布必须使用新版本及其精确 CI 提交，不重建已撤回的 v0.3.0 Release 或覆盖现有 Beta 产物。
 

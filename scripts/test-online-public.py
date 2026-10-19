@@ -25,8 +25,9 @@ def main():
     parser.add_argument('--source', type=Path, required=True)
     parser.add_argument('--report', type=Path, required=True)
     parser.add_argument('--phase', choices=('install', 'resume'), required=True)
-    parser.add_argument('--channel', choices=('stable', 'beta'), default='stable')
+    parser.add_argument('--channel', choices=('stable', 'beta'), help='Override the installer default channel')
     args = parser.parse_args()
+    public_command = COMMAND + (' --channel ' + shlex.quote(args.channel) if args.channel else '')
     if sys.platform != 'linux' or os.geteuid() != 0 or os.getenv('DM_PLATFORM_ISOLATED') != '1':
         parser.error('Requires root in an explicitly isolated Linux guest')
     if Path('/proc/1/comm').read_text().strip() != 'systemd':
@@ -49,7 +50,7 @@ def main():
 
     class PublicAcceptance(harness.Acceptance):
         def invoke_online(self):
-            result = self.helper.command(['bash', '-c', COMMAND + ' --channel ' + shlex.quote(args.channel)], env=self.env,
+            result = self.helper.command(['bash', '-c', public_command], env=self.env,
                                          timeout=2400, allow_failure=True)
             log = self.state / ('public-installer-' + secrets.token_hex(4) + '.log')
             log.write_bytes(result.stdout + b'\n' + result.stderr)
@@ -67,7 +68,7 @@ def main():
                 for phase in self.report.get('phases', []):
                     for check in phase.get('checks', []):
                         check['name'] = check['name'].replace('local candidate online install', 'public curl installation')
-                self.report['transport'] = {'public_url': URL, 'command': COMMAND, 'mocked_operations': []}
+                self.report['transport'] = {'public_url': URL, 'command': public_command, 'mocked_operations': []}
                 self.report['limitations'] = ['A disposable native arm64 Ubuntu 24.04 systemd VM; other distribution/architecture combinations have separate candidate evidence.',
                                               'No firewall rule is changed; remote network exposure is not asserted.']
                 harness.private_json(self.args.report, self.report)

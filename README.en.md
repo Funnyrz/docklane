@@ -2,7 +2,7 @@
 
 > This program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use.
 
-The current source and only downloadable version is the [v0.3.1-beta.1 prerelease](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1). The old v0.3.0 Release has been withdrawn and no formal release is currently available. The stable channel is unavailable until a future formal release. The installer still defaults to `stable`; without parameters it currently stops and suggests `--channel beta`. All commands here explicitly select beta.
+The current source and only downloadable version is the [v0.3.1-beta.1 prerelease](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1). The old v0.3.0 Release has been withdrawn and no formal release is currently available. The stable channel is unavailable until a future formal release. Online installation without parameters defaults to the newest beta and displays the testing-only, no-production warning before making system changes. You can still explicitly select `--channel beta` or pin a version.
 
 **Your containers. Under control.**
 
@@ -95,13 +95,13 @@ The Docker image includes Docker CLI, Compose and Restic. The online installer p
 Run on an `amd64` / `arm64` host with Ubuntu 24.04 or Debian 12/13. Root privileges and a running systemd are required:
 
 ```sh
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
 ```
 
 If this entrypoint is unreachable, use the backup public mirror:
 
 ```sh
-curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
+curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
 ```
 
 These entrypoints use public third-party services and cannot guarantee access from every region or network. A project-owned short-domain entrypoint is deferred. The installer defaults to `--download-source mirror`: GitHub API requests try `gh-proxy.com`, then the official direct endpoint; GitHub pages, Release assets, and files such as Compose / Restic try `gh-proxy.com`, `ghfast.top`, then the official direct endpoint ([public mirror documentation](https://gh-proxy.com/docs/github-accelerator)). Append `--download-source direct` to bypass all mirrors for subsequent installer downloads; use the [original script URL](https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh) if the entrypoint must also be fetched directly. Release, version, SHA-256 and archive checks remain unchanged. Docker's apt repository remains the official source, so access to every dependency from mainland China is not guaranteed.
@@ -167,6 +167,8 @@ sudo docker load -i docker-manager-images.tar.gz
 sudo docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
 sudo ./scripts/install.sh ./docklane
 ```
+
+The online commands above use the current `main` entrypoint. Published v0.3.1-beta.1 assets retain their release-time snapshot; when running the attached `install-online.sh` separately, pass `--channel beta` explicitly.
 
 The materials archive's root-level `VERSION` contains `0.3.1-beta.1` without a `v` prefix. The application version changes while configuration and database schemas remain v1. Raw binaries, `.sha256` sidecars, `IMAGES.txt` and the license are no longer separate beta attachments; these materials remain inside the installation archive. Evidence for withdrawn versions remains historical and is not a current download entrypoint.
 

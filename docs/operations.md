@@ -2,20 +2,20 @@
 
 > 本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。
 
-当前源码及唯一可下载版本为 [v0.3.1-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)，配置与数据库 schema 仍为 v1。旧 v0.3.0 Release 已撤回，目前没有正式版，正式通道在未来正式发布前不可用。安装器默认仍为 `stable`，当前无参数安装会停止并提示使用 `--channel beta`；本页命令均显式选择 Beta。
+当前源码及唯一可下载版本为 [v0.3.1-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)，配置与数据库 schema 仍为 v1。旧 v0.3.0 Release 已撤回，目前没有正式版，正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
 
 ## 一键在线安装
 
 支持 Ubuntu 24.04、Debian 12/13，架构为 `amd64` / `arm64`，要求 root 和正在运行的 systemd。在线入口位于公开仓库，本页命令选择当前 Beta；解析版本后固定该版本的下载地址，所有安装材料与 worker 镜像必须来自同一 Release。Beta 安装要求可用的 GitHub API 元数据，API 不可达或限流时安全停止，不从网页推断 Beta 状态。
 
 ```sh
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
 ```
 
 主入口不可达时，可使用备用公共镜像：
 
 ```sh
-curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
+curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
 ```
 
 两者都是第三方公共服务，不保证所有地区或网络均可达；项目自有短域名入口暂缓提供。安装器默认 `--download-source mirror`：GitHub API 依次尝试 `gh-proxy.com`、官方直连；GitHub 网页、Release 资产及 Compose / Restic 等文件依次尝试 `gh-proxy.com`、`ghfast.top`、官方直连。服务能力参见 [公共镜像服务文档](https://gh-proxy.com/docs/github-accelerator)。追加 `--download-source direct` 可使安装器后续下载完全绕过镜像；入口本身也需直连时，使用[原始脚本地址](https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh)。镜像只改变传输路径，仍使用同一 Release 的版本、SHA-256、架构与归档校验。Docker apt 软件源保持官方地址，不保证整个依赖安装流程都在国内网络可达。
@@ -24,7 +24,7 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 
 | 参数 | 行为 |
 | --- | --- |
-| `--channel stable` / `beta` | 默认 `stable`，目前无正式版会停止；显式 `beta` 选择最新已发布 Beta |
+| `--channel stable` / `beta` | 默认 `beta`，选择最新已发布 Beta；显式 `stable` 请求正式版，目前无正式版会停止 |
 | `--version v0.3.1-beta.1` | 固定当前 Beta，优先于渠道参数；示例同时显式传入 `--channel beta` |
 | `--download-source mirror` / `direct` | 默认镜像优先并回退直连；`direct` 使安装器后续下载完全直连 |
 | `--listen :8080` | 设置监听地址；新装默认 `:8080`，已有安装保留原值，显式指定时覆盖 |

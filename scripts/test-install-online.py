@@ -195,6 +195,34 @@ fetch() {{
         self.assertNotIn('release latest stable', result.stdout)
         self.assertFalse(self.trace.exists())
 
+    def test_default_channel_selects_and_verifies_beta_before_installing(self):
+        self.make_slim_release()
+        (self.assets / 'releases.json').write_text(json.dumps([
+            {**self.slim_metadata, 'tag_name': 'v99.0.0', 'prerelease': False},
+            self.slim_metadata,
+        ]))
+        result = self.bash('main', prelude='''
+bootstrap_tools() { echo dependency-preparation; }
+fetch() {
+ printf 'fetch %s\\n' "$1" >> "$trace"
+ if [[ $1 == *'releases?per_page='* ]]; then cp "$assets/releases.json" "$2"
+ else cp "$assets/${1##*/}" "$2"; fi
+}
+install_docker() { echo "selected:$version:$channel"; exit 0; }
+''')
+        self.assertIn('selected:v0.3.1-beta.1:beta', result.stdout)
+        self.assertIn('Verified v0.3.1-beta.1 for amd64', result.stdout)
+        self.assertLess(result.stdout.index('do not use it in production'),
+                        result.stdout.index('dependency-preparation'))
+        calls = self.trace.read_text()
+        self.assertIn('releases?per_page=100&page=1', calls)
+        self.assertNotIn('/releases/latest', calls)
+
+    def test_no_argument_dry_run_is_beta_and_explicit_stable_is_preserved(self):
+        self.assertIn('release latest beta', self.bash('main --dry-run').stdout)
+        self.assertIn('release latest stable', self.bash('main --channel stable --dry-run').stdout)
+        self.assertFalse(self.trace.exists())
+
     def test_stable_web_fallback_detects_new_layout_from_manifest(self):
         self.make_slim_release('v0.3.1')
         prelude = '''
@@ -212,7 +240,7 @@ fetch_release_page() { printf '%s' 'https://github.com/Funnyrz/docklane/releases
         self.assertNotIn('/LICENSE', calls)
 
     def test_disclaimer_is_printed_before_dependency_mutation(self):
-        result = self.bash('main --version v0.3.0', prelude='bootstrap_tools() { echo mutation-started; return 23; }', ok=False)
+        result = self.bash('main', prelude='bootstrap_tools() { echo mutation-started; return 23; }', ok=False)
         chinese = '本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。'
         self.assertIn(chinese, result.stdout)
         self.assertLess(result.stdout.index(chinese), result.stdout.index('mutation-started'))
@@ -349,8 +377,8 @@ fetch() {{
     def test_help_and_invalid_arguments_do_not_touch_system(self):
         help_text = self.bash('main --help').stdout
         self.assertIn('--migrate-from', help_text)
-        self.assertIn('Defaults to the latest stable GitHub Release', help_text)
-        self.assertIn('When no stable release is published, select --channel beta explicitly.', help_text)
+        self.assertIn('Defaults to the latest beta GitHub Release (testing only; do not use in production)', help_text)
+        self.assertIn('Use --channel stable to request a formal release explicitly.', help_text)
         for args in ['--unknown', '--version', '--version latest', '--version v0.3.0-rc1',
                      '--migrate-from relative', '--config relative', '--listen --dry-run',
                      '--download-source', '--download-source https://evil.invalid']:

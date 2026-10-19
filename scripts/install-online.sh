@@ -47,8 +47,8 @@ Usage: install-online.sh [--channel stable|beta] [--version vX.Y.Z[-beta.N]] [--
                          [--migrate-from /absolute/data] [--config /absolute/config.json]
                          [--download-source mirror|direct] [--dry-run] [--help]
 Requires root, systemd, Ubuntu 24.04 or Debian 12/13, amd64 or arm64.
-Defaults to the latest stable GitHub Release. Existing Docker is never upgraded.
-When no stable release is published, select --channel beta explicitly.
+Defaults to the latest beta GitHub Release (testing only; do not use in production).
+Use --channel stable to request a formal release explicitly. Existing Docker is never upgraded.
 GitHub downloads use public mirrors with direct fallback; use --download-source direct to bypass mirrors.
 Unknown manual deployments require explicit --migrate-from. Source data is retained.
 EOF
@@ -81,7 +81,7 @@ bootstrap_tools() {
   fi
 }
 write_release_selection() {
-  python3 - "$work" "${requested_version:-$version}" "${channel:-stable}" "$arch" "$@" > "$work/release-selection" <<'PY'
+  python3 - "$work" "${requested_version:-$version}" "${channel:-beta}" "$arch" "$@" > "$work/release-selection" <<'PY'
 import json,pathlib,re,sys
 root=pathlib.Path(sys.argv[1]); requested,channel,arch=sys.argv[2:5]
 pattern=re.compile(r'v(\d+)\.(\d+)\.(\d+)(?:-beta\.(\d+))?')
@@ -132,7 +132,7 @@ resolve_release() {
   local endpoint=latest page=1 count
   local pages=()
   requested_version=${requested_version:-$version}
-  if [[ -z $requested_version && ${channel:-stable} == beta ]]; then
+  if [[ -z $requested_version && ${channel:-beta} == beta ]]; then
     while :; do
       fetch "https://api.github.com/repos/Funnyrz/docklane/releases?per_page=100&page=$page" "$work/releases-$page.json" || die 'Beta release metadata is unavailable; no web inference is allowed.'
       count=$(python3 - "$work/releases-$page.json" <<'PY'
@@ -151,7 +151,7 @@ PY
   else
     [[ -z $requested_version ]] || endpoint="tags/$requested_version"
     if ! fetch "https://api.github.com/repos/Funnyrz/docklane/releases/$endpoint" "$work/release.json"; then
-      [[ $requested_version != *-beta.* && ( ${channel:-stable} != beta || -n $requested_version ) ]] || die 'Beta release metadata is unavailable; no web inference is allowed.'
+      [[ $requested_version != *-beta.* && ( ${channel:-beta} != beta || -n $requested_version ) ]] || die 'Beta release metadata is unavailable; no web inference is allowed.'
       log 'GitHub API unavailable; checking the public latest formal release.'
       resolve_release_web
       return
@@ -413,7 +413,7 @@ PY
   local_docker tag "$native" "docker-manager:$version"
 }
 main() {
-  version=; listen=; migrate=; config=; dry_run=false; download_source=mirror; channel=stable; explicit_version=false
+  version=; listen=; migrate=; config=; dry_run=false; download_source=mirror; channel=beta; explicit_version=false
   while (($#)); do
     case "$1" in
       --help|-h) usage; return ;;
