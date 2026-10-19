@@ -1,5 +1,13 @@
 # v0.3 验证记录
 
+## 2026-10-19 公共镜像下载入口
+
+[镜像传输验证记录](evidence/online-install/public-mirrors.json) 对应 [03760ee](https://github.com/Funnyrz/docklane/commit/03760ee64c7f30baa5c2037453cb13c56b3651a2)。主、备用镜像均返回与该提交字节一致的安装入口；全部所需 v0.3.0 arm64 资产（含 worker 镜像）、Compose 2.40.3 和 Restic 0.19.1 经主镜像下载并通过 SHA-256 校验。公开 latest 网页查询实测主镜像 HTTP 403 后，由备用镜像跳转到正确的正式版本地址。
+
+原生 arm64 Ubuntu 24.04 独立 systemd VM 执行 README 中的真实公开 `curl` 命令成功，重复安装保留 Docker 和应用 PID、二进制及 `master.key`，服务保持 active / enabled，`/healthz` 返回 200。本次是在既有测试安装上复验传输和重复安装，不是新增一次全新安装或三发行版 × 双架构验收；没有独立国内运营商网络测试，Docker apt 仍是官方源，不据此保证国内全流程可达。自有短域名由用户选择暂缓，公开镜像仅替换传输路径。正式 v0.3.0 Tag 和资产未覆盖；测试后 VM 已停止并保留原数据。
+
+本地 116 项安装/生命周期/打包/预检测试通过（macOS 跳过 1 项 Linux 专属测试），Shell/Python 语法、actionlint 和文档结构检查通过。该提交的 [CI](https://github.com/Funnyrz/docklane/actions/runs/39221537031) 五项任务全部成功：Linux 安装测试、前后端检查、双架构二进制构建，以及 Docker 28.5.1 / 29.5.2 × amd64 / arm64 四组真实集成。
+
 ## 2026-10-19 在线安装与正式发布
 
 [v0.3.0 正式 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.0) 已发布并设为 latest。Tag 与应用产物来源为 [3a53e098](https://github.com/Funnyrz/docklane/commit/3a53e0986eb4e84f355332974eb6662006673932)，该精确提交的 [CI 39216500363](https://github.com/Funnyrz/docklane/actions/runs/39216500363) 与 [发布工作流 39217575907](https://github.com/Funnyrz/docklane/actions/runs/39217575907) 均成功。

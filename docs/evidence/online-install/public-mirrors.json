@@ -1,0 +1,112 @@
+{
+  "verified_at": "2026-10-19T08:17:54.591574+00:00",
+  "source_commit": "03760ee64c7f30baa5c2037453cb13c56b3651a2",
+  "result": "passed",
+  "bootstrap_sha256": "11cb35b6d72efdc222ef2622ac583b6bccdd9bb56456264b21423b6e029594c1",
+  "bootstrap_mirrors": {
+    "gh-proxy.com": "Matches committed source",
+    "ghfast.top": "Matches committed source"
+  },
+  "release": "v0.3.0",
+  "release_source_commit": "3a53e0986eb4e84f355332974eb6662006673932",
+  "downloaded_and_verified": {
+    "LICENSE": "13d574fba57470036711181178466217fac88a9567e34425104e2e4a3000746d",
+    "IMAGE-SHA256SUMS": "1c2a4d64cc01766fd90c9b2f7fc84814adcf1506c0d047a9a588a9e1e3b7ef6b",
+    "docklane-v0.3.0-linux-arm64.tar.gz.sha256": "8c7f9ac0d218629cc3556a66a4e31466a1943fe7ebc2a4b107e4fa94eeb9dc07",
+    "RELEASE-SHA256SUMS": "b5eeb83cc09c524b868c197998c62e049b240fee8c047974d61981b640460f81",
+    "docker-manager-installation.tar.gz": "b288c09f7a48cedc096f39fe5e047e7aeec15e0fcfaa4eb164e4edba116e6246",
+    "IMAGES.txt": "6e6d5c93cb1eb3df4c32bb5dee2aae1c73fc8d1b42c0a6130e476d32707f92d8",
+    "docklane-v0.3.0-linux-arm64.tar.gz": "9613cacdd66f850bf6b9ac73762bfe2ba6910056a580c179b2bd3d3f801ba0de",
+    "docker-manager-images.tar.gz": "6bbf132d28ba07c78c414274c21ea283ab3d7574d935b423d6a30f940c0090cd",
+    "SHA256SUMS": "35b30055ad1d782f95d38501dc820c256043fe2625d93b228fcd03ee93c50dd5"
+  },
+  "tools": {
+    "compose": "v2.40.3 / aarch64 / upstream checksums.txt matched",
+    "restic": "v0.19.1 / arm64 / upstream SHA256SUMS matched"
+  },
+  "actual_download_routes": [
+    "https://gh-proxy.com/https://api.github.com/repos/Funnyrz/docklane/releases/latest",
+    "https://gh-proxy.com/https://github.com/Funnyrz/docklane/releases/download/v0.3.0/RELEASE-SHA256SUMS",
+    "https://gh-proxy.com/https://github.com/Funnyrz/docklane/releases/download/v0.3.0/LICENSE",
+    "https://gh-proxy.com/https://github.com/Funnyrz/docklane/releases/download/v0.3.0/SHA256SUMS",
+    "https://gh-proxy.com/https://github.com/Funnyrz/docklane/releases/download/v0.3.0/IMAGE-SHA256SUMS",
+    "https://gh-proxy.com/https://github.com/Funnyrz/docklane/releases/download/v0.3.0/IMAGES.txt",
+    "https://gh-proxy.com/https://github.com/Funnyrz/docklane/releases/download/v0.3.0/docker-manager-images.tar.gz",
+    "https://gh-proxy.com/https://github.com/Funnyrz/docklane/releases/download/v0.3.0/docker-manager-installation.tar.gz",
+    "https://gh-proxy.com/https://github.com/Funnyrz/docklane/releases/download/v0.3.0/docklane-v0.3.0-linux-arm64.tar.gz",
+    "https://gh-proxy.com/https://github.com/Funnyrz/docklane/releases/download/v0.3.0/docklane-v0.3.0-linux-arm64.tar.gz.sha256",
+    "https://gh-proxy.com/https://github.com/docker/compose/releases/download/v2.40.3/docker-compose-linux-aarch64",
+    "https://gh-proxy.com/https://github.com/docker/compose/releases/download/v2.40.3/checksums.txt",
+    "https://gh-proxy.com/https://github.com/restic/restic/releases/download/v0.19.1/restic_0.19.1_linux_arm64.bz2",
+    "https://gh-proxy.com/https://github.com/restic/restic/releases/download/v0.19.1/SHA256SUMS"
+  ],
+  "actual_latest_page_fallback": {
+    "routes": [
+      "https://gh-proxy.com/https://github.com/Funnyrz/docklane/releases/latest",
+      "https://ghfast.top/https://github.com/Funnyrz/docklane/releases/latest"
+    ],
+    "first_route_http_status": 403,
+    "canonical_final_url": "https://github.com/Funnyrz/docklane/releases/tag/v0.3.0"
+  },
+  "local_tests": {
+    "online": 48,
+    "lifecycle": 43,
+    "packaging": 12,
+    "release_preflight": 13,
+    "skipped": 1,
+    "skip_reason": "Linux-only lifecycle TIME_WAIT case on macOS; included by Linux CI",
+    "additional": [
+      "Shell syntax",
+      "Python compilation",
+      "actionlint",
+      "acceptance structure and 84 documentation links"
+    ]
+  },
+  "public_vm_repeat_install": {
+    "result": "passed",
+    "command": "set -o pipefail; curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --",
+    "bootstrap_sha256": "11cb35b6d72efdc222ef2622ac583b6bccdd9bb56456264b21423b6e029594c1",
+    "duration_seconds": 50.77,
+    "environment": "Native arm64 Ubuntu 24.04 isolated systemd VM; current development host network",
+    "checks": [
+      "public entrypoint equals reviewed source",
+      "literal public curl pipeline succeeds",
+      "existing Docker PID preserved",
+      "identical app PID and binary preserved",
+      "master.key preserved",
+      "service active",
+      "service enabled",
+      "healthz HTTP 200"
+    ],
+    "limitations": [
+      "Repeat installation on an existing v0.3.0 test installation, not a fresh install",
+      "Does not prove mainland ISP reachability or mainland access to official Docker apt repositories"
+    ]
+  },
+  "limitations": [
+    "Current host and local VM network, no independent mainland ISP measurement",
+    "Docker apt repository remains official; no mainland dependency-install guarantee",
+    "Project-owned short domain deferred by user; public third-party mirror availability can change",
+    "Published v0.3.0 Tag and assets were not modified"
+  ],
+  "ci": {
+    "url": "https://github.com/Funnyrz/docklane/actions/runs/39221537031",
+    "source_commit": "03760ee64c7f30baa5c2037453cb13c56b3651a2",
+    "checks_job": "success",
+    "docker_integration": "success",
+    "result": "success",
+    "jobs": [
+      "checks",
+      "Docker 29.5.2 / amd64",
+      "Docker 28.5.1 / arm64",
+      "Docker 29.5.2 / arm64",
+      "Docker 28.5.1 / amd64"
+    ]
+  },
+  "cleanup": {
+    "test_vm": "dm-online-public-ubuntu24-arm64",
+    "status": "Stopped",
+    "existing_application_and_data": "Preserved"
+  },
+  "completed_at": "2026-10-19T08:23:12.039431+00:00"
+}
