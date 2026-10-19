@@ -2,13 +2,15 @@
 
 ## 当前发布状态
 
-目前最新 Beta 为 [v0.3.1-beta.2 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2)。原 v0.3.0 Release 已撤回，当前没有正式 Release，也没有可用的正式版 latest 入口；正式通道需等待未来正式发布。当前安装请使用 [README 的一键安装命令](../README.md#一键在线安装推荐)。当前源码为 `0.3.1-beta.2`；无参数安装默认选择最新 Beta，并在修改系统前显示测试版警告。显式 `--channel stable` 仍请求正式版，当前会因暂无正式版而停止。v0.3.1-beta.2 的原生程序、在线与离线新装及 Docker 部署统一默认使用 9999 端口，已有配置保留原监听地址；附件在线脚本已包含默认 Beta 通道与安装进度提示。
+目前最新 Beta 为 [v0.3.2-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1)，当前源码版本为 `0.3.2-beta.1`。旧 v0.3.1-beta.1、v0.3.1-beta.2 的 Release、附件及远端 Tag 已撤回；v0.3.0 Release 也已撤回，但保留其 Tag。当前没有正式 Release 或正式版 latest，显式 `--channel stable` 会停止。当前安装请使用 [README 的一键安装命令](../README.md#一键在线安装推荐)，无参数默认选择最新 Beta，并在修改系统前显示测试版警告。
+
+本版服务、账号、目录、镜像和安装附件统一为 `docklane`，六附件为双架构 `docklane-v0.3.2-beta.1-linux-{amd64,arm64}.tar.gz`、`docklane-installation.tar.gz`、`docklane-images.tar.gz`、`install-online.sh` 和 `RELEASE-SHA256SUMS`。原生程序、在线与离线新装及 Docker 部署默认端口为 9999；随包在线脚本包含默认 Beta 通道与安装进度。旧 `docker-manager` 部署残留会导致安装停止，不自动更名或迁移。
 
 当前发布工作流支持仅有预发布版：正式版 latest 查询的实际 HTTP 404 表示尚无正式版；鉴权、限流和服务器错误仍中止。Beta 发布保持 `prerelease=true`、`latest=false`，不要求事先存在正式 Release。未来发布必须使用新版本及其精确 CI 提交，不重建已撤回的 v0.3.0 Release 或覆盖现有 Beta 产物。
 
 ## 历史发布与环境记录
 
-> 以下原有发布、CI、公开下载、latest 状态及清理描述均为相应测试/发布时刻的历史记录，保留用于追溯；它们不代表已撤回的 Release 现在仍可下载。原始 JSON、Tag 与历史验收记录未因本次撤回说明而改写。
+> 以下原有发布、CI、公开下载、latest 状态及清理描述均为相应测试/发布时刻的历史记录，保留用于追溯；它们不代表已撤回的 Release 现在仍可下载。旧 Beta Release、附件及远端 Tag 已撤回，历史链接可能失效；Git 提交及原始 JSON 验收记录保留。
 
 截至 2026-10-19，公开仓库 [Funnyrz/docklane](https://github.com/Funnyrz/docklane) 的首个正式版本 [v0.3.0](https://github.com/Funnyrz/docklane/releases/tag/v0.3.0) 已发布并设为 latest，默认分支为 `main`。Tag 与应用产物来源为 [3a53e098](https://github.com/Funnyrz/docklane/commit/3a53e0986eb4e84f355332974eb6662006673932)，精确提交的 [CI 39216500363](https://github.com/Funnyrz/docklane/actions/runs/39216500363) 和 [发布工作流 39217575907](https://github.com/Funnyrz/docklane/actions/runs/39217575907) 均成功。[公开 curl 验收](evidence/online-install/public-curl.json) 无传输 mock，已验证正式资产安装、重复执行及真实 VM 重启后自启，保留匿名 API 限流的原始失败记录。
 

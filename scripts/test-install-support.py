@@ -20,6 +20,8 @@ from unittest.mock import patch
 spec = importlib.util.spec_from_file_location('install_support', Path(__file__).with_name('install-support.py'))
 m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
+DEFAULT_PATHS = {name: getattr(m, name) for name in ('DATA', 'CONFIG', 'UNIT', 'BINARY', 'BACKUPS')}
+DEFAULT_LEGACY_PATHS = m.LEGACY_PATHS
 
 
 class LifecycleTests(unittest.TestCase):
@@ -32,11 +34,11 @@ class LifecycleTests(unittest.TestCase):
         (self.material / 'VERSION').write_text('0.3.0\n')
         self.example = {'version': 1, 'data_dir': str(self.root / 'managed-data'), 'listen': ':9999', 'mode': 'binary', 'allowed_paths': [], 'path_mappings': [], 'backup_temp_dir': '', 'restic_path': 'restic', 'compose_path': 'docker'}
         (self.material / 'deployments/config.example.json').write_text(json.dumps(self.example))
-        (self.material / 'deployments/docker-manager.service').write_text('test unit')
+        (self.material / 'deployments/docklane.service').write_text('test unit')
         (self.material / 'LICENSE').write_text('MIT')
         self.binary = self.root / 'candidate'
         self.binary.write_bytes(b'candidate')
-        for name, path in {'DATA': self.root / 'managed-data', 'CONFIG': self.root / 'config/config.json', 'BINARY': self.root / 'bin/docklane', 'UNIT': self.root / 'systemd/docker-manager.service', 'BACKUPS': self.root / 'backups', 'STATE': self.root / 'state/release.json', 'LICENSE': self.root / 'license/LICENSE'}.items():
+        for name, path in {'DATA': self.root / 'managed-data', 'CONFIG': self.root / 'config/config.json', 'BINARY': self.root / 'bin/docklane', 'UNIT': self.root / 'systemd/docklane.service', 'BACKUPS': self.root / 'backups', 'STATE': self.root / 'state/release.json', 'LICENSE': self.root / 'license/LICENSE'}.items():
             p = patch.object(m, name, path)
             p.start()
             self.addCleanup(p.stop)
@@ -46,10 +48,12 @@ class LifecycleTests(unittest.TestCase):
         patch.object(m.os, 'lchown').start()
         patch.object(m, 'account', return_value=(os.getuid(), os.getgid())).start()
         patch.object(m, 'service_context', return_value=None).start()
+        patch.object(m, 'refuse_legacy_installation').start()
+        patch.object(m, 'LEGACY_PATHS', ()).start()
         patch.object(m, 'check_port').start()
         patch.object(m, 'health_check').start()
         patch.object(m, 'check_external_paths').start()
-        patch.object(m, 'checked_worker_image', side_effect=lambda configured, version: 'docker-manager:' + version).start()
+        patch.object(m, 'checked_worker_image', side_effect=lambda configured, version: 'docklane:' + version).start()
         patch.object(m, 'service_groups', return_value=['docker']).start()
         self.args = argparse.Namespace(binary=str(self.binary), source_dir=str(self.material), version='v0.3.0', sha256=m.digest(self.binary), listen=None, migrate_from=None, config=None)
 
@@ -76,7 +80,7 @@ class LifecycleTests(unittest.TestCase):
         (self.material / 'web/package.json').write_text('{"version":"0.3.1-beta.10"}')
         self.assertEqual(m.material_version(self.material), 'v0.3.1-beta.10')
         (self.material / 'web/package.json').unlink()
-        self.assertEqual(m.material_version(self.material), 'v0.3.1-beta.2')
+        self.assertEqual(m.material_version(self.material), 'v0.3.2-beta.1')
 
     def test_numeric_version_order_places_stable_after_same_core_beta(self):
         self.assertGreater(m.version_key('v0.3.1-beta.10'), m.version_key('v0.3.1-beta.2'))
@@ -106,15 +110,103 @@ class LifecycleTests(unittest.TestCase):
 
     def test_beta_worker_default_with_architecture_tracks_selected_release(self):
         self.run.return_value = subprocess.CompletedProcess([], 0, 'sha256:' + 'a' * 64, '')
-        self.assertEqual(REAL_CHECK_WORKER('docker-manager:v0.3.1-beta.2-arm64', 'v0.3.1-beta.10'), 'docker-manager:v0.3.1-beta.10')
+        self.assertEqual(REAL_CHECK_WORKER('docklane:v0.3.1-beta.2-arm64', 'v0.3.1-beta.10'), 'docklane:v0.3.1-beta.10')
 
     def test_fresh_install_enables_health_and_tool_path_contract(self):
         self.deploy()
         self.assertEqual(m.BINARY.read_bytes(), b'candidate')
         self.assertEqual(json.loads(m.STATE.read_text())['version'], 'v0.3.0')
-        self.assertIn(unittest.mock.call(['systemctl', 'enable', '--now', 'docker-manager']), self.run.call_args_list)
+        self.assertIn(unittest.mock.call(['systemctl', 'enable', '--now', 'docklane']), self.run.call_args_list)
         m.health_check.assert_called_once_with(':9999')
         self.assertEqual(m.LICENSE.read_text(), 'MIT')
+
+    def test_standard_paths_unit_and_account_use_docklane(self):
+        self.assertEqual(DEFAULT_PATHS, {'DATA': Path('/var/lib/docklane'), 'CONFIG': Path('/etc/docklane/config.json'),
+                                       'UNIT': Path('/etc/systemd/system/docklane.service'), 'BINARY': Path('/usr/local/bin/docklane'),
+                                       'BACKUPS': Path('/var/backups/docklane')})
+        self.assertEqual((m.SERVICE, m.ACCOUNT), ('docklane', 'docklane'))
+        unit = (Path(__file__).resolve().parent.parent / 'deployments/docklane.service').read_text()
+        for line in ('User=docklane', 'Group=docklane', 'WorkingDirectory=/var/lib/docklane',
+                     'Environment=DM_CONFIG=/etc/docklane/config.json', 'ProtectHome=true', 'SendSIGKILL=no'):
+            self.assertIn(line, unit.splitlines())
+        with patch.object(m.grp, 'getgrnam', side_effect=[KeyError, unittest.mock.Mock(gr_gid=123)]), \
+                patch.object(m.pwd, 'getpwnam', side_effect=[KeyError, unittest.mock.Mock(pw_uid=124)]):
+            self.assertEqual(REAL_ACCOUNT(), (124, 123))
+        self.assertIn(unittest.mock.call(['groupadd', '--system', 'docklane']), self.run.call_args_list)
+        self.assertIn(unittest.mock.call(['useradd', '--system', '--gid', 'docklane', '--home-dir', str(m.DATA),
+                                         '--shell', '/usr/sbin/nologin', 'docklane']), self.run.call_args_list)
+
+    def test_legacy_files_and_broken_unit_links_are_preserved_without_deploy_mutation(self):
+        for kind in ('config', 'data', 'binary', 'unit', 'drop-in', 'broken-link'):
+            with self.subTest(kind=kind):
+                legacy = self.root / ('legacy-' + kind)
+                if kind in ('config', 'data', 'drop-in'):
+                    legacy.mkdir()
+                    (legacy / 'preserve').write_bytes(b'legacy state')
+                elif kind == 'broken-link':
+                    legacy.symlink_to(self.root / 'missing-unit')
+                else:
+                    legacy.write_bytes(b'legacy state')
+                self.run.reset_mock()
+                with patch.object(m, 'LEGACY_PATHS', (legacy,)), patch.object(m, 'refuse_legacy_installation', REAL_REFUSE_LEGACY):
+                    with self.assertRaisesRegex(m.InstallError, 'Legacy docker-manager'):
+                        self.deploy()
+                self.run.assert_not_called()
+                self.assertFalse(m.CONFIG.exists())
+                self.assertFalse(m.DATA.exists())
+                self.assertFalse(m.STATE.exists())
+                if kind == 'broken-link':
+                    self.assertTrue(legacy.is_symlink())
+                elif legacy.is_file():
+                    self.assertEqual(legacy.read_bytes(), b'legacy state')
+                else:
+                    self.assertEqual((legacy / 'preserve').read_bytes(), b'legacy state')
+
+    def test_loaded_or_stopped_legacy_unit_and_drop_ins_block_deploy(self):
+        for props in ('LoadState=loaded\nActiveState=inactive\n', 'LoadState=masked\n',
+                      'LoadState=not-found\nDropInPaths=/run/systemd/system/docker-manager.service.d/local.conf\n'):
+            with self.subTest(props=props):
+                self.run.return_value = subprocess.CompletedProcess([], 0, props, '')
+                self.run.reset_mock()
+                with patch.object(m, 'refuse_legacy_installation', REAL_REFUSE_LEGACY):
+                    with self.assertRaisesRegex(m.InstallError, 'Legacy docker-manager.service'):
+                        self.deploy()
+                self.assertEqual(self.run.call_count, 1)
+                self.assertFalse(m.BINARY.exists())
+                self.assertFalse(m.CONFIG.exists())
+
+    def test_unverifiable_legacy_state_fails_closed(self):
+        for status, props in ((1, ''), (0, ''), (0, 'FragmentPath=\n'), (1, 'failure'),
+                              (0, 'LoadState=\n'), (0, 'LoadState=not-found\nLoadState=not-found\n')):
+            with self.subTest(status=status, props=props):
+                self.run.return_value = subprocess.CompletedProcess([], status, props, 'systemd unavailable')
+                self.run.reset_mock()
+                with patch.object(m, 'refuse_legacy_installation', REAL_REFUSE_LEGACY):
+                    with self.assertRaisesRegex(m.InstallError, 'Cannot verify'):
+                        self.deploy()
+                self.assertEqual(self.run.call_count, 1)
+                self.assertFalse(m.BINARY.exists())
+                self.assertFalse(m.CONFIG.exists())
+                self.assertFalse(m.DATA.exists())
+                self.assertFalse(m.STATE.exists())
+        for status in (0, 1):
+            self.run.return_value = subprocess.CompletedProcess([], status, 'LoadState=not-found\n', '')
+            REAL_REFUSE_LEGACY()
+
+    def test_legacy_guard_paths_match_online_bootstrap(self):
+        expected = {Path('/etc/docker-manager'), Path('/var/lib/docker-manager'), Path('/var/backups/docker-manager'),
+                    Path('/usr/local/bin/docker-manager'), Path('/etc/systemd/system/multi-user.target.wants/docker-manager.service')}
+        expected |= {Path(root) / name for root in ('/etc/systemd/system', '/run/systemd/system', '/usr/lib/systemd/system', '/lib/systemd/system')
+                     for name in ('docker-manager.service', 'docker-manager.service.d')}
+        self.assertEqual(set(DEFAULT_LEGACY_PATHS), expected)
+
+    def test_new_beta_installation_records_version_and_canonical_worker(self):
+        (self.material / 'VERSION').write_text('0.3.2-beta.1\n')
+        self.args.version = 'v0.3.2-beta.1'
+        self.deploy()
+        self.assertEqual(json.loads(m.CONFIG.read_text())['backup_worker_image'], 'docklane:v0.3.2-beta.1')
+        self.assertEqual(json.loads(m.STATE.read_text())['version'], self.args.version)
+        self.assertEqual(m.material_version(self.material), self.args.version)
 
     def test_environment_and_relative_paths(self):
         config = self.root / 'old.json'
@@ -152,7 +244,7 @@ class LifecycleTests(unittest.TestCase):
         self.assertEqual(result['backup_temp_dir'], str(self.root / 'cache'))
         self.assertEqual(result['listen'], ':9999')
         self.assertEqual(result['allowed_paths'], [])
-        self.assertEqual(result['backup_worker_image'], 'docker-manager:v0.3.0')
+        self.assertEqual(result['backup_worker_image'], 'docklane:v0.3.0')
         self.assertFalse(result['enable_daemon_write'])
 
     def test_live_default_data_is_resolved_against_verified_process_cwd(self):
@@ -312,7 +404,7 @@ class LifecycleTests(unittest.TestCase):
 
     def test_standard_worker_is_updated_to_selected_release(self):
         self.run.return_value = subprocess.CompletedProcess([], 0, 'sha256:' + 'a' * 64 + '\n', '')
-        self.assertEqual(REAL_CHECK_WORKER('docker-manager:v0.2.0', 'v0.3.0'), 'docker-manager:v0.3.0')
+        self.assertEqual(REAL_CHECK_WORKER('docklane:v0.2.0', 'v0.3.0'), 'docklane:v0.3.0')
 
     def test_custom_worker_requires_same_image_identity(self):
         self.run.side_effect = [subprocess.CompletedProcess([], 0, 'sha256:' + 'a' * 64, ''), subprocess.CompletedProcess([], 0, 'sha256:' + 'b' * 64, '')]
@@ -324,7 +416,7 @@ class LifecycleTests(unittest.TestCase):
     def test_missing_selected_worker_refused_before_deploy(self):
         self.run.return_value = subprocess.CompletedProcess([], 1, '', 'image missing')
         with self.assertRaisesRegex(m.InstallError, 'unavailable'):
-            REAL_CHECK_WORKER('docker-manager:v0.2.0', 'v0.3.0')
+            REAL_CHECK_WORKER('docklane:v0.2.0', 'v0.3.0')
 
     def test_nonlocal_engine_refused_before_source_stop_or_config_write(self):
         old = self.root / 'data'
@@ -357,6 +449,52 @@ class LifecycleTests(unittest.TestCase):
         self.assertEqual((m.DATA / 'master.key').read_bytes(), b'k' * 32)
         self.assertTrue(next(m.BACKUPS.iterdir()).joinpath('data/master.key').is_file())
 
+    def test_uninstall_unknown_service_or_changed_binary_removes_nothing(self):
+        self.deploy()
+        self.db(m.DATA).close()
+        before = {path: path.read_bytes() for path in (m.BINARY, m.UNIT, m.STATE, m.CONFIG, m.DATA / 'master.key')}
+        self.run.reset_mock()
+        with self.assertRaisesRegex(m.InstallError, 'No recognized managed'):
+            m._uninstall_locked()
+        self.run.assert_not_called()
+        with patch.object(m, 'service_context', return_value=({}, m.DATA, 0)), patch.object(Path, 'stat', root_owned_stat):
+            m.STATE.chmod(0o600)
+            m.BINARY.write_bytes(b'unrelated replacement binary')
+            before[m.BINARY] = m.BINARY.read_bytes()
+            with self.assertRaisesRegex(m.InstallError, 'does not match'):
+                m._uninstall_locked()
+        self.run.assert_not_called()
+        for path, content in before.items():
+            self.assertEqual(path.read_bytes(), content)
+
+    def test_uninstall_only_removes_matching_docklane_unit_and_binary(self):
+        self.deploy()
+        self.db(m.DATA).close()
+        before = {path: path.read_bytes() for path in (m.STATE, m.CONFIG, m.DATA / 'master.key')}
+        self.run.reset_mock()
+        self.run.return_value = subprocess.CompletedProcess([], 0, '0\n', '')
+        with patch.object(m, 'service_context', return_value=({}, m.DATA, 0)), patch.object(Path, 'stat', root_owned_stat):
+            m.STATE.chmod(0o600)
+            with contextlib.redirect_stdout(io.StringIO()):
+                m._uninstall_locked()
+        self.assertFalse(m.BINARY.exists())
+        self.assertFalse(m.UNIT.exists())
+        self.assertEqual(self.run.call_args_list, [unittest.mock.call(['systemctl', 'disable', '--now', 'docklane']),
+                                                unittest.mock.call(['systemctl', 'show', 'docklane', '--property=MainPID', '--value']),
+                                                unittest.mock.call(['systemctl', 'daemon-reload'])])
+        for path, content in before.items():
+            self.assertEqual(path.read_bytes(), content)
+
+    def test_uninstall_does_not_remove_binary_after_unconfirmed_stop(self):
+        self.deploy()
+        self.run.return_value = subprocess.CompletedProcess([], 0, '123\n', '')
+        with patch.object(m, 'service_context', return_value=({}, m.DATA, 123)), patch.object(Path, 'stat', root_owned_stat):
+            m.STATE.chmod(0o600)
+            with self.assertRaisesRegex(m.InstallError, 'graceful stop'):
+                m._uninstall_locked()
+        self.assertTrue(m.UNIT.is_file())
+        self.assertTrue(m.BINARY.is_file())
+
     def test_upgrade_backs_up_effective_custom_directory(self):
         data = self.root / 'custom-data'
         self.db(data).close()
@@ -382,7 +520,7 @@ class LifecycleTests(unittest.TestCase):
         m.health_check.side_effect = m.InstallError('unhealthy')
         with self.assertRaisesRegex(m.InstallError, 'unhealthy'):
             self.deploy()
-        self.assertIn(unittest.mock.call(['systemctl', 'stop', 'docker-manager'], check=False), self.run.call_args_list)
+        self.assertIn(unittest.mock.call(['systemctl', 'stop', 'docklane'], check=False), self.run.call_args_list)
         self.assertTrue(next(m.BACKUPS.iterdir()).joinpath('data/master.key').is_file())
         self.assertTrue((old / 'master.key').is_file())
 
@@ -556,10 +694,10 @@ class LifecycleTests(unittest.TestCase):
         self.assertTrue(all(call.args[0][0] == 'runuser' for call in self.run.call_args_list))
 
     def test_service_groups_preserve_existing_memberships_and_add_docker(self):
-        groups = {100: unittest.mock.Mock(gr_name='docker-manager'), 101: unittest.mock.Mock(gr_name='backup-read'),
+        groups = {100: unittest.mock.Mock(gr_name='docklane'), 101: unittest.mock.Mock(gr_name='backup-read'),
                   102: unittest.mock.Mock(gr_name='docker')}
-        with patch.object(m.grp, 'getgrnam', side_effect=lambda name: unittest.mock.Mock(gr_gid=100 if name == 'docker-manager' else 102)), patch.object(m.grp, 'getgrgid', side_effect=groups.__getitem__), patch.object(m.os, 'getgrouplist', return_value=[100, 101]):
-            self.assertEqual(REAL_SERVICE_GROUPS(), ['backup-read', 'docker', 'docker-manager'])
+        with patch.object(m.grp, 'getgrnam', side_effect=lambda name: unittest.mock.Mock(gr_gid=100 if name == 'docklane' else 102)), patch.object(m.grp, 'getgrgid', side_effect=groups.__getitem__), patch.object(m.os, 'getgrouplist', return_value=[100, 101]):
+            self.assertEqual(REAL_SERVICE_GROUPS(), ['backup-read', 'docker', 'docklane'])
 
     def test_real_subprocess_runuser_receives_repeated_group_options(self):
         commands = self.root / 'commands'
@@ -570,13 +708,13 @@ class LifecycleTests(unittest.TestCase):
                         'import json,os,sys\n'
                         'args=sys.argv[1:]\n'
                         'groups=[args[i+1] for i,arg in enumerate(args) if arg=="-G"]\n'
-                        'assert groups==["backup-read","docker","docker-manager"], groups\n'
+                        'assert groups==["backup-read","docker","docklane"], groups\n'
                         'assert not any("," in group for group in groups), groups\n'
-                        'assert args[:4]==["-u","docker-manager","-g","docker-manager"]\n'
+                        'assert args[:4]==["-u","docklane","-g","docklane"]\n'
                         'assert args[-4:][0:2]==["--","test"]\n'
                         'with open(os.environ["DM_GROUP_TEST_TRACE"],"a") as f: f.write(json.dumps(args)+"\\n")\n')
         fake.chmod(0o755)
-        with patch.object(m, 'run', new=REAL_RUN), patch.object(m, 'service_groups', return_value=['backup-read', 'docker', 'docker-manager']), patch.dict(os.environ, {'PATH': str(commands) + os.pathsep + os.environ['PATH'], 'DM_GROUP_TEST_TRACE': str(trace)}):
+        with patch.object(m, 'run', new=REAL_RUN), patch.object(m, 'service_groups', return_value=['backup-read', 'docker', 'docklane']), patch.dict(os.environ, {'PATH': str(commands) + os.pathsep + os.environ['PATH'], 'DM_GROUP_TEST_TRACE': str(trace)}):
             m.check_docker_socket()
         lines = [json.loads(line) for line in trace.read_text().splitlines()]
         self.assertEqual(len(lines), 2)
@@ -628,5 +766,14 @@ REAL_HEALTH_CHECK = m.health_check
 REAL_CHECK_WORKER = m.checked_worker_image
 REAL_SERVICE_GROUPS = m.service_groups
 REAL_RUN = m.run
+REAL_REFUSE_LEGACY = m.refuse_legacy_installation
+REAL_ACCOUNT = m.account
+REAL_PATH_STAT = Path.stat
+
+
+def root_owned_stat(path, *args, **kwargs):
+    values = list(REAL_PATH_STAT(path, *args, **kwargs))
+    values[4] = 0
+    return os.stat_result(values)
 if __name__ == '__main__':
     unittest.main()

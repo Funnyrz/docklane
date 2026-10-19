@@ -60,7 +60,7 @@ def checksum_manifest(root, manifest, required):
 
 def release_assets(tag):
     return {f"docklane-{tag}-linux-{arch}.tar.gz" for arch in ("amd64", "arm64")} | {
-        "docker-manager-installation.tar.gz", "docker-manager-images.tar.gz", "install-online.sh"}
+        "docklane-installation.tar.gz", "docklane-images.tar.gz", "install-online.sh"}
 
 
 def parsed_manifest(content):
@@ -123,13 +123,13 @@ def validate_candidate(directory, tag, expected_sha=None):
     for name, value in sums.items():
         if file_digest(directory / name) != value:
             raise ValueError('Checksum mismatch: ' + name)
-    with tarfile.open(directory / 'docker-manager-installation.tar.gz', 'r:gz') as archive:
+    with tarfile.open(directory / 'docklane-installation.tar.gz', 'r:gz') as archive:
         members = archive_members(archive)
         metadata = {name: member_bytes(archive, members, name) for name in (
             'VERSION', 'SHA256SUMS', 'IMAGE-SHA256SUMS', 'IMAGES.txt', 'TOOL-VERSIONS.txt',
             'release-ci-evidence.json', 'SECURITY-NOTES.md', 'LICENSE', 'scripts/install-online.sh',
             'scripts/install-support.py', 'scripts/install.sh', 'scripts/upgrade.sh',
-            'scripts/uninstall.sh', 'deployments/docker-manager.service', 'deployments/config.example.json')}
+            'scripts/uninstall.sh', 'deployments/docklane.service', 'deployments/config.example.json')}
     if metadata['VERSION'] != (tag[1:] + '\n').encode():
         raise ValueError('Installation VERSION disagrees with release tag')
     if metadata['scripts/install-online.sh'] != (directory / 'install-online.sh').read_bytes():
@@ -168,10 +168,10 @@ def validate_candidate(directory, tag, expected_sha=None):
             if value.hexdigest() != binary_sums['docklane-linux-' + arch]:
                 raise ValueError('Internal binary checksum mismatch: ' + arch)
     image_sums = parsed_manifest(metadata['IMAGE-SHA256SUMS'])
-    if image_sums != {'docker-manager-images.tar.gz': sums['docker-manager-images.tar.gz']}:
+    if image_sums != {'docklane-images.tar.gz': sums['docklane-images.tar.gz']}:
         raise ValueError('Internal image checksum manifest mismatch')
     image_lines = metadata['IMAGES.txt'].decode().splitlines()
-    wanted = {f'docker-manager:{tag}-{arch}': arch for arch in ('amd64', 'arm64')}
+    wanted = {f'docklane:{tag}-{arch}': arch for arch in ('amd64', 'arm64')}
     seen = {}
     for line in image_lines:
         match = re.fullmatch(r'\[([^]]+)\] sha256:[a-f0-9]{64} linux/(amd64|arm64)', line)
@@ -198,7 +198,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=pathlib.Path, default=pathlib.Path(__file__).resolve().parents[1])
     parser.add_argument("--repo", help="Explicit GitHub OWNER/REPO, otherwise inspect origin")
-    parser.add_argument("--tag", help="Exact release tag, for example v0.3.1-beta.2")
+    parser.add_argument("--tag", help="Exact release tag, for example v0.3.2-beta.1")
     parser.add_argument("--registry", help="Optional future GHCR destination; not required or published by the archive-based release")
     parser.add_argument("--artifacts", type=pathlib.Path, help="Prepared candidate directory; defaults to ROOT/bin/release")
     parser.add_argument("--online", action="store_true", help="Read GitHub account, repo settings, CI and tag using gh; never write")

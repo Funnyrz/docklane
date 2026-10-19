@@ -28,11 +28,11 @@ import time
 import urllib.request
 
 LABEL = "io.docker-manager.platform-acceptance"
-DATA = pathlib.Path("/var/lib/docker-manager")
-CONFIG = pathlib.Path("/etc/docker-manager")
+DATA = pathlib.Path("/var/lib/docklane")
+CONFIG = pathlib.Path("/etc/docklane")
 INSTALLED = pathlib.Path("/usr/local/bin/docklane")
 LEGACY_INSTALLED = pathlib.Path("/usr/local/bin/docker-manager")
-UNIT = pathlib.Path("/etc/systemd/system/docker-manager.service")
+UNIT = pathlib.Path("/etc/systemd/system/docklane.service")
 
 
 def stamp():
@@ -239,25 +239,25 @@ class Acceptance:
         return dict(expected, original_container_id=fixture["writer"], restored_sha256=fixture["payload_sha256"])
 
     def unit_state(self):
-        output = self.command("systemctl", "show", "docker-manager", "--property=ActiveState,SubState,UnitFileState,MainPID,User,Group,FragmentPath").stdout.decode()
+        output = self.command("systemctl", "show", "docklane", "--property=ActiveState,SubState,UnitFileState,MainPID,User,Group,FragmentPath").stdout.decode()
         return dict(line.split("=", 1) for line in output.splitlines() if "=" in line)
 
     def prepare(self):
         self.check(not self.control, "prepare already has state; use resume or cleanup")
         for path in (DATA, CONFIG, INSTALLED, LEGACY_INSTALLED, UNIT):
             self.check(not path.exists(), "refusing existing installation path: " + str(path))
-        self.check(self.command("systemctl", "cat", "docker-manager", allow_failure=True).returncode != 0, "refusing an existing service")
+        self.check(self.command("systemctl", "cat", "docklane", allow_failure=True).returncode != 0, "refusing an existing service")
         with socket.socket() as probe:
             probe.bind(("127.0.0.1", 8080))
         self.new_control()
-        self.control["account_created"] = self.command("getent", "passwd", "docker-manager", allow_failure=True).returncode != 0
+        self.control["account_created"] = self.command("getent", "passwd", "docklane", allow_failure=True).returncode != 0
         fixture = self.fixture("binary", self.state / "fixture")
         self.control["installation_owned"] = True
         self.control["prepare_process"] = self.process_identity()
         self.save()
         self.command("sh", str(self.args.source / "scripts/install.sh"), str(self.args.binary), timeout=180)
-        self.command("systemctl", "stop", "docker-manager", timeout=200)
-        account = pwd.getpwnam("docker-manager")
+        self.command("systemctl", "stop", "docklane", timeout=200)
+        account = pwd.getpwnam("docklane")
         os.chown(self.state, 0, account.pw_gid)
         self.state.chmod(0o750)
         for path in [pathlib.Path(fixture["directory"]), *pathlib.Path(fixture["directory"]).rglob("*")]:
@@ -267,7 +267,7 @@ class Acceptance:
                       compose_path=shutil.which("docker"), restic_path=shutil.which("restic"),
                       enable_daemon_write=False, session_secure=False)
         (CONFIG / "config.json").write_text(json.dumps(config, indent=2) + "\n")
-        self.command("systemctl", "start", "docker-manager", timeout=60)
+        self.command("systemctl", "start", "docklane", timeout=60)
         base = "http://127.0.0.1:8080"
         self.wait_api(base)
         api = self.client(base, "binary")
@@ -285,9 +285,9 @@ class Acceptance:
                 "config": sha(CONFIG / "config.json"), "binary": sha(INSTALLED), "unit": sha(UNIT)}
 
     def run_upgrade(self, binary, expect_failure=False):
-        self.command("systemctl", "stop", "docker-manager", timeout=200)
+        self.command("systemctl", "stop", "docklane", timeout=200)
         fingerprints = self.fingerprints()
-        backup_root = pathlib.Path("/var/backups/docker-manager")
+        backup_root = pathlib.Path("/var/backups/docklane")
         before = set(backup_root.iterdir()) if backup_root.exists() else set()
         result = self.command("sh", str(self.args.source / "scripts/upgrade.sh"), str(binary), timeout=200, allow_failure=expect_failure)
         self.check((result.returncode != 0) == expect_failure, "upgrade exit result differs from expected real outcome")
@@ -299,11 +299,11 @@ class Acceptance:
         self.save()
         matching = {"database": sha(backup / "data/docker-manager.db"), "master_key": sha(backup / "data/master.key"),
                     "config": sha(backup / "config/config.json"), "binary": sha(backup / "docklane"),
-                    "unit": sha(backup / "docker-manager.service")}
+                    "unit": sha(backup / "docklane.service")}
         self.check(matching == fingerprints, "upgrade backup is not the matching stopped database/key/config/binary group")
         self.check(backup.stat().st_mode & 0o077 == 0, "upgrade backup exposes credentials")
         if expect_failure:
-            self.check(self.command("systemctl", "is-active", "--quiet", "docker-manager", allow_failure=True).returncode != 0,
+            self.check(self.command("systemctl", "is-active", "--quiet", "docklane", allow_failure=True).returncode != 0,
                        "failed upgrade left service active")
             self.check(self.unit_state()["MainPID"] == "0", "failed upgrade did not stop service")
         else:
@@ -317,10 +317,10 @@ class Acceptance:
         original = self.control["prepare_process"]
         self.check(current["boot_id"] != original["boot_id"] or current["pid1_start_ticks"] != original["pid1_start_ticks"],
                    "resume requires an actual guest/PID1 restart; service-only restart is insufficient")
-        self.check(self.command("systemctl", "is-enabled", "--quiet", "docker-manager", allow_failure=True).returncode == 0,
+        self.check(self.command("systemctl", "is-enabled", "--quiet", "docklane", allow_failure=True).returncode == 0,
                    "service is not enabled after guest restart")
         self.wait_api(self.control["binary_base"])
-        self.check(self.command("systemctl", "is-active", "--quiet", "docker-manager", allow_failure=True).returncode == 0,
+        self.check(self.command("systemctl", "is-active", "--quiet", "docklane", allow_failure=True).returncode == 0,
                    "systemd failed to start service automatically")
         api = self.client(self.control["binary_base"], "binary", True)
         retained = self.verify_api(api, "binary")
@@ -343,10 +343,10 @@ class Acceptance:
         self.command("cp", "-a", str(backup / "data"), str(DATA))
         self.command("cp", "-a", str(backup / "config"), str(CONFIG))
         self.command("cp", "-a", str(backup / "docklane"), str(INSTALLED))
-        self.command("cp", "-a", str(backup / "docker-manager.service"), str(UNIT))
+        self.command("cp", "-a", str(backup / "docklane.service"), str(UNIT))
         self.command("systemctl", "daemon-reload")
-        self.command("systemctl", "reset-failed", "docker-manager")
-        self.command("systemctl", "start", "docker-manager", timeout=60)
+        self.command("systemctl", "reset-failed", "docklane")
+        self.command("systemctl", "start", "docklane", timeout=60)
         self.wait_api(self.control["binary_base"])
         retained = self.verify_api(api, "binary")
         self.check(sha(DATA / "master.key") == self.control["master_key_sha256"], "matching-group rollback changed key")
@@ -399,7 +399,7 @@ class Acceptance:
         self.wait_api(self.control["binary_base"])
         api = self.client(self.control["binary_base"], "binary", True)
         self.verify_api(api, "binary")
-        self.command("systemctl", "stop", "docker-manager", timeout=200)
+        self.command("systemctl", "stop", "docklane", timeout=200)
         # An actual SQLite BEFORE INSERT abort hits Open's migration transaction,
         # even for INSERT OR IGNORE of the already applied version. This tests a
         # real SQL failure without inventing a historical business release.
@@ -409,7 +409,7 @@ class Acceptance:
                              "BEGIN SELECT RAISE(ABORT,'" + injection + "'); END")
         database.close()
         failed = self.run_upgrade(self.args.binary, True)
-        journal = self.command("journalctl", "-u", "docker-manager", "--no-pager", "-n", "50").stdout.decode(errors="replace")
+        journal = self.command("journalctl", "-u", "docklane", "--no-pager", "-n", "50").stdout.decode(errors="replace")
         self.check(injection in journal, "new executable did not reach the injected migration SQL failure")
         with sqlite3.connect(DATA / "docker-manager.db") as database:
             versions = database.execute("SELECT version FROM schema_migrations ORDER BY version").fetchall()
@@ -427,10 +427,10 @@ class Acceptance:
         with sqlite3.connect(DATA / "docker-manager.db") as database:
             database.execute("DROP TRIGGER dm_acceptance_abort")
         database.close()
-        self.command("cp", "-a", str(backup / "docker-manager.service"), str(UNIT))
+        self.command("cp", "-a", str(backup / "docklane.service"), str(UNIT))
         self.command("systemctl", "daemon-reload")
-        self.command("systemctl", "reset-failed", "docker-manager")
-        self.command("systemctl", "start", "docker-manager", timeout=60)
+        self.command("systemctl", "reset-failed", "docklane")
+        self.command("systemctl", "start", "docklane", timeout=60)
         self.wait_api(self.control["binary_base"])
         retained = self.verify_api(api, "binary")
         self.check(sha(DATA / "master.key") == self.control["master_key_sha256"], "migration recovery changed encryption key")
@@ -480,7 +480,7 @@ class Acceptance:
                     shutil.rmtree(path)
             for saved in self.control.get("backups", []):
                 path = pathlib.Path(saved)
-                self.check(path.parent == pathlib.Path("/var/backups/docker-manager") and re.fullmatch(r"\d{8}T\d{6}Z", path.name), "unowned backup cleanup path")
+                self.check(path.parent == pathlib.Path("/var/backups/docklane") and re.fullmatch(r"\d{8}T\d{6}Z", path.name), "unowned backup cleanup path")
                 if path.exists():
                     shutil.rmtree(path)
         ids = self.dc("ps", "--all", "--quiet", "--no-trunc", "--filter", "label=" + LABEL + "=" + self.control["token"]).stdout.decode().split()
@@ -498,8 +498,8 @@ class Acceptance:
             if path.exists():
                 shutil.rmtree(path)
         if self.control.get("account_created"):
-            self.command("userdel", "docker-manager", allow_failure=True)
-            self.command("groupdel", "docker-manager", allow_failure=True)
+            self.command("userdel", "docklane", allow_failure=True)
+            self.command("groupdel", "docklane", allow_failure=True)
         for path in [self.secrets_path, *self.state.glob("*-cookies.txt"), self.state / "invalid-new-binary"]:
             path.unlink(missing_ok=True)
         self.control["cleaned"] = True
@@ -515,7 +515,7 @@ class Acceptance:
             self.phase["status"] = "failed"
             self.phase["error"] = self.helper.clean_message(error)
             if self.control.get("installation_owned"):
-                self.phase["journal"] = self.helper.clean_message(self.command("journalctl", "-u", "docker-manager", "--no-pager", "-n", "30", allow_failure=True).stdout.decode(errors="replace"))
+                self.phase["journal"] = self.helper.clean_message(self.command("journalctl", "-u", "docklane", "--no-pager", "-n", "30", allow_failure=True).stdout.decode(errors="replace"))
             raise
         finally:
             self.phase["finished_at"] = stamp()
@@ -533,7 +533,7 @@ def main():
     parser.add_argument("--state", type=pathlib.Path, required=True)
     parser.add_argument("--source", type=pathlib.Path, required=True)
     parser.add_argument("--binary", type=pathlib.Path, required=True)
-    parser.add_argument("--image", default="docker-manager:v0.3.0")
+    parser.add_argument("--image", default="docklane:v0.3.2-beta.1")
     parser.add_argument("--fixture-image", default="busybox:1.37.0")
     parser.add_argument("--report", type=pathlib.Path, required=True)
     args = parser.parse_args()

@@ -6,7 +6,7 @@ on:
       release_tag:
         description: 'Existing stable or beta.N tag matching the source package version and successful CI'
         required: true
-        default: v0.3.1-beta.2
+        default: v0.3.2-beta.1
         type: string
       publish:
         description: 'Publish a new release only after the candidate has passed all checks'
@@ -102,7 +102,7 @@ jobs:
       - name: Upload reviewable artifacts only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: docker-manager-${{ inputs.release_tag }}-candidate-${{ github.run_id }}
+          name: docklane-${{ inputs.release_tag }}-candidate-${{ github.run_id }}
           path: bin/release/
           if-no-files-found: error
           retention-days: 14
@@ -124,7 +124,7 @@ jobs:
       - name: Download the candidate from this run
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: docker-manager-${{ inputs.release_tag }}-candidate-${{ github.run_id }}
+          name: docklane-${{ inputs.release_tag }}-candidate-${{ github.run_id }}
           path: candidate
       - name: Validate candidate, stage draft, verify uploaded bytes, then publish
         env:
@@ -221,6 +221,9 @@ jobs:
           Installation shows eight stages, download files/source attempts and a real progress bar in interactive terminals.
           已有配置的监听地址会保留；需要切换时显式追加 `--listen :9999`。
           Existing configured listeners are preserved; append `--listen :9999` to change an existing installation.
+          服务、账号、标准目录、镜像和附件名称统一为 docklane；旧 docker-manager 部署需自行清理，安装器不会覆盖或自动迁移。
+          Service, account, standard directories, images and assets use docklane; legacy deployments are refused without overwrite or automatic migration.
+          Service: `docklane.service`; config: `/etc/docklane/config.json`; data: `/var/lib/docklane`.
           This beta does not create or replace a stable release.
 
           ```sh
@@ -228,7 +231,7 @@ jobs:
           ```
 
           Download assets from this same release and verify `RELEASE-SHA256SUMS` before offline use.
-          Worker archive tags: `docker-manager:{tag}-amd64` and `docker-manager:{tag}-arm64`.
+          Worker archive tags: `docklane:{tag}-amd64` and `docklane:{tag}-arm64`.
           See the installation archive's README and SECURITY-NOTES.md for migration, backup and permissions.
 
           Source commit: {sha}

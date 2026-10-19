@@ -2,7 +2,7 @@
 
 > This program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use.
 
-The current source version is [v0.3.1-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2), also the newest beta prerelease. The old v0.3.0 Release has been withdrawn and no formal release is currently available. The stable channel is unavailable until a future formal release. Online installation without parameters defaults to the newest beta and displays the testing-only, no-production warning before making system changes. You can still explicitly select `--channel beta` or pin a version.
+The current source version is [v0.3.2-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1), also the newest beta prerelease. The v0.3.1-beta.1 and v0.3.1-beta.2 Releases, attachments and remote tags have been withdrawn. The old v0.3.0 Release has also been withdrawn and no formal release is currently available. The stable channel is unavailable until a future formal release. Online installation without parameters defaults to the newest beta and displays the testing-only, no-production warning before making system changes. You can still explicitly select `--channel beta` or pin a version.
 
 **Your containers. Under control.**
 
@@ -86,9 +86,11 @@ The Docker image includes Docker CLI, Compose and Restic. The online installer p
 
 ## Deployment
 
-### Product name and upgrade compatibility
+### Deployment names and installation boundaries
 
-**The product is Docklane, and its executable is `docklane`.** For upgrade compatibility, the systemd service and account, image tags, configuration and data directories, Go module, `DM_*` environment variables and browser storage keys retain their existing technical identifiers. Installation/upgrade scripts install the new binary as `docklane` while retaining the `docker-manager` service and existing data.
+**The product is Docklane; the command, systemd service and dedicated account are all `docklane`.** Configuration, application data and installation backups use `/etc/docklane`, `/var/lib/docklane` and `/var/backups/docklane`. The image, Compose service and data volume use `docklane`, `docklane` and `docklane-data`. The Go module, `DM_*` environment variables, browser storage keys, HTTP API, database and encryption formats retain their existing compatibility identifiers.
+
+This release targets fresh installations and does not automatically rename or migrate old `docker-manager` deployments. The installer stops clearly when it finds an old service, configuration or data footprint, without overwriting or deleting it. The `--migrate-from` option below is only for an explicitly selected, general manually started Docklane instance; it does not bypass legacy deployment checks.
 
 ### One-command online installation (recommended)
 
@@ -108,7 +110,7 @@ These entrypoints use public third-party services and cannot guarantee access fr
 
 Installation shows eight stages and the current download, source and retry attempt. Interactive terminals also show a real download progress bar; redirected logs use plain text.
 
-These commands select the newest published beta, or pin a version with `--version` (currently [v0.3.1-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2)), using release metadata and verify asset SHA-256 checksums, architecture and archive paths. The installer installs `/usr/local/bin/docklane`, creates a dedicated account and `docker-manager.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. New installations listen on `:9999` by default; the script does not change firewall rules. Existing configurations retain their listener. Append `--listen :9999` to the installation command to change an existing installation to port 9999.
+These commands select the newest published beta, or pin a version with `--version` (currently [v0.3.2-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1)), using release metadata and verify asset SHA-256 checksums, architecture and archive paths. The installer installs `/usr/local/bin/docklane`, creates a dedicated account and `docklane.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. New installations listen on `:9999` by default; the script does not change firewall rules. Existing configurations retain their listener. Append `--listen :9999` to the installation command to change an existing installation to port 9999.
 
 Beta installation requires available GitHub API metadata. If the API is unreachable or rate-limited, installation stops safely and asks you to retry later; beta status is never inferred from HTML. No Release is currently available for the stable channel.
 
@@ -118,7 +120,7 @@ Choose a version and listener, or preview the actions first:
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --channel beta --version v0.3.1-beta.2 --listen :9999 --dry-run
+  | sudo bash -s -- --channel beta --version v0.3.2-beta.1 --listen :9999 --dry-run
 ```
 
 A configuration supplied with `--config` that sets `listen` retains that address unless `--listen` overrides it. Remove `--dry-run` to install; use `--help` for parameters. Repeated execution preserves configuration and data, and skips replacing an identical binary with the same version and checksum. A version change stops the service and creates a backup before upgrading. Explicitly migrate an existing manually started instance rather than treating it as a fresh installation:
@@ -131,11 +133,11 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
 Add `--config /absolute/path/config.json` if the old startup configuration or listener cannot be established reliably. Set `listen` to the old instance’s effective address; migration does not automatically change it to port 9999. Migration needs downtime and retains both the complete source data and a matching database/key backup. External business paths still need access for the dedicated account. The service retains `ProtectHome=true`; move Compose projects, repositories or backup sources under home directories to suitable authorized locations first. See [migration and recovery](docs/operations.md#手动实例迁移).
 
 ```sh
-sudo systemctl status docker-manager       # Inspect service state
-sudo journalctl -u docker-manager -f        # Follow logs
-sudo systemctl restart docker-manager      # Restart
-sudo systemctl stop docker-manager         # Stop
-sudo systemctl disable docker-manager      # Disable startup at boot
+sudo systemctl status docklane       # Inspect service state
+sudo journalctl -u docklane -f        # Follow logs
+sudo systemctl restart docklane      # Restart
+sudo systemctl stop docklane         # Stop
+sudo systemctl disable docklane      # Disable startup at boot
 ```
 
 ### Beta prerelease installation and downloads
@@ -144,17 +146,17 @@ For learning and testing only. Select the published beta channel or pin this ver
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.1-beta.2
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.2-beta.1
 ```
 
 The beta Release has exactly six attachments; `RELEASE-SHA256SUMS` covers the other five:
 
 | Attachment | Contents |
 | --- | --- |
-| `docklane-v0.3.1-beta.2-linux-amd64.tar.gz` | amd64 `docklane` and `LICENSE` |
-| `docklane-v0.3.1-beta.2-linux-arm64.tar.gz` | arm64 `docklane` and `LICENSE` |
-| `docker-manager-installation.tar.gz` | Installation scripts, configuration and documentation; root-level `VERSION`, license, internal binary/image checksums, `IMAGES.txt`, tool versions and CI evidence |
-| `docker-manager-images.tar.gz` | Application and backup worker images for both architectures |
+| `docklane-v0.3.2-beta.1-linux-amd64.tar.gz` | amd64 `docklane` and `LICENSE` |
+| `docklane-v0.3.2-beta.1-linux-arm64.tar.gz` | arm64 `docklane` and `LICENSE` |
+| `docklane-installation.tar.gz` | Installation scripts, configuration and documentation; root-level `VERSION`, license, internal binary/image checksums, `IMAGES.txt`, tool versions and CI evidence |
+| `docklane-images.tar.gz` | Application and backup worker images for both architectures |
 | `install-online.sh` | Version-matched online entrypoint |
 | `RELEASE-SHA256SUMS` | Top-level attachment SHA-256 manifest |
 
@@ -162,25 +164,25 @@ Offline systemd installation requires the Docker, Compose, Restic, Python and ac
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.1-beta.2-linux-amd64.tar.gz
-tar -xzf docker-manager-installation.tar.gz
+tar -xzf docklane-v0.3.2-beta.1-linux-amd64.tar.gz
+tar -xzf docklane-installation.tar.gz
 sha256sum --check IMAGE-SHA256SUMS
-sudo docker load -i docker-manager-images.tar.gz
-sudo docker tag docker-manager:v0.3.1-beta.2-amd64 docker-manager:v0.3.1-beta.2
+sudo docker load -i docklane-images.tar.gz
+sudo docker tag docklane:v0.3.2-beta.1-amd64 docklane:v0.3.2-beta.1
 sudo ./scripts/install.sh ./docklane
 ```
 
-The v0.3.1-beta.2 online entrypoint, native executable, offline installation configuration and Docker deployment all default to port 9999. The attached online script defaults to the newest beta and includes installation stages and download progress. Existing installations retain their configured listener unless `--listen` explicitly overrides it. Older v0.3.1-beta.1 assets retain their release-time snapshot: they default to port 8080, and their attached online script requires an explicit `--channel beta`.
+The v0.3.2-beta.1 online entrypoint, native executable, offline installation configuration and Docker deployment all default to port 9999. The attached online script defaults to the newest beta and includes installation stages and download progress. Existing installations retain their configured listener unless `--listen` explicitly overrides it. The v0.3.1-beta.1 and v0.3.1-beta.2 releases have been withdrawn. Use this release’s complete materials without mixing historical attachments.
 
-The materials archive's root-level `VERSION` contains `0.3.1-beta.2` without a `v` prefix. The application version changes while configuration and database schemas remain v1. Raw binaries, `.sha256` sidecars, `IMAGES.txt` and the license are no longer separate beta attachments; these materials remain inside the installation archive. Evidence for withdrawn versions remains historical and is not a current download entrypoint.
+The materials archive's root-level `VERSION` contains `0.3.2-beta.1` without a `v` prefix. The application version changes while configuration and database schemas remain v1. Raw binaries, `.sha256` sidecars, `IMAGES.txt` and the license are no longer separate beta attachments; these materials remain inside the installation archive. Evidence for withdrawn versions remains historical and is not a current download entrypoint.
 
 ### Native binary package: run directly
 
-Download the native package and `RELEASE-SHA256SUMS` from the [v0.3.1-beta.2 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2) into an empty directory. This example is for amd64; replace the architecture in the package name for arm64:
+Download the native package and `RELEASE-SHA256SUMS` from the [v0.3.2-beta.1 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1) into an empty directory. This example is for amd64; replace the architecture in the package name for arm64:
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.1-beta.2-linux-amd64.tar.gz
+tar -xzf docklane-v0.3.2-beta.1-linux-amd64.tar.gz
 DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:9999 ./docklane
 ```
 
@@ -192,17 +194,17 @@ Download the current beta's installation materials, image archive and top-level 
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docker-manager-installation.tar.gz
+tar -xzf docklane-installation.tar.gz
 sha256sum --check IMAGE-SHA256SUMS
-docker load -i docker-manager-images.tar.gz
-docker tag docker-manager:v0.3.1-beta.2-amd64 docker-manager:v0.3.1-beta.2
-export DM_BACKUP_HOST_DIR=/srv/docker-manager/backups
-export DM_RESTORE_HOST_DIR=/srv/docker-manager/restores
+docker load -i docklane-images.tar.gz
+docker tag docklane:v0.3.2-beta.1-amd64 docklane:v0.3.2-beta.1
+export DM_BACKUP_HOST_DIR=/srv/docklane/backups
+export DM_RESTORE_HOST_DIR=/srv/docklane/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
-The archive includes both architectures. Set the common tag for the native architecture before starting; temporary backup/restore containers use the same version of the local worker. The Compose file inside v0.3.1-beta.2 already maps `127.0.0.1:9999:9999` and sets `DM_LISTEN: ":9999"`.
+The archive includes both architectures. Set the common tag for the native architecture before starting; temporary backup/restore containers use the same version of the local worker. The Compose file inside v0.3.2-beta.1 already maps `127.0.0.1:9999:9999` and sets `DM_LISTEN: ":9999"`.
 
 ### Docker: build from source
 
@@ -211,9 +213,9 @@ Install Git, Docker Engine, Docker Buildx (for BuildKit builds) and Compose v2, 
 ```sh
 git clone https://github.com/Funnyrz/docklane.git
 cd docklane
-docker build -t docker-manager:v0.3.1-beta.2 .
-export DM_BACKUP_HOST_DIR=/srv/docker-manager/backups
-export DM_RESTORE_HOST_DIR=/srv/docker-manager/restores
+docker build -t docklane:v0.3.2-beta.1 .
+export DM_BACKUP_HOST_DIR=/srv/docklane/backups
+export DM_RESTORE_HOST_DIR=/srv/docklane/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
@@ -222,11 +224,11 @@ The example Compose file binds only to `127.0.0.1:9999`. Access it locally, thro
 
 ### Linux binary and systemd
 
-The current Release provides native `tar.gz` packages for both architectures. Installation places the executable at `/usr/local/bin/docklane`; the service is `docker-manager`. Follow [Beta prerelease installation and downloads](#beta-prerelease-installation-and-downloads) above, using the extracted `./docklane` rather than downloading a separate raw binary.
+The current Release provides native `tar.gz` packages for both architectures. Installation places the executable at `/usr/local/bin/docklane`; the service is `docklane`. Follow [Beta prerelease installation and downloads](#beta-prerelease-installation-and-downloads) above, using the extracted `./docklane` rather than downloading a separate raw binary.
 
 Prepare local Docker Engine 28/29, Compose v2 (validated version v2.40.3), Restic 0.19.1 on the service PATH, Python 3 and `runuser` (util-linux). The `docker` group must exist and grant the service account access to the Docker Socket through that supplementary group. Upgrade an existing managed installation with `scripts/upgrade.sh ./docklane` from matching versioned materials, retaining a consistent backup first.
 
-The installer creates a dedicated account and systemd service. Configuration lives at `/etc/docker-manager/config.json`; application data lives at `/var/lib/docker-manager`. Docker group access still grants high privileges. Grant backup-source read access and repository/restore-directory write access separately. Daemon writes and service restarts are not granted by default.
+The installer creates a dedicated account and systemd service. Configuration lives at `/etc/docklane/config.json`; application data lives at `/var/lib/docklane`. Docker group access still grants high privileges. Grant backup-source read access and repository/restore-directory write access separately. Daemon writes and service restarts are not granted by default.
 
 ### First visit and language
 

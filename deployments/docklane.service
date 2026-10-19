@@ -5,13 +5,13 @@ Wants=network.target
 
 [Service]
 Type=simple
-User=docker-manager
-Group=docker-manager
+User=docklane
+Group=docklane
 SupplementaryGroups=docker
-Environment=DM_CONFIG=/etc/docker-manager/config.json
+Environment=DM_CONFIG=/etc/docklane/config.json
 Environment=PATH=/usr/local/lib/docklane/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart=/usr/local/bin/docklane
-WorkingDirectory=/var/lib/docker-manager
+WorkingDirectory=/var/lib/docklane
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=180

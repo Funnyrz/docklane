@@ -25,15 +25,22 @@ import time
 import urllib.request
 
 
-DATA = Path('/var/lib/docker-manager')
-CONFIG = Path('/etc/docker-manager/config.json')
+DATA = Path('/var/lib/docklane')
+CONFIG = Path('/etc/docklane/config.json')
 BINARY = Path('/usr/local/bin/docklane')
-UNIT = Path('/etc/systemd/system/docker-manager.service')
-BACKUPS = Path('/var/backups/docker-manager')
+UNIT = Path('/etc/systemd/system/docklane.service')
+BACKUPS = Path('/var/backups/docklane')
 STATE = Path('/var/lib/docklane-installer/release.json')
 LICENSE = Path('/usr/share/licenses/docklane/LICENSE')
-SERVICE = 'docker-manager'
-ACCOUNT = 'docker-manager'
+SERVICE = 'docklane'
+ACCOUNT = 'docklane'
+LEGACY_PATHS = (
+    Path('/etc/docker-manager'), Path('/var/lib/docker-manager'), Path('/var/backups/docker-manager'),
+    Path('/usr/local/bin/docker-manager'),
+    Path('/etc/systemd/system/multi-user.target.wants/docker-manager.service'),
+    *(Path(root) / name for root in ('/etc/systemd/system', '/run/systemd/system', '/usr/lib/systemd/system', '/lib/systemd/system')
+      for name in ('docker-manager.service', 'docker-manager.service.d')),
+)
 TOOL_PATH = '/usr/local/lib/docklane/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 STOP_TIMEOUT = 180
 HEALTH_TIMEOUT = 60
@@ -48,7 +55,7 @@ GO_DEFAULTS = {
     'version': 1, 'log_level': 'info', 'listen': ':9999', 'data_dir': './data',
     'docker_endpoint': 'unix:///var/run/docker.sock', 'mode': 'binary',
     'daemon_config_path': '/etc/docker/daemon.json', 'compose_path': 'docker',
-    'restic_path': 'restic', 'backup_worker_image': 'docker-manager:v0.3.1-beta.2',
+    'restic_path': 'restic', 'backup_worker_image': 'docklane:v0.3.2-beta.1',
     'allowed_paths': [], 'path_mappings': [], 'enable_daemon_write': False,
     'session_secure': False, 'backup_temp_dir': '',
 }
@@ -58,10 +65,23 @@ class InstallError(Exception):
     pass
 
 
+def refuse_legacy_installation():
+    """Inspect legacy names without creating directories or changing services."""
+    for path in LEGACY_PATHS:
+        if path.exists() or path.is_symlink():
+            raise InstallError(f'Legacy docker-manager installation found at {path}. This release requires a new Docklane installation; preserve and resolve the old installation manually.')
+    result = run(['systemctl', 'show', 'docker-manager.service', '--property=LoadState,FragmentPath,DropInPaths'], check=False)
+    props = dict(line.split('=', 1) for line in result.stdout.splitlines() if '=' in line)
+    if len([line for line in result.stdout.splitlines() if line.startswith('LoadState=')]) != 1 or not props.get('LoadState'):
+        raise InstallError('Cannot verify the legacy docker-manager.service state; no installation changes were made.')
+    if props['LoadState'] != 'not-found' or props.get('FragmentPath') or props.get('DropInPaths'):
+        raise InstallError('Legacy docker-manager.service is still known to systemd. This release does not rename or migrate it; resolve it manually before installation.')
+
+
 def material_version(source_dir):
     version_file = Path(source_dir) / 'VERSION'
     package = Path(source_dir) / 'web/package.json'
-    value = version_file.read_text().strip() if version_file.is_file() else (read_json(package).get('version') if package.is_file() else '0.3.1-beta.2')
+    value = version_file.read_text().strip() if version_file.is_file() else (read_json(package).get('version') if package.is_file() else '0.3.2-beta.1')
     version_key(value)
     return 'v' + value.removeprefix('v')
 
@@ -210,17 +230,17 @@ def service_context():
     result = run(['systemctl', 'show', SERVICE, '--property=LoadState,FragmentPath,ExecStart,User,Group,WorkingDirectory,Environment,DropInPaths,MainPID,Restart'], check=False)
     props = dict(line.split('=', 1) for line in result.stdout.splitlines() if '=' in line)
     if props.get('LoadState', 'not-found') == 'not-found':
-        if UNIT.exists():
+        if UNIT.exists() or UNIT.is_symlink():
             raise InstallError('An unrecognized service unit already exists; inspect it before installing.')
         return None
     if props.get('FragmentPath') != str(UNIT) or props.get('User') != ACCOUNT or props.get('Group') != ACCOUNT:
-        raise InstallError('Existing docker-manager service is not a standard managed installation.')
+        raise InstallError('Existing docklane service is not a standard managed installation.')
     if props.get('DropInPaths'):
         raise InstallError('Service has local drop-ins; reconcile them before automatic deployment.')
     if props.get('Restart') != 'on-failure':
         raise InstallError('Managed service requires Restart=on-failure for a safe graceful stop.')
     start = props.get('ExecStart', '')
-    if not any(f'path={path} ' in start for path in (str(BINARY), '/usr/local/bin/docker-manager')):
+    if f'path={BINARY} ' not in start:
         raise InstallError('Existing service executes an unknown binary.')
     env = dict(item.split('=', 1) for item in shlex.split(props.get('Environment', '')) if '=' in item)
     if 'DM_CONFIG' not in env:
@@ -237,7 +257,7 @@ def effective_config(source_dir, env, cwd, explicit=None, migration=False, live_
     # An existing process began from Go defaults, not the fresh-install example.
     config = copy.deepcopy(GO_DEFAULTS) if migration else read_json(source_dir / 'deployments/config.example.json')
     if migration:
-        config['backup_worker_image'] = 'docker-manager:' + material_version(source_dir)
+        config['backup_worker_image'] = 'docklane:' + material_version(source_dir)
     selected = explicit or env.get('DM_CONFIG')
     startup = {}
     if selected:
@@ -463,7 +483,7 @@ def backup(directory, config, original_config, effective=None):
         shutil.copy2(original_config, destination / 'original-config.json')
     if CONFIG.parent.exists():
         copy_tree(CONFIG.parent, destination / 'config')
-    for path, name in ((BINARY, 'docklane'), (Path('/usr/local/bin/docker-manager'), 'docker-manager'), (UNIT, 'docker-manager.service'), (STATE, 'release.json')):
+    for path, name in ((BINARY, 'docklane'), (UNIT, 'docklane.service'), (STATE, 'release.json')):
         if path.is_file():
             shutil.copy2(path, destination / name)
     write_json(destination / 'restore.json', {'data_dir': str(directory), 'installed_data_dir': str(DATA), 'binary': str(BINARY), 'config': str(CONFIG), 'unit': str(UNIT)})
@@ -486,7 +506,7 @@ def tree_hashes(directory):
 
 def checked_worker_image(configured, version):
     """Online bootstrap has verified and loaded the release's canonical image."""
-    expected = 'docker-manager:' + version
+    expected = 'docklane:' + version
 
     def image_id(reference):
         result = run(['docker', 'image', 'inspect', '--format', '{{.Id}}', reference], check=False)
@@ -496,7 +516,7 @@ def checked_worker_image(configured, version):
         return value
 
     expected_id = image_id(expected)
-    if re.fullmatch(r'docker-manager:v\d+\.\d+\.\d+(?:-beta\.\d+)?(?:-(?:amd64|arm64))?', configured or ''):
+    if re.fullmatch(r'docklane:v\d+\.\d+\.\d+(?:-beta\.\d+)?(?:-(?:amd64|arm64))?', configured or ''):
         return expected
     if image_id(configured) != expected_id:
         raise InstallError('The custom backup_worker_image does not match the verified worker from the selected release; provide a matching alias or the release default.')
@@ -570,13 +590,14 @@ def health_check(listen):
 def deploy(args):
     if sys.platform != 'linux' or os.geteuid() != 0 or not Path('/run/systemd/system').is_dir():
         raise InstallError('Deployment requires root on Linux with systemd running.')
+    refuse_legacy_installation()
     source_dir = Path(args.source_dir).resolve(strict=True)
     if material_version(source_dir) != args.version:
         raise InstallError('Installation material version does not match the selected release.')
     candidate = Path(args.binary).resolve(strict=True)
     if digest(candidate) != args.sha256.lower():
         raise InstallError('Binary SHA-256 does not match; installation refused.')
-    for required in ('deployments/docker-manager.service', 'deployments/config.example.json', 'LICENSE'):
+    for required in ('deployments/docklane.service', 'deployments/config.example.json', 'LICENSE'):
         if not (source_dir / required).is_file():
             raise InstallError(f'Release installation material missing: {required}')
     run(['docker', 'info'])
@@ -596,6 +617,7 @@ def deploy(args):
 
 
 def _deploy_locked(args, source_dir, candidate):
+    refuse_legacy_installation()
     managed = service_context()
     installed_state = read_json(STATE) if STATE.is_file() else {}
     prevent_implicit_downgrade(args.version, installed_state.get('version'), getattr(args, 'explicit_version', False))
@@ -635,7 +657,7 @@ def _deploy_locked(args, source_dir, candidate):
                 env, cwd = process_context(old_pid)
             elif not args.config:
                 raise InstallError('Stopped migration sources require --config with an effective JSON configuration and absolute paths.')
-        elif BINARY.exists() or (Path('/usr/local/bin/docker-manager')).exists():
+        elif BINARY.exists() or BINARY.is_symlink():
             raise InstallError('An unmanaged Docklane binary exists; use explicit migration or resolve it first.')
         elif DATA.exists() and any(DATA.iterdir()):
             raise InstallError('The data directory is nonempty without a recognized service; use explicit migration.')
@@ -725,7 +747,7 @@ def _deploy_locked(args, source_dir, candidate):
         write_json(CONFIG, config, mode=0o640, uid=0, gid=gid)
         if not same_binary:
             install_file(candidate, BINARY, 0o755)
-        install_file(source_dir / 'deployments/docker-manager.service', UNIT, 0o644)
+        install_file(source_dir / 'deployments/docklane.service', UNIT, 0o644)
         install_file(source_dir / 'LICENSE', LICENSE, 0o644)
         owned_directory(STATE.parent, 0, 0, 0o700)
         if lock:
@@ -759,6 +781,44 @@ def _deploy_locked(args, source_dir, candidate):
             lock.close()
 
 
+def uninstall():
+    if sys.platform != 'linux' or os.geteuid() != 0 or not Path('/run/systemd/system').is_dir():
+        raise InstallError('Uninstall requires root on Linux with systemd running.')
+    refuse_legacy_installation()
+    lock_path = Path('/run/lock/docklane-install.lock')
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open('a') as installer_lock:
+        try:
+            fcntl.flock(installer_lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise InstallError('Another Docklane installer is already running.') from exc
+        _uninstall_locked()
+
+
+def _uninstall_locked():
+    refuse_legacy_installation()
+    # A receipt and the matching managed unit protect unrelated executables.
+    if not service_context():
+        raise InstallError('No recognized managed docklane.service was found; no files were removed.')
+    for path in (UNIT, STATE, BINARY):
+        if path.is_symlink() or not path.is_file() or path.stat().st_uid != 0 or path.stat().st_mode & 0o022:
+            raise InstallError(f'Refusing to remove an unrecognized or insecure installation file: {path}')
+    if STATE.stat().st_mode & 0o077:
+        raise InstallError('Installer receipt is not private; no files were removed.')
+    state = read_json(STATE)
+    version_key(state.get('version'))
+    if state.get('sha256') != digest(BINARY):
+        raise InstallError('Installed binary does not match the Docklane receipt; no files were removed.')
+    run(['systemctl', 'disable', '--now', SERVICE])
+    remaining = run(['systemctl', 'show', SERVICE, '--property=MainPID', '--value'])
+    if remaining.stdout.strip() != '0':
+        raise InstallError('The Docklane service did not confirm a graceful stop; no files were removed.')
+    UNIT.unlink()
+    BINARY.unlink()
+    run(['systemctl', 'daemon-reload'])
+    print('Docklane service removed. Configuration, application data, account, installer receipt and backup repositories were preserved.')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
@@ -773,15 +833,23 @@ def main():
     command.add_argument('--explicit-version', action='store_true')
     inspect_version = commands.add_parser('version')
     inspect_version.add_argument('--source-dir', required=True)
+    commands.add_parser('uninstall')
+    commands.add_parser('check-legacy')
     args = parser.parse_args()
     try:
         if args.command == 'version':
             print(material_version(args.source_dir))
             return 0
+        if args.command == 'check-legacy':
+            refuse_legacy_installation()
+            return 0
         if os.environ.get('DOCKLANE_NOTICE_SHOWN') != '1':
             print('本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。', flush=True)
             print('This program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use.', flush=True)
-        deploy(args)
+        if args.command == 'uninstall':
+            uninstall()
+        else:
+            deploy(args)
     except (InstallError, OSError, ValueError, sqlite3.Error) as exc:
         print(f'Installation refused: {exc}', file=sys.stderr)
         return 1

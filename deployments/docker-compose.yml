@@ -1,6 +1,7 @@
+name: docklane
 services:
-  docker-manager:
-    image: docker-manager:v0.3.1-beta.2
+  docklane:
+    image: docklane:v0.3.2-beta.1
     build: ..
     restart: unless-stopped
     ports:
@@ -12,11 +13,12 @@ services:
       DM_ALLOWED_PATHS: /backups,/restore
       DM_PATH_MAPPINGS: '[{"host":"${DM_BACKUP_HOST_DIR:?Set an absolute backup directory}","local":"/backups"},{"host":"${DM_RESTORE_HOST_DIR:?Set an absolute restore directory}","local":"/restore"}]'
     volumes:
-      - manager-data:/data
+      - docklane-data:/data
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DM_BACKUP_HOST_DIR:?Set an absolute backup directory}:/backups
       - ${DM_RESTORE_HOST_DIR:?Set an absolute restore directory}:/restore
     security_opt:
       - no-new-privileges:true
 volumes:
-  manager-data:
+  docklane-data:
+    name: docklane-data

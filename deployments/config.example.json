@@ -1,9 +1,9 @@
 {
   "version": 1,
   "log_level": "info",
-  "backup_temp_dir": "/var/lib/docker-manager/tmp",
+  "backup_temp_dir": "/var/lib/docklane/tmp",
   "listen": ":9999",
-  "data_dir": "/var/lib/docker-manager",
+  "data_dir": "/var/lib/docklane",
   "docker_endpoint": "unix:///var/run/docker.sock",
   "mode": "binary",
   "session_secure": false,
@@ -13,5 +13,5 @@
   "restic_path": "restic",
   "daemon_config_path": "/etc/docker/daemon.json",
   "enable_daemon_write": false,
-  "backup_worker_image": "docker-manager:v0.3.1-beta.2"
+  "backup_worker_image": "docklane:v0.3.2-beta.1"
 }

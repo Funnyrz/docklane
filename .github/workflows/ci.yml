@@ -84,8 +84,8 @@ jobs:
     env:
       COMPOSE_VERSION: 2.40.3
       RESTIC_VERSION: 0.19.1
-      DOCKER_HOST: unix:///tmp/docker-manager-ci-engine.sock
-      DM_TEST_DOCKER_ENDPOINT: unix:///tmp/docker-manager-ci-engine.sock
+      DOCKER_HOST: unix:///tmp/docklane-ci-engine.sock
+      DM_TEST_DOCKER_ENDPOINT: unix:///tmp/docklane-ci-engine.sock
       ENGINE_VERSION: ${{ matrix.engine }}
       DOCKER_ARCH: ${{ matrix.docker_arch }}
       BINARY_ARCH: ${{ matrix.arch }}
@@ -110,41 +110,41 @@ jobs:
         run: |
           set -euo pipefail
           test "$(uname -m)" = "$DOCKER_ARCH"
-          tool_dir="$RUNNER_TEMP/docker-manager-tools"
-          mkdir -p "$tool_dir" "$RUNNER_TEMP/docker-manager-evidence"
-          df -h "$RUNNER_TEMP" > "$RUNNER_TEMP/docker-manager-evidence/runner-disk.txt"
+          tool_dir="$RUNNER_TEMP/docklane-tools"
+          mkdir -p "$tool_dir" "$RUNNER_TEMP/docklane-evidence"
+          df -h "$RUNNER_TEMP" > "$RUNNER_TEMP/docklane-evidence/runner-disk.txt"
           curl --fail --location --retry 3 "https://download.docker.com/linux/static/stable/${DOCKER_ARCH}/docker-${ENGINE_VERSION}.tgz" -o "$tool_dir/docker.tgz"
-          sha256sum "$tool_dir/docker.tgz" > "$RUNNER_TEMP/docker-manager-evidence/engine-download.sha256"
+          sha256sum "$tool_dir/docker.tgz" > "$RUNNER_TEMP/docklane-evidence/engine-download.sha256"
           tar -xzf "$tool_dir/docker.tgz" -C "$tool_dir"
           printf '{}\n' > "$tool_dir/engine.json"
           echo "$tool_dir/docker" >> "$GITHUB_PATH"
           # GitHub-hosted disposable VM only. The runner's daemon and data stay untouched.
           sudo ip link add dm-ci0 type bridge
-          touch "$RUNNER_TEMP/docker-manager-bridge-owned"
+          touch "$RUNNER_TEMP/docklane-bridge-owned"
           sudo ip address add 172.31.250.1/24 dev dm-ci0
           sudo ip link set dm-ci0 up
           sudo env PATH="$tool_dir/docker:$PATH" "$tool_dir/docker/dockerd" \
             --config-file "$tool_dir/engine.json" \
             --host "$DOCKER_HOST" --group "$(id -gn)" \
-            --data-root "$RUNNER_TEMP/docker-manager-engine-data" \
-            --exec-root "$RUNNER_TEMP/docker-manager-engine-exec" \
-            --pidfile "$RUNNER_TEMP/docker-manager-engine.pid" \
+            --data-root "$RUNNER_TEMP/docklane-engine-data" \
+            --exec-root "$RUNNER_TEMP/docklane-engine-exec" \
+            --pidfile "$RUNNER_TEMP/docklane-engine.pid" \
             --bridge dm-ci0 \
             --default-address-pool base=172.28.0.0/16,size=24 \
-            > "$RUNNER_TEMP/docker-manager-evidence/engine.log" 2>&1 &
+            > "$RUNNER_TEMP/docklane-evidence/engine.log" 2>&1 &
           for attempt in $(seq 1 90); do
             if "$tool_dir/docker/docker" info >/dev/null 2>&1; then break; fi
             sleep 1
           done
           test "$("$tool_dir/docker/docker" version --format '{{.Server.Version}}')" = "$ENGINE_VERSION"
-          "$tool_dir/docker/docker" version > "$RUNNER_TEMP/docker-manager-evidence/docker-version.txt"
-          uname -a > "$RUNNER_TEMP/docker-manager-evidence/kernel.txt"
-          cat /etc/os-release > "$RUNNER_TEMP/docker-manager-evidence/os-release.txt"
+          "$tool_dir/docker/docker" version > "$RUNNER_TEMP/docklane-evidence/docker-version.txt"
+          uname -a > "$RUNNER_TEMP/docklane-evidence/kernel.txt"
+          cat /etc/os-release > "$RUNNER_TEMP/docklane-evidence/os-release.txt"
       - name: Install pinned Compose and Restic in private tool directories
         shell: bash
         run: |
           set -euo pipefail
-          tool_dir="$RUNNER_TEMP/docker-manager-tools"
+          tool_dir="$RUNNER_TEMP/docklane-tools"
           mkdir -p "$tool_dir/docker/cli-plugins"
           curl --fail --location --retry 3 "https://github.com/docker/compose/releases/download/v${COMPOSE_VERSION}/docker-compose-linux-${DOCKER_ARCH}" -o "$tool_dir/docker/cli-plugins/docker-compose"
           curl --fail --location --retry 3 "https://github.com/docker/compose/releases/download/v${COMPOSE_VERSION}/checksums.txt" -o "$tool_dir/compose-checksums.txt"
@@ -160,9 +160,9 @@ jobs:
           chmod +x "$tool_dir/restic" "$tool_dir/docker/cli-plugins/docker-compose"
           echo "DOCKER_CONFIG=$tool_dir/docker" >> "$GITHUB_ENV"
           echo "DM_TEST_RESTIC=$tool_dir/restic" >> "$GITHUB_ENV"
-          echo "DM_TEST_BINARY=$RUNNER_TEMP/docker-manager" >> "$GITHUB_ENV"
-          echo "DM_TEST_WORKER_IMAGE=docker-manager:integration-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_ENV"
-          echo "DM_TEST_REPORT=$RUNNER_TEMP/docker-manager-evidence/integration.json" >> "$GITHUB_ENV"
+          echo "DM_TEST_BINARY=$RUNNER_TEMP/docklane" >> "$GITHUB_ENV"
+          echo "DM_TEST_WORKER_IMAGE=docklane:integration-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_ENV"
+          echo "DM_TEST_REPORT=$RUNNER_TEMP/docklane-evidence/integration.json" >> "$GITHUB_ENV"
           echo "DM_TEST_TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
         with:
@@ -177,7 +177,7 @@ jobs:
           docker compose version --short
           "$DM_TEST_RESTIC" version
           docker build --tag "$DM_TEST_WORKER_IMAGE" .
-          docker image inspect "$DM_TEST_WORKER_IMAGE" > "$RUNNER_TEMP/docker-manager-evidence/worker-image.json"
+          docker image inspect "$DM_TEST_WORKER_IMAGE" > "$RUNNER_TEMP/docklane-evidence/worker-image.json"
           go test -race ./...
       - name: Verify real Docker, Compose, Restic and fresh-database recovery
         run: scripts/integration.sh "$DM_TEST_BINARY"
@@ -186,16 +186,16 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: real-linux-docker-${{ matrix.engine }}-${{ matrix.arch }}
-          path: ${{ runner.temp }}/docker-manager-evidence/
+          path: ${{ runner.temp }}/docklane-evidence/
           if-no-files-found: error
           retention-days: 14
       - name: Stop only the owned Engine
         if: always()
         shell: bash
         run: |
-          if test -f "$RUNNER_TEMP/docker-manager-engine.pid"; then
-            owned_pid=$(cat "$RUNNER_TEMP/docker-manager-engine.pid")
-            if sudo ps -p "$owned_pid" -o args= | grep -F -- "--data-root $RUNNER_TEMP/docker-manager-engine-data" >/dev/null; then
+          if test -f "$RUNNER_TEMP/docklane-engine.pid"; then
+            owned_pid=$(cat "$RUNNER_TEMP/docklane-engine.pid")
+            if sudo ps -p "$owned_pid" -o args= | grep -F -- "--data-root $RUNNER_TEMP/docklane-engine-data" >/dev/null; then
               sudo kill -TERM "$owned_pid"
               for attempt in $(seq 1 30); do
                 if ! sudo kill -0 "$owned_pid" 2>/dev/null; then break; fi
@@ -207,6 +207,6 @@ jobs:
               fi
             fi
           fi
-          if test -f "$RUNNER_TEMP/docker-manager-bridge-owned"; then
+          if test -f "$RUNNER_TEMP/docklane-bridge-owned"; then
             sudo ip link delete dm-ci0
           fi

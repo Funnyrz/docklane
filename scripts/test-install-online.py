@@ -22,7 +22,7 @@ import unittest
 
 SOURCE = Path(__file__).resolve().with_name('install-online.sh')
 BASH = shutil.which('bash')
-TAG = 'v0.3.0'
+TAG = 'v0.3.2'
 
 
 def quote(value):
@@ -64,10 +64,17 @@ class InstallerTest(unittest.TestCase):
         source = SOURCE.read_text()
         replacements = {
             '/etc/os-release': str(self.os_release),
-            '/etc/docker-manager/config.json': str(self.root / 'installed-config.json'),
+            '/etc/docklane/config.json': str(self.root / 'installed-config.json'),
+            '/etc/docker-manager': str(self.root / 'legacy-config'),
+            '/var/lib/docker-manager': str(self.root / 'legacy-data'),
+            '/var/backups/docker-manager': str(self.root / 'legacy-backups'),
             '/usr/local/bin/docklane': str(self.root / 'installed-docklane'),
             '/usr/local/bin/docker-manager': str(self.root / 'installed-docker-manager'),
-            '/etc/systemd/system/docker-manager.service': str(self.root / 'installed-service'),
+            '/etc/systemd/system/docklane.service': str(self.root / 'installed-service'),
+            '/etc/systemd/system/multi-user.target.wants/docker-manager.service': str(self.root / 'legacy-enabled-service'),
+            '/etc/systemd/system': str(self.root / 'legacy-systemd-etc'),
+            '/usr/lib/systemd/system': str(self.root / 'legacy-systemd-usr'),
+            '/lib/systemd/system': str(self.root / 'legacy-systemd-lib'),
             '/var/lib/docklane-installer': str(self.root / 'receipt'),
             '/run/systemd/system': str(self.systemd),
             '/usr/local/lib/docker': str(self.root / 'docker-tools'),
@@ -92,7 +99,7 @@ trace={quote(self.trace)}
 assets={quote(self.assets)}
 uname() {{ case "$1" in -s) echo Linux ;; -m) echo x86_64 ;; esac; }}
 id() {{ echo 0; }}
-systemctl() {{ printf 'systemctl %s\\n' "$*" >> "$trace"; }}
+systemctl() {{ if [[ $1 == show && $2 == docker-manager.service ]]; then printf 'LoadState=not-found\\nFragmentPath=\\nDropInPaths=\\n'; else printf 'systemctl %s\\n' "$*" >> "$trace"; fi; }}
 apt-get() {{ printf 'apt-get %s\\n' "$*" >> "$trace"; }}
 fetch() {{
   printf 'fetch %s\\n' "$1" >> "$trace"
@@ -113,47 +120,22 @@ fetch() {{
         return result
 
     def make_release(self, arch='amd64', *, binary_members=None, material_members=None):
+        self.make_slim_release(TAG)
         self.binary_name = f'docklane-{TAG}-linux-{arch}.tar.gz'
-        self.license = b'MIT License\nCopyright (c) 2026 Funnyrz\n'
-        header = bytearray(64)
-        header[:6] = b'\x7fELF\x02\x01'
-        header[18:20] = struct.pack('<H', {'amd64': 62, 'arm64': 183}[arch])
-        self.binary = bytes(header)
-        archive(self.assets / self.binary_name,
-                binary_members or {'docklane': self.binary, 'LICENSE': self.license})
-        materials = {name: b'fixture' for name in (
-            'scripts/install-support.py', 'scripts/install.sh', 'scripts/upgrade.sh',
-            'scripts/uninstall.sh', 'deployments/docker-manager.service',
-            'deployments/config.example.json')}
-        materials['LICENSE'] = self.license
-        archive(self.assets / 'docker-manager-installation.tar.gz',
-                materials if material_members is None else material_members)
-        (self.assets / 'LICENSE').write_bytes(self.license)
-        (self.assets / 'docker-manager-images.tar.gz').write_bytes(b'image archive fixture')
-        image_id = 'sha256:' + '1' * 64
-        (self.assets / 'IMAGES.txt').write_text(f'[docker-manager:{TAG}-{arch}] {image_id} linux/{arch}\n')
-        (self.assets / 'SHA256SUMS').write_text(
-            f'{hashlib.sha256(self.binary).hexdigest()}  docklane-linux-{arch}\n'
-            f'{hashlib.sha256(self.license).hexdigest()}  LICENSE\n')
-        self.rehash()
-        names = [p.name for p in self.assets.iterdir() if p.name != 'release.json']
-        release = {'tag_name': TAG, 'draft': False, 'prerelease': False, 'published_at': '2026-10-19T00:00:00Z', 'assets': [
-            {'name': name, 'state': 'uploaded', 'browser_download_url':
-             f'https://github.com/Funnyrz/docklane/releases/download/{TAG}/{name}'}
-            for name in names]}
-        (self.assets / 'release.json').write_text(json.dumps(release))
+        with tarfile.open(self.assets / self.binary_name) as source:
+            self.binary = source.extractfile('docklane').read()
+        if binary_members is not None:
+            archive(self.assets / self.binary_name, binary_members)
+        if material_members is not None:
+            self.slim_materials = material_members
+        self.repack_slim()
 
     def rehash(self):
-        name = self.binary_name
-        (self.assets / (name + '.sha256')).write_text(f'{checksum(self.assets / name)}  {name}\n')
-        image = 'docker-manager-images.tar.gz'
-        (self.assets / 'IMAGE-SHA256SUMS').write_text(f'{checksum(self.assets / image)}  {image}\n')
-        paths = sorted(p for p in self.assets.iterdir()
-                       if p.name not in ('release.json', 'RELEASE-SHA256SUMS'))
-        (self.assets / 'RELEASE-SHA256SUMS').write_text(''.join(
-            f'{checksum(p)}  {p.name}\n' for p in paths))
+        if (self.assets / 'SHA256SUMS').exists():
+            self.slim_materials['SHA256SUMS'] = (self.assets / 'SHA256SUMS').read_bytes()
+        self.repack_slim()
 
-    def make_slim_release(self, tag='v0.3.1-beta.1'):
+    def make_slim_release(self, tag='v0.3.2-beta.1'):
         for path in self.assets.iterdir():
             path.unlink()
         self.slim_tag = tag
@@ -167,19 +149,19 @@ fetch() {{
                 self.binary = bytes(header)
             archive(self.assets / f'docklane-{tag}-linux-{arch}.tar.gz', {'docklane': bytes(header), 'LICENSE': self.license})
             sums.append(f'{hashlib.sha256(header).hexdigest()}  docklane-linux-{arch}\n')
-        (self.assets / 'docker-manager-images.tar.gz').write_bytes(b'fixture worker')
+        (self.assets / 'docklane-images.tar.gz').write_bytes(b'fixture worker')
         (self.assets / 'install-online.sh').write_bytes(SOURCE.read_bytes())
         sums.append(f'{hashlib.sha256(self.license).hexdigest()}  LICENSE\n')
-        self.slim_materials = {name: b'fixture' for name in ('scripts/install-online.sh', 'scripts/install-support.py', 'scripts/install.sh', 'scripts/upgrade.sh', 'scripts/uninstall.sh', 'deployments/docker-manager.service')}
+        self.slim_materials = {name: b'fixture' for name in ('scripts/install-online.sh', 'scripts/install-support.py', 'scripts/install.sh', 'scripts/upgrade.sh', 'scripts/uninstall.sh', 'deployments/docklane.service')}
         self.slim_materials.update({
             'VERSION': (tag[1:] + '\n').encode(), 'LICENSE': self.license,
             'SHA256SUMS': ''.join(sums).encode(),
-            'IMAGE-SHA256SUMS': f'{checksum(self.assets / "docker-manager-images.tar.gz")}  docker-manager-images.tar.gz\n'.encode(),
-            'IMAGES.txt': ''.join(f'[docker-manager:{tag}-{arch}] sha256:{"1" * 64} linux/{arch}\n' for arch in ('amd64','arm64')).encode(),
+            'IMAGE-SHA256SUMS': f'{checksum(self.assets / "docklane-images.tar.gz")}  docklane-images.tar.gz\n'.encode(),
+            'IMAGES.txt': ''.join(f'[docklane:{tag}-{arch}] sha256:{"1" * 64} linux/{arch}\n' for arch in ('amd64','arm64')).encode(),
             'TOOL-VERSIONS.txt': b'golang 1.27.2\nnodejs 22.22.0\npnpm 10.28.2\n',
             'SECURITY-NOTES.md': b'Test only; keep data backed up.',
             'release-ci-evidence.json': json.dumps({'version': tag[1:], 'tag': tag, 'head_sha': 'a' * 40, 'ci_run_id': 123, 'ci_run_url': 'https://github.com/Funnyrz/docklane/actions/runs/123', 'publication': 'candidate'}).encode(),
-            'deployments/config.example.json': json.dumps({'version': 1, 'backup_worker_image': 'docker-manager:' + tag}).encode(),
+            'deployments/config.example.json': json.dumps({'version': 1, 'backup_worker_image': 'docklane:' + tag}).encode(),
         })
         self.repack_slim()
         names = [path.name for path in self.assets.iterdir() if path.name != 'release.json']
@@ -189,8 +171,8 @@ fetch() {{
         (self.assets / 'release.json').write_text(json.dumps(self.slim_metadata))
 
     def repack_slim(self):
-        archive(self.assets / 'docker-manager-installation.tar.gz', self.slim_materials)
-        names = ['install-online.sh', 'docker-manager-installation.tar.gz', 'docker-manager-images.tar.gz',
+        archive(self.assets / 'docklane-installation.tar.gz', self.slim_materials)
+        names = ['install-online.sh', 'docklane-installation.tar.gz', 'docklane-images.tar.gz',
                  f'docklane-{self.slim_tag}-linux-amd64.tar.gz', f'docklane-{self.slim_tag}-linux-arm64.tar.gz']
         (self.assets / 'RELEASE-SHA256SUMS').write_text(''.join(f'{checksum(self.assets / name)}  {name}\n' for name in names))
 
@@ -215,8 +197,8 @@ fetch() {
 }
 install_docker() { echo "selected:$version:$channel"; exit 0; }
 ''')
-        self.assertIn('selected:v0.3.1-beta.1:beta', result.stdout)
-        self.assertIn('Verified v0.3.1-beta.1 for amd64', result.stdout)
+        self.assertIn('selected:v0.3.2-beta.1:beta', result.stdout)
+        self.assertIn('Verified v0.3.2-beta.1 for amd64', result.stdout)
         self.assertLess(result.stdout.index('do not use it in production'),
                         result.stdout.index('dependency-preparation'))
         calls = self.trace.read_text()
@@ -228,7 +210,7 @@ install_docker() { echo "selected:$version:$channel"; exit 0; }
         self.assertIn('release latest stable', self.bash('main --channel stable --dry-run').stdout)
         self.assertFalse(self.trace.exists())
 
-    def test_fresh_install_default_port_is_passed_to_legacy_release_helper(self):
+    def test_fresh_install_default_port_is_passed_to_release_helper(self):
         result = self.bash('main', prelude=self.progress_prelude().replace(
             'echo deployment-complete;', 'echo "deployment-complete $*";'))
         self.assertIn('--listen :9999', result.stdout)
@@ -248,7 +230,7 @@ install_docker() { echo "selected:$version:$channel"; exit 0; }
 
     def test_port_default_never_overrides_existing_installation_footprints(self):
         paths = ['installed-config.json', 'receipt/release.json', 'installed-docklane',
-                 'installed-docker-manager', 'installed-service']
+                 'installed-service']
         for name in paths:
             for symlink in (False, True):
                 with self.subTest(path=name, symlink=symlink):
@@ -264,6 +246,57 @@ install_docker() { echo "selected:$version:$channel"; exit 0; }
                     finally:
                         path.unlink()
 
+    def test_legacy_footprints_and_symlinks_stop_before_dependencies(self):
+        paths = [self.root / name for name in ('legacy-config', 'legacy-data', 'legacy-backups',
+                                               'installed-docker-manager', 'legacy-enabled-service')]
+        paths += [base / name for base in (self.root / 'legacy-systemd-etc', self.systemd,
+                                          self.root / 'legacy-systemd-usr', self.root / 'legacy-systemd-lib')
+                  for name in ('docker-manager.service', 'docker-manager.service.d')]
+        for path in paths:
+            for symlink in (False, True):
+                with self.subTest(path=path, symlink=symlink):
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    if symlink:
+                        path.symlink_to(self.root / 'missing-target')
+                    else:
+                        path.mkdir()
+                        (path / 'preserve').write_text('retained')
+                    try:
+                        result = self.bash('main', prelude='bootstrap_tools() { echo mutation-started; }', ok=False)
+                        self.assertIn('Legacy docker-manager deployment detected', result.stderr)
+                        self.assertNotIn('mutation-started', result.stdout)
+                        self.assertTrue(path.is_symlink() if symlink else path.exists())
+                    finally:
+                        if symlink:
+                            path.unlink()
+                        else:
+                            shutil.rmtree(path)
+
+    def test_stopped_loaded_legacy_service_is_refused(self):
+        for state in ('LoadState=loaded', 'LoadState=masked',
+                      'LoadState=not-found\nDropInPaths=/run/old.conf',
+                      'LoadState=not-found\nFragmentPath=/run/old.service'):
+            result = self.bash('main', prelude=f'''
+systemctl() {{ printf '%s\\n' {quote(state)}; }}
+bootstrap_tools() {{ echo mutation-started; }}
+''', ok=False)
+            self.assertIn('still loaded', result.stderr)
+            self.assertNotIn('mutation-started', result.stdout)
+        for status in (0, 1):
+            self.bash('check_legacy_installation', prelude=f"systemctl() {{ echo LoadState=not-found; return {status}; }}")
+
+    def test_unverifiable_legacy_query_stops_before_host_mutation(self):
+        for status, state in ((1, ''), (0, ''), (0, 'FragmentPath='), (1, 'failure'),
+                              (0, 'LoadState='), (0, 'LoadState=not-found\nLoadState=not-found')):
+            with self.subTest(status=status, state=state):
+                result = self.bash('main', prelude=f'''
+systemctl() {{ printf '%s\\n' {quote(state)}; return {status}; }}
+bootstrap_tools() {{ echo mutation-started; }}
+''', ok=False)
+                self.assertIn('Cannot verify the legacy', result.stderr)
+                self.assertNotIn('mutation-started', result.stdout)
+                self.assertFalse(self.trace.exists())
+
     def test_port_default_rejects_invalid_custom_configuration(self):
         config = self.root / 'invalid.json'
         for value in ('invalid', '[]'):
@@ -275,7 +308,7 @@ install_docker() { echo "selected:$version:$channel"; exit 0; }
         return '''
 bootstrap_tools() { :; }
 resolve_release() {
- version=v0.3.1-beta.1
+ version=v0.3.2-beta.1
  printf slim > "$work/layout"
  printf fixture > "$work/binary.sha256"
 }
@@ -292,6 +325,7 @@ python3() { if [[ $1 == */materials/scripts/install-support.py ]]; then echo dep
         self.assertEqual(positions, sorted(positions))
         self.assertLess(result.stdout.index('do not use it in production'), positions[0])
         self.assertLess(result.stdout.index('deployment-complete'), positions[-1])
+        self.assertIn('systemctl status docklane; logs: journalctl -u docklane -f', result.stdout)
 
     def test_failed_installation_does_not_report_later_stages_or_completion(self):
         result = self.bash('main', prelude=self.progress_prelude(fail_worker=True), ok=False)
@@ -336,19 +370,19 @@ fetch_release_page() { printf '%s' 'https://github.com/Funnyrz/docklane/releases
 
     def test_new_six_assets_use_hashed_internal_metadata(self):
         self.make_slim_release()
-        self.bash('version=v0.3.1-beta.1; resolve_release; verify_release')
+        self.bash('version=v0.3.2-beta.1; resolve_release; verify_release')
         calls = self.trace.read_text()
         self.assertEqual(sum('download/' in line for line in calls.splitlines()), 4)
         self.assertNotIn('linux-arm64.tar.gz', calls)
         self.assertNotIn('/install-online.sh', calls)
         self.assertEqual((self.work / 'VERSION').exists(), False)
-        self.assertEqual((self.work / 'materials/VERSION').read_text().strip(), '0.3.1-beta.1')
+        self.assertEqual((self.work / 'materials/VERSION').read_text().strip(), '0.3.2-beta.1')
         self.assertEqual((self.work / 'binary/docklane').read_bytes(), self.binary)
 
     def test_internal_version_ci_worker_license_and_archive_integrity(self):
-        for name, value in [('VERSION', b'9.0.0'), ('release-ci-evidence.json', b'{"version":"0.3.1-beta.1","tag":"v0.3.0","head_sha":"bad"}'),
-                            ('deployments/config.example.json', b'{"backup_worker_image":"docker-manager:v0.3.0"}'),
-                            ('LICENSE', b'other license'), ('IMAGES.txt', b'[docker-manager:v0.3.0-amd64] sha256:' + b'1' * 64 + b' linux/amd64\n'), ('TOOL-VERSIONS.txt', b''), ('SECURITY-NOTES.md', b''),
+        for name, value in [('VERSION', b'9.0.0'), ('release-ci-evidence.json', b'{"version":"0.3.2-beta.1","tag":"v0.3.2","head_sha":"bad"}'),
+                            ('deployments/config.example.json', b'{"backup_worker_image":"docklane:v0.3.2"}'),
+                            ('LICENSE', b'other license'), ('IMAGES.txt', b'[docklane:v0.3.2-amd64] sha256:' + b'1' * 64 + b' linux/amd64\n'), ('TOOL-VERSIONS.txt', b''), ('SECURITY-NOTES.md', b''),
                             ('unsafe-link', (tarfile.SYMTYPE, '/etc/passwd'))]:
             with self.subTest(metadata=name):
                 shutil.rmtree(self.work)
@@ -356,17 +390,29 @@ fetch_release_page() { printf '%s' 'https://github.com/Funnyrz/docklane/releases
                 self.make_slim_release()
                 self.slim_materials[name] = value
                 self.repack_slim()
-                self.bash('version=v0.3.1-beta.1; resolve_release; verify_release', ok=False)
+                self.bash('version=v0.3.2-beta.1; resolve_release; verify_release', ok=False)
                 self.assertFalse((self.work / 'binary.sha256').exists())
+
+    def test_withdrawn_asset_names_are_not_accepted(self):
+        self.make_slim_release()
+        def rename_asset(release):
+            for asset in release['assets']:
+                if asset['name'] == 'docklane-images.tar.gz':
+                    asset['name'] = 'docker-manager-images.tar.gz'
+                    asset['browser_download_url'] = asset['browser_download_url'].replace('docklane-images.tar.gz', asset['name'])
+        self.change_release(rename_asset)
+        result = self.bash('version=v0.3.2-beta.1; resolve_release', ok=False)
+        self.assertIn('exactly the six supported assets', result.stderr)
+        self.assertFalse((self.work / 'binary').exists())
 
     def test_six_asset_manifest_must_list_both_archives_and_script(self):
         self.make_slim_release()
         manifest = self.assets / 'RELEASE-SHA256SUMS'
         manifest.write_text(''.join(line + '\n' for line in manifest.read_text().splitlines() if 'arm64' not in line))
-        self.assertIn('other five assets', self.bash('version=v0.3.1-beta.1; resolve_release; verify_release', ok=False).stderr)
+        self.assertIn('other five assets', self.bash('version=v0.3.2-beta.1; resolve_release; verify_release', ok=False).stderr)
 
     def test_beta_pages_select_highest_numeric_published_beta(self):
-        self.make_slim_release('v0.3.1-beta.10')
+        self.make_slim_release('v0.3.2-beta.10')
         latest = self.slim_metadata
         older = {**latest, 'tag_name': 'v0.3.1-beta.2'}
         draft = {**latest, 'tag_name': 'v99.0.0-beta.1', 'draft': True}
@@ -380,16 +426,16 @@ fetch() {{
  else cp "$assets/${{1##*/}}" "$2"; fi
 }}
 """
-        self.bash('channel=beta; resolve_release; [[ $version == v0.3.1-beta.10 ]]; verify_release', prelude=prelude)
+        self.bash('channel=beta; resolve_release; [[ $version == v0.3.2-beta.10 ]]; verify_release', prelude=prelude)
         self.assertIn('page=2', self.trace.read_text())
 
     def test_explicit_version_overrides_channel_but_checks_prerelease_status(self):
         self.make_slim_release()
-        self.bash('channel=stable; version=v0.3.1-beta.1; resolve_release; verify_release')
+        self.bash('channel=stable; version=v0.3.2-beta.1; resolve_release; verify_release')
         shutil.rmtree(self.work)
         self.work.mkdir()
         self.change_release(lambda release: release.update(prerelease=False))
-        self.bash('channel=beta; version=v0.3.1-beta.1; resolve_release', ok=False)
+        self.bash('channel=beta; version=v0.3.2-beta.1; resolve_release', ok=False)
 
     def test_nonboolean_or_missing_draft_is_never_a_published_release(self):
         for value in (None, 0, '', True, 'false', 'missing'):
@@ -402,7 +448,7 @@ fetch() {{
                 else:
                     self.slim_metadata['draft'] = value
                 (self.assets / 'release.json').write_text(json.dumps(self.slim_metadata))
-                self.bash('version=v0.3.1-beta.1; resolve_release', ok=False)
+                self.bash('version=v0.3.2-beta.1; resolve_release', ok=False)
                 (self.assets / 'release.json').write_text(json.dumps([self.slim_metadata]))
                 self.bash('channel=beta; resolve_release', prelude='fetch() { cp "$assets/release.json" "$2"; }', ok=False)
 
@@ -410,16 +456,16 @@ fetch() {{
         result = self.bash('channel=beta; resolve_release', prelude='fetch() { return 22; }; fetch_release_page() { echo unwanted-web >&2; }', ok=False)
         self.assertIn('Beta release metadata is unavailable', result.stderr)
         self.assertNotIn('unwanted-web', result.stderr)
-        result = self.bash('version=v0.3.1-beta.1; resolve_release', prelude='fetch() { return 22; }; fetch_release_page() { echo unwanted-web >&2; }', ok=False)
+        result = self.bash('version=v0.3.2-beta.1; resolve_release', prelude='fetch() { return 22; }; fetch_release_page() { echo unwanted-web >&2; }', ok=False)
         self.assertNotIn('unwanted-web', result.stderr)
 
-    def test_implicit_downgrade_is_rejected_for_legacy_bootstrap(self):
+    def test_implicit_downgrade_is_rejected(self):
         receipt = self.root / 'receipt'
         receipt.mkdir()
-        (receipt / 'release.json').write_text(json.dumps({'version': 'v0.3.1-beta.10'}))
-        self.assertIn('downgrade', self.bash('version=v0.3.0; check_selected_downgrade', ok=False).stderr)
-        self.bash('version=v0.3.0; explicit_version=true; check_selected_downgrade')
-        self.bash('version=v0.3.1; check_selected_downgrade')
+        (receipt / 'release.json').write_text(json.dumps({'version': 'v0.3.2-beta.10'}))
+        self.assertIn('downgrade', self.bash('version=v0.3.1; check_selected_downgrade', ok=False).stderr)
+        self.bash('version=v0.3.1; explicit_version=true; check_selected_downgrade')
+        self.bash('version=v0.3.2; check_selected_downgrade')
         self.assertIn('downgrade', self.bash('version=v0.3.1-beta.2; check_selected_downgrade', ok=False).stderr)
 
     def change_release(self, change):
@@ -456,7 +502,7 @@ fetch() {{
         self.assertIn('--migrate-from', help_text)
         self.assertIn('Defaults to the latest beta GitHub Release (testing only; do not use in production)', help_text)
         self.assertIn('Use --channel stable to request a formal release explicitly.', help_text)
-        for args in ['--unknown', '--version', '--version latest', '--version v0.3.0-rc1',
+        for args in ['--unknown', '--version', '--version latest', '--version v0.3.2-rc1',
                      '--migrate-from relative', '--config relative', '--listen --dry-run',
                      '--download-source', '--download-source https://evil.invalid']:
             with self.subTest(args=args):
@@ -464,7 +510,7 @@ fetch() {{
         self.assertFalse(self.trace.exists())
 
     def test_dry_run_has_no_install_or_download(self):
-        result = self.bash('main --dry-run --version v0.3.0 --listen :9090 '
+        result = self.bash('main --dry-run --version v0.3.2 --listen :9090 '
                            '--migrate-from /old/data --config /old/config.json')
         self.assertIn(':9090', result.stdout)
         self.assertIn('/old/data', result.stdout)
@@ -599,17 +645,17 @@ cat {quote(self.work / 'effective')}
         self.assertIn('source data and recovery backups are retained', result.stderr)
 
     def test_latest_resolves_once_and_downloads_pinned_assets(self):
-        self.bash('resolve_release; [[ $version == v0.3.0 ]]; verify_release')
+        self.bash('resolve_release; [[ $version == v0.3.2 ]]; verify_release')
         calls = self.trace.read_text().splitlines()
         self.assertEqual(sum('api.github.com' in line for line in calls), 1)
         self.assertIn('/releases/latest', calls[0])
-        self.assertTrue(all('/download/v0.3.0/' in line for line in calls[1:]))
+        self.assertTrue(all('/download/v0.3.2/' in line for line in calls[1:]))
         self.assertEqual((self.work / 'binary/docklane').read_bytes(), self.binary)
         self.assertEqual((self.work / 'binary.sha256').read_text(), hashlib.sha256(self.binary).hexdigest())
 
     def test_explicit_release_is_fixed(self):
-        self.bash('version=v0.3.0; resolve_release; verify_release')
-        self.assertIn('/releases/tags/v0.3.0', self.trace.read_text().splitlines()[0])
+        self.bash('version=v0.3.2; resolve_release; verify_release')
+        self.assertIn('/releases/tags/v0.3.2', self.trace.read_text().splitlines()[0])
 
     def api_unavailable_prelude(self, redirect=None, *, failed_asset='', web_failure=False):
         redirect = redirect or f'https://github.com/Funnyrz/docklane/releases/tag/{TAG}'
@@ -640,22 +686,22 @@ curl() {{
 '''
 
     def test_rate_limited_api_uses_one_web_redirect_and_pins_all_assets(self):
-        self.bash('resolve_release; [[ $version == v0.3.0 ]]; verify_release',
+        self.bash('resolve_release; [[ $version == v0.3.2 ]]; verify_release',
                   prelude=self.api_unavailable_prelude())
         calls = self.trace.read_text().splitlines()
         self.assertEqual(sum('api.github.com' in line for line in calls), 1)
         self.assertEqual(sum(line.startswith('web-curl ') for line in calls), 1)
         self.assertIn('--write-out %{url_effective}', calls[1])
         self.assertIn("--proto =https --proto-redir =https", calls[1])
-        self.assertTrue(all('/download/v0.3.0/' in line for line in calls[2:]))
+        self.assertTrue(all('/download/v0.3.2/' in line for line in calls[2:]))
         self.assertEqual((self.work / 'binary/docklane').read_bytes(), self.binary)
         self.assertNotIn('v9.9.9', (self.work / 'release-selection').read_text())
 
     def test_rate_limited_explicit_latest_is_allowed(self):
-        self.bash('version=v0.3.0; resolve_release; verify_release',
+        self.bash('version=v0.3.2; resolve_release; verify_release',
                   prelude=self.api_unavailable_prelude())
         calls = self.trace.read_text().splitlines()
-        self.assertIn('/releases/tags/v0.3.0', calls[0])
+        self.assertIn('/releases/tags/v0.3.2', calls[0])
         self.assertEqual(sum(line.startswith('web-curl ') for line in calls), 1)
 
     def test_rate_limited_explicit_older_version_is_safely_rejected(self):
@@ -667,16 +713,16 @@ curl() {{
 
     def test_web_redirect_rejects_untrusted_or_nonstable_release_urls(self):
         invalid = [
-            'https://github.com/Other/docklane/releases/tag/v0.3.0',
-            'https://github.com/Funnyrz/other/releases/tag/v0.3.0',
-            'https://evil.invalid/Funnyrz/docklane/releases/tag/v0.3.0',
-            'http://github.com/Funnyrz/docklane/releases/tag/v0.3.0',
-            'https://github.com/Funnyrz/docklane/releases/tag/v0.3.0-rc1',
+            'https://github.com/Other/docklane/releases/tag/v0.3.2',
+            'https://github.com/Funnyrz/other/releases/tag/v0.3.2',
+            'https://evil.invalid/Funnyrz/docklane/releases/tag/v0.3.2',
+            'http://github.com/Funnyrz/docklane/releases/tag/v0.3.2',
+            'https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-rc1',
             'https://github.com/Funnyrz/docklane/releases/tag/draft',
             'https://github.com/Funnyrz/docklane/releases/new?draft=true',
             'https://github.com/Funnyrz/docklane/releases/latest',
-            'https://github.com/Funnyrz/docklane/releases/tag/v0.3.0?prerelease=false',
-            'https://github.com/Funnyrz/docklane/releases/tag/v0.3.0/extra',
+            'https://github.com/Funnyrz/docklane/releases/tag/v0.3.2?prerelease=false',
+            'https://github.com/Funnyrz/docklane/releases/tag/v0.3.2/extra',
         ]
         for url in invalid:
             with self.subTest(url=url):
@@ -702,7 +748,7 @@ fetch_release_page() {{ return 22; }}
 
     def test_beta_redirect_is_never_accepted_as_stable(self):
         result = self.bash('channel=stable; resolve_release',
-                           prelude=self.api_unavailable_prelude('https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1'), ok=False)
+                           prelude=self.api_unavailable_prelude('https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1'), ok=False)
         self.assertIn('did not resolve to a stable Docklane release', result.stderr)
         self.assertIn('No stable release could be verified', result.stderr)
         self.assertIn('--channel beta explicitly', result.stderr)
@@ -715,15 +761,15 @@ fetch_release_page() {{ return 22; }}
 
     def test_web_fallback_asset_download_failure_stops(self):
         self.bash('resolve_release; echo unexpected-verification',
-                  prelude=self.api_unavailable_prelude(failed_asset='LICENSE'), ok=False)
+                  prelude=self.api_unavailable_prelude(failed_asset='docklane-images.tar.gz'), ok=False)
         self.assertFalse((self.work / 'binary').exists())
         self.assertFalse((self.work / 'SHA256SUMS').exists())
 
     def test_web_fallback_keeps_checksum_verification(self):
-        (self.assets / 'LICENSE').write_bytes(b'corrupted after release checksums')
+        (self.assets / 'docklane-installation.tar.gz').write_bytes(b'corrupted after release checksums')
         result = self.bash('resolve_release; verify_release',
                            prelude=self.api_unavailable_prelude(), ok=False)
-        self.assertIn('Checksum mismatch: LICENSE', result.stderr)
+        self.assertIn('Checksum mismatch: docklane-installation.tar.gz', result.stderr)
         self.assertFalse((self.work / 'binary').exists())
 
     def test_valid_api_metadata_rejection_does_not_use_web_fallback(self):
@@ -741,7 +787,7 @@ fetch_release_page() { echo 'unexpected web fallback' >&2; exit 90; }
 
     def test_unstable_missing_duplicate_or_redirected_assets_rejected(self):
         changes = [lambda r: r.update(draft=True), lambda r: r.update(prerelease=True),
-                   lambda r: r.update(tag_name='v0.3.0-rc1'),
+                   lambda r: r.update(tag_name='v0.3.2-rc1'),
                    lambda r: r['assets'].pop(),
                    lambda r: r['assets'].append(r['assets'][0].copy()),
                    lambda r: r['assets'][0].update(browser_download_url='https://evil.invalid/payload'),
@@ -759,25 +805,24 @@ fetch_release_page() { echo 'unexpected web fallback' >&2; exit 90; }
         self.bash('resolve_release; echo reached-verification', prelude='''
 original_fetch=$(declare -f fetch)
 eval "${original_fetch/fetch ()/fixture_fetch ()}"
-fetch() { if [[ $1 == *LICENSE ]]; then printf partial > "$2"; return 22; fi; fixture_fetch "$@"; }
+fetch() { if [[ $1 == *docklane-images.tar.gz ]]; then printf partial > "$2"; return 22; fi; fixture_fetch "$@"; }
 ''', ok=False)
         self.assertFalse((self.work / 'binary').exists())
 
     def test_corrupt_asset_and_unsafe_manifest_rejected(self):
-        self.bash('resolve_release; printf corrupt >> "$work/LICENSE"; verify_release', ok=False)
+        self.bash('resolve_release; printf corrupt >> "$work/docklane-installation.tar.gz"; verify_release', ok=False)
         self.assertFalse((self.work / 'binary').exists())
         shutil.rmtree(self.work)
         self.work.mkdir()
         self.bash('resolve_release; printf "bad checksum\\n" > "$work/RELEASE-SHA256SUMS"; verify_release', ok=False)
 
-    def test_duplicate_manifest_and_inconsistent_sidecar(self):
+    def test_duplicate_manifest_and_inconsistent_image_manifest(self):
         self.bash('resolve_release; cat "$work/RELEASE-SHA256SUMS" >> "$work/duplicate"; '
                   'cat "$work/duplicate" >> "$work/RELEASE-SHA256SUMS"; verify_release', ok=False)
         shutil.rmtree(self.work)
         self.work.mkdir()
-        (self.assets / (self.binary_name + '.sha256')).write_text('0' * 64 + '  ' + self.binary_name + '\n')
-        paths = sorted(p for p in self.assets.iterdir() if p.name not in ('release.json', 'RELEASE-SHA256SUMS'))
-        (self.assets / 'RELEASE-SHA256SUMS').write_text(''.join(f'{checksum(p)}  {p.name}\n' for p in paths))
+        self.slim_materials['IMAGE-SHA256SUMS'] = b'0' * 64 + b'  docklane-images.tar.gz\n'
+        self.repack_slim()
         result = self.bash('resolve_release; verify_release', ok=False)
         self.assertIn('Inconsistent manifest', result.stderr)
 
@@ -957,12 +1002,12 @@ local_docker() {{ [[ -x {quote(plugin)} ]] && {quote(plugin)}; }}
 
     def worker_fixture(self, store='classic', *, graph='valid'):
         config = json.dumps({'architecture': 'amd64', 'os': 'linux',
-                             'config': {'Env': [f'DM_BACKUP_WORKER_IMAGE=docker-manager:{TAG}']}}).encode()
+                             'config': {'Env': [f'DM_BACKUP_WORKER_IMAGE=docklane:{TAG}']}}).encode()
         config_id = 'sha256:' + hashlib.sha256(config).hexdigest()
         legacy = store in ('classic-only', 'legacy-to-containerd')
         config_name = config_id[7:] + '.json' if legacy else 'blobs/sha256/' + config_id[7:]
         members = {config_name: config}
-        native = f'docker-manager:{TAG}-amd64'
+        native = f'docklane:{TAG}-amd64'
         members['manifest.json'] = json.dumps([{'Config': config_name,
                                               'RepoTags': [native], 'Layers': []}]).encode()
         referenced = 'sha256:' + 'f' * 64 if graph == 'wrong-config' else config_id
@@ -975,7 +1020,7 @@ local_docker() {{ [[ -x {quote(plugin)} ]] && {quote(plugin)}; }}
             members['blobs/sha256/' + index_id[7:]] = b'{}' if graph == 'corrupt-index' else index
         expected = config_id if legacy else index_id
         (self.work / 'IMAGES.txt').write_text(f'[{native}] {expected} linux/amd64\n')
-        archive(self.work / 'docker-manager-images.tar.gz', members)
+        archive(self.work / 'docklane-images.tar.gz', members)
         # docker image save always produces a plain tar, and stores may rewrite
         # metadata filenames and inspect IDs while preserving exact config bytes.
         self.loaded_archive = self.root / 'loaded-worker.tar'
@@ -986,7 +1031,7 @@ local_docker() {{ [[ -x {quote(plugin)} ]] && {quote(plugin)}; }}
         if store == 'legacy-to-containerd':
             identity = 'sha256:' + '2' * 64
         worker = [{'Id': identity, 'Architecture': 'amd64', 'Os': 'linux',
-                   'Config': {'Env': [f'DM_BACKUP_WORKER_IMAGE=docker-manager:{TAG}']}}]
+                   'Config': {'Env': [f'DM_BACKUP_WORKER_IMAGE=docklane:{TAG}']}}]
         fixture = self.root / 'worker.json'
         fixture.write_text(json.dumps(worker))
         return fixture, worker
@@ -1013,7 +1058,7 @@ local_docker() {{
             with self.subTest(store=store):
                 fixture, _ = self.worker_fixture(store)
                 self.bash('install_worker', prelude=self.worker_prelude(fixture))
-                self.assertIn(f'docker tag docker-manager:{TAG}-amd64 docker-manager:{TAG}', self.trace.read_text())
+                self.assertIn(f'docker tag docklane:{TAG}-amd64 docklane:{TAG}', self.trace.read_text())
                 self.trace.unlink()
 
     def test_worker_rejects_index_with_wrong_graph_or_corrupt_digest(self):
@@ -1037,7 +1082,7 @@ local_docker() {{
         fixture, worker = self.worker_fixture()
         prelude = self.worker_prelude(fixture)
         for field, value in [('Id', 'not-a-valid-sha256'), ('Architecture', 'arm64'), ('Os', 'windows'),
-                             ('Config', {'Env': ['DM_BACKUP_WORKER_IMAGE=docker-manager:v0.2.0']})]:
+                             ('Config', {'Env': ['DM_BACKUP_WORKER_IMAGE=docklane:v0.2.0']})]:
             with self.subTest(field=field):
                 bad = json.loads(json.dumps(worker))
                 bad[0][field] = value

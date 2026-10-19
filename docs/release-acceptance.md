@@ -23,7 +23,7 @@
 
 ## 安装、重启、升级与镜像持久化
 
-当前源码构建的可执行文件为 `bin/docklane`，发布二进制为 `docklane-linux-amd64` / `docklane-linux-arm64`，精简包内仅含 `docklane`。安装与升级脚本安装 `/usr/local/bin/docklane`，并处理旧二进制路径切换；systemd 单元、服务账号、配置/数据目录、镜像标签和 `DM_*` 标识保留兼容。历史验收报告保留当时的产物名称与摘要，不因更名改写证据。
+当前源码构建的可执行文件为 `bin/docklane`，发布二进制为 `docklane-linux-amd64` / `docklane-linux-arm64`，精简包内仅含 `docklane`。安装与升级脚本安装 `/usr/local/bin/docklane`。当前版本的服务及账号为 `docklane`，配置目录为 `/etc/docklane`，数据目录为 `/var/lib/docklane`，镜像为 `docklane:v0.3.2-beta.1`；`DM_*` 接口及内部数据格式保持不变。旧 `docker-manager` 部署残留会被拒绝，不执行自动更名迁移。上方平台报告为历史验收，保留当时的产物名称与摘要；本次发布的实际验证范围见 [当前验证记录](verification.md)。
 
 `scripts/platform-acceptance.py` 必须在明确隔离的 Linux guest 内以 root 运行；首次安装阶段拒绝已有应用安装及数据。源码目录包含 `scripts/` 与 `deployments/`，先准备实际 Docker、固定版本工具、已校验二进制和本机架构正式镜像。
 
@@ -32,8 +32,8 @@ export DM_PLATFORM_ISOLATED=1
 export DM_PLATFORM_ENVIRONMENT=vm
 python3 scripts/platform-acceptance.py --phase prepare \
   --state /var/lib/dm-platform-run1 --source "$PWD" \
-  --binary "$PWD/bin/release/docklane-linux-arm64" \
-  --image docker-manager:v0.3.0 --fixture-image docker-manager:v0.3.0 \
+  --binary "$PWD/bin/release-internal/docklane-linux-arm64" \
+  --image docklane:v0.3.2-beta.1 --fixture-image docklane:v0.3.2-beta.1 \
   --report /var/lib/dm-platform-run1-report.json
 # 在外部真正关闭并启动这个测试 VM，然后依次执行同样参数：
 # --phase resume、--phase migration、--phase docker、--phase cleanup
@@ -52,7 +52,7 @@ python3 scripts/platform-acceptance.py --phase prepare \
 ```sh
 DM_TEST_DOCKER_ENDPOINT=unix:///var/run/docker.sock \
 DM_TEST_RESTIC=/usr/local/bin/restic \
-DM_TEST_WORKER_IMAGE=docker-manager:v0.3.0 \
+DM_TEST_WORKER_IMAGE=docklane:v0.3.2-beta.1 \
 DM_TEST_REPORT=/var/tmp/dm-integration-report.json \
 DM_TEST_TMPDIR=/var/tmp \
 python3 scripts/integration.py --binary /opt/release/docklane-linux-amd64
@@ -68,4 +68,4 @@ python3 scripts/integration.py --binary /opt/release/docklane-linux-amd64
 
 `scripts/cross-host-recovery.py` 只接收传输后的加密仓库、0600 离线口令材料和源文件期望值；在另一台 Linux 环境创建全新 SQLite，发现仓库内验证标记和 manifest，恢复到新目录并独立核对内容、权限及 UID/GID。源应用 SQLite 和 master.key 不属于传输材料。
 
-所有报告记录具体工具、CPU、系统、开始/结束时间和产物摘要；以 [验收矩阵](acceptance-matrix.md) 与 [验证记录](verification.md) 为索引。本地 CI 专属 Engine 的两版预演见 [准备证据](evidence/remote-release-readiness.json)，缺失的仓库、commit/tag、runner、registry 与发布配置见 [具体要求](remote-release-requirements.md)。未配置这些目标，因此本地验收不包含远端 CI 实跑、镜像推送或正式签发发布。
+所有报告记录具体工具、CPU、系统、开始/结束时间和产物摘要；以 [验收矩阵](acceptance-matrix.md) 与 [验证记录](verification.md) 为索引。本地 CI 专属 Engine 的两版预演见 [准备证据](evidence/remote-release-readiness.json)，缺失的仓库、commit/tag、runner、registry 与发布配置见 [具体要求](remote-release-requirements.md)。以上早期准备报告保留当时环境；当前 GitHub CI 与发布结果以验证记录中的准确提交和工作流链接为准。

@@ -32,7 +32,7 @@ for path in output.iterdir():
     if path.name not in public or not path.is_file() or path.is_symlink():
         raise SystemExit('Refusing contaminated public output directory: ' + str(path))
 required = {'SHA256SUMS', 'IMAGE-SHA256SUMS', 'IMAGES.txt', 'release-ci-evidence.json',
-            'docklane-linux-amd64', 'docklane-linux-arm64', 'LICENSE', 'docker-manager-images.tar.gz'}
+            'docklane-linux-amd64', 'docklane-linux-arm64', 'LICENSE', 'docklane-images.tar.gz'}
 for arch in ('amd64', 'arm64'):
     required |= {f'docklane-{tag}-linux-{arch}.tar.gz', f'docklane-{tag}-linux-{arch}.tar.gz.sha256'}
 allowed = required | {'VERSION'}
@@ -73,10 +73,10 @@ metadata.update({'VERSION': (version + '\n').encode(), 'TOOL-VERSIONS.txt': (roo
                  'SECURITY-NOTES.md': (root / 'docs/security-notes.md').read_bytes()})
 with tempfile.TemporaryDirectory(prefix='.docklane-candidate-', dir=output.parent) as temporary:
     candidate = Path(temporary)
-    for name in helper.release_assets(tag) - {'docker-manager-installation.tar.gz', 'install-online.sh'}:
+    for name in helper.release_assets(tag) - {'docklane-installation.tar.gz', 'install-online.sh'}:
         shutil.copyfile(build / name, candidate / name)
     shutil.copyfile(root / 'scripts/install-online.sh', candidate / 'install-online.sh')
-    with tarfile.open(candidate / 'docker-manager-installation.tar.gz', 'w:gz', format=tarfile.PAX_FORMAT) as archive:
+    with tarfile.open(candidate / 'docklane-installation.tar.gz', 'w:gz', format=tarfile.PAX_FORMAT) as archive:
         for entry in entries:
             archive.add(entry, arcname=entry.relative_to(root).as_posix(), recursive=False)
         for name, content in metadata.items():

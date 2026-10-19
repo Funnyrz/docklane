@@ -2,7 +2,7 @@
 
 > 本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。
 
-当前源码及最新 Beta 为 [v0.3.1-beta.2 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2)，配置与数据库 schema 仍为 v1。旧 v0.3.0 Release 已撤回，目前没有正式版，正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
+当前源码及最新 Beta 为 [v0.3.2-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1)，配置与数据库 schema 仍为 v1。旧 v0.3.1-beta.1、v0.3.1-beta.2 的 Release、附件及远端 Tag 已撤回；v0.3.0 Release 也已撤回，目前没有正式版，正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
 
 ## 一键在线安装
 
@@ -27,7 +27,7 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 | 参数 | 行为 |
 | --- | --- |
 | `--channel stable` / `beta` | 默认 `beta`，选择最新已发布 Beta；显式 `stable` 请求正式版，目前无正式版会停止 |
-| `--version v0.3.1-beta.2` | 固定当前 Beta，优先于渠道参数；示例同时显式传入 `--channel beta` |
+| `--version v0.3.2-beta.1` | 固定当前 Beta，优先于渠道参数；示例同时显式传入 `--channel beta` |
 | `--download-source mirror` / `direct` | 默认镜像优先并回退直连；`direct` 使安装器后续下载完全直连 |
 | `--listen :9999` | 设置监听地址；新装默认 `:9999`，已有安装保留原值，显式指定时覆盖 |
 | `--migrate-from /绝对路径/data` | 显式迁移手动实例的完整应用数据；保留源目录 |
@@ -37,16 +37,16 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 
 脚本补齐基础工具（包括 Python 3）。Docker 未安装时从 Docker 官方软件源安装稳定 29.x 并启用开机自启；已有可用 Docker 28/29 不升级、不重启，冲突安装明确报错。复用 Compose v2，缺失时安装 v2.40.3；使用 Restic 0.19.1，其他应用的不同版本不被覆盖。Docklane 专用工具与同 Release 的 worker 镜像由脚本准备，镜像加载后检查版本和架构。
 
-安装路径为 `/usr/local/bin/docklane`，账号和服务名为 `docker-manager`，默认配置为 `/etc/docker-manager/config.json`，默认数据目录为 `/var/lib/docker-manager`。服务以专用账号运行，保留 `ProtectHome=true` 等限制；不授予 daemon 配置写权限，不改防火墙，不递归修改外部业务目录的所有者。使用外部 Compose、备份源、仓库和恢复目录前仍需显式授权路径与文件权限。
+安装路径为 `/usr/local/bin/docklane`，账号和服务名为 `docklane`，默认配置为 `/etc/docklane/config.json`，默认数据目录为 `/var/lib/docklane`，安装备份位于 `/var/backups/docklane`。服务以专用账号运行，保留 `ProtectHome=true` 等限制；不授予 daemon 配置写权限，不改防火墙，不递归修改外部业务目录的所有者。使用外部 Compose、备份源、仓库和恢复目录前仍需显式授权路径与文件权限。
 
 结束时脚本检查 `systemctl is-active`、`systemctl is-enabled` 和有界 `/healthz` 请求，成功后显示访问地址、配置位置及日志命令。`:9999` 监听所有网卡，请通过可信网络或 HTTPS 反向代理访问。服务器重新启动后由 systemd 自动启动，无需再次运行脚本。
 
 ```sh
-sudo systemctl status docker-manager
-sudo journalctl -u docker-manager -f
-sudo systemctl restart docker-manager
-sudo systemctl stop docker-manager
-sudo systemctl disable docker-manager
+sudo systemctl status docklane
+sudo journalctl -u docklane -f
+sudo systemctl restart docklane
+sudo systemctl stop docklane
+sudo systemctl disable docklane
 ```
 
 ### Beta 通道
@@ -55,10 +55,12 @@ sudo systemctl disable docker-manager
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.1-beta.2
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.2-beta.1
 ```
 
 ### 手动实例迁移
+
+本版不自动将旧 `docker-manager` 部署更名或迁移；检测到旧服务、配置或数据残留时明确停止，不覆盖或删除旧内容。`--migrate-from` 仅用于一般手动 Docklane 实例，不能绕过上述检查。
 
 已有手动部署不要直接执行全新安装。先预览迁移，再使用相同参数去掉 `--dry-run` 执行：
 
@@ -81,10 +83,10 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --channel beta --version v0.3.1-beta.2
+  | sudo bash -s -- --channel beta --version v0.3.2-beta.1
 ```
 
-标准受管安装会保留现有配置和实际生效的数据目录；同版本且二进制 SHA-256 一致时跳过替换。版本变化先停服务，再备份实际数据目录、配置、服务单元和旧二进制，之后安装同版本材料并检查健康。显式指定 `--listen` 才更改已有监听地址。要将既有 8080 监听改为 9999，在上述在线命令末尾追加 `--listen :9999`；无参数重跑会继续保留 8080。需要降级时应按下方回退说明恢复配套备份，不能用旧程序直接打开升级后的数据库。
+标准受管安装会保留现有配置和实际生效的数据目录；同版本且二进制 SHA-256 一致时跳过替换。版本变化先停服务，再备份实际数据目录、配置、服务单元和旧二进制，之后安装同版本材料并检查健康。显式指定 `--listen` 才更改已有监听地址。要将自定义监听改为 9999，在上述在线命令末尾追加 `--listen :9999`；无参数重跑会保留已配置地址。需要降级时应按下方回退说明恢复配套备份，不能用旧程序直接打开升级后的数据库。
 
 安装或升级失败返回非零退出码，停止未通过健康检查的新服务，并保留源数据及备份。先阅读错误输出与日志，不反复重启或混合恢复数据库和密钥。管理员按下方[升级和回退](#升级和回退)区分受管升级与首次手动迁移恢复；首次迁移可能没有旧服务单元或旧二进制备份，不能直接套用 systemd 回退步骤。失败前已停机的来源不会被强行启动；恢复由管理员确认。
 
@@ -96,15 +98,15 @@ Beta Release 只有六个附件：双架构原生 `tar.gz`、安装材料、镜�
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.1-beta.2-linux-amd64.tar.gz
-tar -xzf docker-manager-installation.tar.gz
+tar -xzf docklane-v0.3.2-beta.1-linux-amd64.tar.gz
+tar -xzf docklane-installation.tar.gz
 sha256sum --check IMAGE-SHA256SUMS
-sudo docker load -i docker-manager-images.tar.gz
-sudo docker tag docker-manager:v0.3.1-beta.2-amd64 docker-manager:v0.3.1-beta.2
+sudo docker load -i docklane-images.tar.gz
+sudo docker tag docklane:v0.3.2-beta.1-amd64 docklane:v0.3.2-beta.1
 sudo ./scripts/install.sh ./docklane
 ```
 
-v0.3.1-beta.2 的在线入口、原生程序、离线安装配置和 Docker 部署统一默认使用 9999 端口；包内 Compose 已设置 `127.0.0.1:9999:9999` 和 `DM_LISTEN=:9999`。随包在线脚本默认选择最新 Beta，并包含安装阶段及下载进度提示。已有安装保留已配置的监听地址；在线升级时只有显式 `--listen` 才覆盖。旧 v0.3.1-beta.1 附件保留发布时快照：默认端口为 8080，其附带在线脚本需显式传入 `--channel beta`。
+v0.3.2-beta.1 的在线入口、原生程序、离线安装配置和 Docker 部署统一默认使用 9999 端口；包内 Compose 已设置 `127.0.0.1:9999:9999` 和 `DM_LISTEN=:9999`。随包在线脚本默认选择最新 Beta，并包含安装阶段及下载进度提示。已有安装保留已配置的监听地址；在线升级时只有显式 `--listen` 才覆盖。旧 v0.3.1-beta.1、v0.3.1-beta.2 已撤回，请使用本版完整材料，不混用历史附件。
 
 arm64 将包名和镜像标签中的 `amd64` 改为 `arm64`。原生包仅含 `docklane` 和 `LICENSE`，安装时还需要同版本材料，不应混用 `main` 的配置或服务文件。源码构建的原始二进制在 `bin/release-internal/`（`RELEASE_BUILD_DIR`），最终附件在 `bin/release/`（`RELEASE_OUTPUT_DIR`）；源码安装使用 `sudo ./scripts/install.sh ./bin/release-internal/docklane-linux-amd64`。已撤回版本不再提供当前下载命令，旧验收记录仅作历史留存。
 
@@ -118,13 +120,13 @@ arm64 将包名和镜像标签中的 `amd64` 改为 `arm64`。原生包仅含 `d
 
 数据目录必须可写，应用设置权限 0700，数据库和主密钥 0600。不要将已有通用业务目录用作 data_dir。应用支持的密钥文件必须随应用数据备份。
 
-二进制可执行文件为 `docklane`，systemd 安装路径为 `/usr/local/bin/docklane`。为兼容已有安装，服务名与账号仍为 `docker-manager`，配置和数据目录仍为 `/etc/docker-manager` 与 `/var/lib/docker-manager`。二进制示例默认使用 docker-manager 账号；对需要备份的目录授予读取权限，对仓库/恢复目录授予写入权限。Docker Socket 的访问属于高权限。非本地驱动卷需要单独适配，首版不隐式访问远程驱动。
+二进制可执行文件为 `docklane`，systemd 安装路径为 `/usr/local/bin/docklane`。服务名与账号统一为 `docklane`，配置和数据目录为 `/etc/docklane` 与 `/var/lib/docklane`。二进制示例默认使用 docklane 账号；对需要备份的目录授予读取权限，对仓库/恢复目录授予写入权限。Docker Socket 的访问属于高权限。非本地驱动卷需要单独适配，首版不隐式访问远程驱动。
 
 容器模式的路径填写宿主机路径，配置显式 host/local 映射。例如 `/srv/backups` → `/backups`。Compose 相对 Bind 路径要求保留原宿主机工作目录语义，不允许通过错误映射部署到意外位置。
 
 非 root 服务备份其他 UID 的本地 Volume 时，临时执行容器只获得指定只读数据源、可写仓库和私有临时目录，并以仓库所有者身份写入仓库。恢复不同 UID/GID 的文件需要受限恢复容器：仓库只读、仓库锁目录可写、恢复目标可写，禁用网络，不挂载 Docker Socket；授予恢复文件元数据必需的 Linux capabilities。缺少镜像、Docker 权限或能力时任务失败，不将未校验的恢复标记成功。运行镜像和 `backup_worker_image` 应使用相同版本。
 
-当前 Beta 本地构建和离线归档使用 `docker-manager:v0.3.1-beta.2`；若以后从正式 registry 安装，需同时将应用镜像与 `DM_BACKUP_WORKER_IMAGE`（二进制模式为 `backup_worker_image`）设为实际发布的完整镜像引用，建议固定已核对架构的 Digest。只拉取 `ghcr.io/…` 不会生成默认的本地 tag。启动后先执行一次 Volume 备份和新目录恢复，确认 worker 镜像可用。远端仓库、权限和签发要求见 [发布配置要求](remote-release-requirements.md)。
+当前 Beta 本地构建和离线归档使用 `docklane:v0.3.2-beta.1`；若以后从正式 registry 安装，需同时将应用镜像与 `DM_BACKUP_WORKER_IMAGE`（二进制模式为 `backup_worker_image`）设为实际发布的完整镜像引用，建议固定已核对架构的 Digest。只拉取 `ghcr.io/…` 不会生成默认的本地 tag。启动后先执行一次 Volume 备份和新目录恢复，确认 worker 镜像可用。远端仓库、权限和签发要求见 [发布配置要求](remote-release-requirements.md)。
 
 Docker 模式应将目录备份源单独只读挂入管理容器，将仓库和恢复目录分别可写映射；不要将三者共同的父目录可写挂入面板。停机备份会拒绝停止面板自身或共享其应用数据的容器；无法确认自身身份时也会拒绝，以免停止执行备份和补偿的进程。需要在线文件备份时可显式选择 file 模式并接受一致性风险。临时备份容器将 HOME、临时文件和 Restic 缓存放在私有 `/tmp` tmpfs，兼容只读根目录。
 
@@ -151,19 +153,19 @@ Docker 模式永远不允许自动写宿主机 daemon 配置。二进制模式�
 
 ## 升级和回退
 
-`--version` 选择目标版本，不保证旧版数据库或旧安装器能接受较新配置。已撤回的 v0.3.0 安装辅助程序不识别 Beta worker 标签，显式指定旧版本也可能在停机前被拒绝；从 Beta 回退应恢复升级前同一组备份的程序、配置、数据库与密钥，不能只替换版本号或二进制。
+`--version` 选择目标版本，不保证旧版数据库或旧安装器能接受较新配置。已撤回版本不再提供下载；本版不支持旧 `docker-manager` 部署自动更名或升级。对于新命名下的受管 Docklane 安装，从 Beta 回退应恢复升级前同一组备份的程序、配置、数据库与密钥，不能只替换版本号或二进制。
 
-在线升级见上方流程；离线升级先校验发布 `RELEASE-SHA256SUMS`。二进制使用 `scripts/upgrade.sh /path/to/docklane`，同时保留该版本的 `deployments/docker-manager.service`。脚本停服务后按实际生效的数据目录备份完整数据、配置、原服务单元及存在的 `docklane` / `docker-manager` 二进制，再安装 `/usr/local/bin/docklane` 和匹配的服务单元，执行 daemon-reload 后启动，并在有界等待内检查服务与 `/healthz`。旧 `/usr/local/bin/docker-manager` 保留作为回退材料；已有服务会迁移到新入口，无需迁移数据目录。
+在线升级见上方流程；离线升级先校验发布 `RELEASE-SHA256SUMS`。二进制使用 `scripts/upgrade.sh /path/to/docklane`，同时保留该版本的 `deployments/docklane.service`。脚本停服务后按实际生效的数据目录备份完整数据、配置、原服务单元及 `docklane` 二进制，再安装 `/usr/local/bin/docklane` 和匹配的服务单元，执行 daemon-reload 后启动，并在有界等待内检查服务与 `/healthz`。升级继续使用原配置与数据目录，不更名或接管旧 `docker-manager` 部署。
 
-已有 systemd 受管安装升级失败时，保持停止状态；从同一次备份恢复配置、完整数据目录（含数据库、存在的 WAL/SHM 及 `master.key`）、原服务单元和对应旧二进制到原路径，再执行 `systemctl daemon-reload` 和 `systemctl start docker-manager`。旧服务单元可能仍指向 `/usr/local/bin/docker-manager`，必须与备份二进制匹配，避免直接用旧程序打开新版本数据库。
+已有 systemd 受管安装升级失败时，保持停止状态；从同一次备份恢复配置、完整数据目录（含数据库、存在的 WAL/SHM 及 `master.key`）、原服务单元和对应旧二进制到原路径，再执行 `systemctl daemon-reload` 和 `systemctl start docklane`。服务单元必须与备份二进制匹配，避免直接用旧程序打开新版本数据库。
 
-首次手动实例迁移失败时，先确认新建的 `docker-manager` 服务已停止；若已注册服务，取消其开机自启，避免恢复旧实例后再次启动新目标。保留失败目标目录用于检查，不把其中的数据库或密钥混拷回原目录。确认原手动二进制仍可用，按原运行账号和工作目录，使用保留的源数据目录以及同次备份的 `startup-config.json` 恢复原实例（通过 `DM_CONFIG` 指定，并避免遗留 `DM_*` 环境变量覆盖配置）。若原二进制路径被替换，使用同组备份中的对应旧程序。首次迁移备份可能没有旧服务单元或旧二进制；没有旧单元时无需恢复单元，也不应以 `systemctl start docker-manager` 代替原手动启动方式。若选择从备份恢复源数据，须让两个实例都保持停止，并完整恢复同一备份组的数据库、WAL/SHM、`master.key` 及其他管理数据；不要混用源、失败目标与不同备份组。
+首次手动实例迁移失败时，先确认新建的 `docklane` 服务已停止；若已注册服务，取消其开机自启，避免恢复旧实例后再次启动新目标。保留失败目标目录用于检查，不把其中的数据库或密钥混拷回原目录。确认原手动二进制仍可用，按原运行账号和工作目录，使用保留的源数据目录以及同次备份的 `startup-config.json` 恢复原实例（通过 `DM_CONFIG` 指定，并避免遗留 `DM_*` 环境变量覆盖配置）。若原二进制路径被替换，使用同组备份中的对应旧程序。首次迁移备份可能没有旧服务单元或旧二进制；没有旧单元时无需恢复单元，也不应以 `systemctl start docklane` 代替原手动启动方式。若选择从备份恢复源数据，须让两个实例都保持停止，并完整恢复同一备份组的数据库、WAL/SHM、`master.key` 及其他管理数据；不要混用源、失败目标与不同备份组。
 
 使用 Volume 备份/恢复的二进制部署还需加载或更新本次发布的同版本 worker 镜像：新程序使用镜像内的 `docklane` 入口，旧镜像即使标签相同也不兼容，可从完整离线包导入对应镜像。
 
 容器升级前停服务并备份持久化应用目录，然后替换镜像；备份仓库与应用数据分别保留。数据库迁移失败不删除原数据。应用版本比数据库旧时拒绝启动。
 
-`scripts/uninstall.sh` 移除新旧两个可执行文件及服务单元，默认保留账号、配置、应用数据及备份仓库。仅在确认独立备份可恢复后，人工清理不再需要的数据。
+`scripts/uninstall.sh` 移除 `/usr/local/bin/docklane` 及 `docklane.service`，默认保留账号、配置、应用数据及备份仓库。仅在确认独立备份可恢复后，人工清理不再需要的数据。
 
 ## 故障排查
 
@@ -174,4 +176,4 @@ Docker 模式永远不允许自动写宿主机 daemon 配置。二进制模式�
 - `RESTORE_VALIDATION_REQUIRED`：原位覆盖可能已有部分写入，原写入容器保持停止。人工验证数据或从可信快照重新恢复后再启动服务；不能仅凭文件恢复命令退出码认定服务可用。
 - 容器启动失败：保留旧容器与任务记录；配置回退不能撤销应用写入。
 - 仓库满：释放独立临时空间并检查保留策略；失败备份不触发破坏性清理。
-- systemd 日志：journalctl -u docker-manager；确认密钥和备份凭据没有粘贴到配置说明或诊断输出。
+- systemd 日志：journalctl -u docklane；确认密钥和备份凭据没有粘贴到配置说明或诊断输出。

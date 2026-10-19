@@ -2,7 +2,14 @@
 
 ## 当前发布状态
 
-当前最新版本为 [v0.3.1-beta.2 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2)，旧 v0.3.1-beta.1 仍保留下载。原 v0.3.0 Release 已撤回，当前没有正式 Release，也没有可用的正式版 latest 入口；正式通道需等待未来正式发布。当前安装请使用 [README 的一键安装命令](../README.md#一键在线安装推荐)。当前源码为 `0.3.1-beta.2`；无参数安装默认选择最新 Beta，并在修改系统前显示测试版警告。显式 `--channel stable` 仍请求正式版，当前会因暂无正式版而停止。
+当前源码与最新 Beta 为 [v0.3.2-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1)。旧 v0.3.1-beta.1、v0.3.1-beta.2 的 Release、附件及远端 Tag 已撤回；v0.3.0 Release 也已撤回，但保留其 Tag。当前没有正式 Release 或正式版 latest，显式 `--channel stable` 会因暂无正式版而停止。当前安装请使用 [README 的一键安装命令](../README.md#一键在线安装推荐)，无参数默认选择最新 Beta，并在修改系统前显示测试版警告。
+
+本版部署名称统一为 `docklane`：服务、账号、配置/数据/安装备份目录、镜像及六附件使用新名称，默认端口为 9999，安装器保留阶段与下载进度提示。旧 `docker-manager` 服务、配置或数据残留会使安装停止，不自动更名、迁移、覆盖或删除。新版本的实际发布及验收证据按后续记录核对；以下旧版检查不能代替本版验证。
+
+## 历史发布与验证记录
+
+> 以下内容保留对应执行时刻的结论；旧 Beta Release、附件及远端 Tag 已撤回，历史下载与 Tag 链接可能失效。Git 提交、原始证据和下列历史段落保留用于追溯，不代表当前可下载版本。
+
 
 [v0.3.1-beta.2 发布验证](evidence/beta-release-0.3.1-beta.2.json)对应 [bc0c775](https://github.com/Funnyrz/docklane/commit/bc0c775fa98d9b249108aff5ab32b27e58114139)。[主分支 CI](https://github.com/Funnyrz/docklane/actions/runs/39261562974)、[Tag CI](https://github.com/Funnyrz/docklane/actions/runs/39262606812)、[候选构建](https://github.com/Funnyrz/docklane/actions/runs/39262607783)及[发布工作流](https://github.com/Funnyrz/docklane/actions/runs/39264009565)全部成功，包含 Docker 28/29 × amd64/arm64 集成及草稿上传后的下载复核。新版恰好六个附件；公开镜像下载的全部摘要与 GitHub 记录一致，内外 SHA-256、双架构 ELF、MIT 原文、同版本材料及 worker 身份检查通过。实际包内 arm64 程序未设置 `DM_LISTEN` / `DM_CONFIG` 时默认在 9999 健康；arm64 Docker 镜像也实际提供 9999 服务，设置接口均返回 `0.3.1-beta.2`。原生程序、在线与离线新装、Compose 及镜像默认统一为 9999，随包入口包含默认 Beta 通道与安装进度。
 

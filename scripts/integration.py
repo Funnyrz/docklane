@@ -159,7 +159,7 @@ class Server:
             "path_mappings": [], "compose_path": docker, "restic_path": restic,
             "daemon_config_path": str(root / "daemon-never-change.json"),
             "enable_daemon_write": False, "session_secure": False,
-            "backup_worker_image": worker or "docker-manager:integration-worker-not-supplied",
+            "backup_worker_image": worker or "docklane:integration-worker-not-supplied",
         }
         self.config_path.write_text(json.dumps(config))
         self.config_path.chmod(0o600)

@@ -48,12 +48,11 @@ local_docker() {
     docker --host unix:///var/run/docker.sock "$@"
 }
 default_install_listen() {
-  # The verified release payload may predate the current online default. Pass
-  # the default only to a fresh installation, never to an existing deployment.
+  # Apply the default only to a fresh installation, preserving saved listeners.
   [[ -z $listen && -z $migrate ]] || return 0
   local path configured
-  for path in /etc/docker-manager/config.json /var/lib/docklane-installer/release.json \
-    /usr/local/bin/docklane /usr/local/bin/docker-manager /etc/systemd/system/docker-manager.service; do
+  for path in /etc/docklane/config.json /var/lib/docklane-installer/release.json \
+    /usr/local/bin/docklane /etc/systemd/system/docklane.service; do
     [[ ! -e $path && ! -L $path ]] || return 0
   done
   if [[ -n $config ]]; then
@@ -68,6 +67,30 @@ PY
   fi
   listen=:9999
 }
+check_legacy_installation() {
+  local path root state field value load_state= load_count=0 fragment= drop_ins=
+  for path in /etc/docker-manager /var/lib/docker-manager /var/backups/docker-manager \
+    /usr/local/bin/docker-manager /etc/systemd/system/multi-user.target.wants/docker-manager.service; do
+    [[ ! -e $path && ! -L $path ]] || die "Legacy docker-manager deployment detected at $path. Back it up and remove it manually before a new Docklane installation; nothing was changed."
+  done
+  for root in /etc/systemd/system /run/systemd/system /usr/lib/systemd/system /lib/systemd/system; do
+    for path in "$root/docker-manager.service" "$root/docker-manager.service.d"; do
+      [[ ! -e $path && ! -L $path ]] || die "Legacy docker-manager deployment detected at $path. Back it up and remove it manually before a new Docklane installation; nothing was changed."
+    done
+  done
+  # systemctl may return nonzero for a missing unit. Only its explicit
+  # not-found state proves absence; failed/empty queries must stop preflight.
+  state=$(systemctl show docker-manager.service --property=LoadState,FragmentPath,DropInPaths 2>/dev/null) || true
+  while IFS='=' read -r field value; do
+    case "$field" in
+      LoadState) load_state=$value; load_count=$((load_count+1)) ;;
+      FragmentPath) fragment=$value ;;
+      DropInPaths) drop_ins=$value ;;
+    esac
+  done <<< "$state"
+  [[ $load_count == 1 && -n $load_state ]] || die 'Cannot verify the legacy docker-manager.service state; no installation changes were made.'
+  [[ $load_state == not-found && -z $fragment && -z $drop_ins ]] || die 'Legacy docker-manager systemd service is still loaded. Back it up and remove it manually before a new Docklane installation; nothing was changed.'
+}
 usage() {
   cat <<'EOF'
 Usage: install-online.sh [--channel stable|beta] [--version vX.Y.Z[-beta.N]] [--listen :9999]
@@ -77,7 +100,8 @@ Requires root, systemd, Ubuntu 24.04 or Debian 12/13, amd64 or arm64.
 Defaults to the latest beta GitHub Release (testing only; do not use in production).
 Use --channel stable to request a formal release explicitly. Existing Docker is never upgraded.
 GitHub downloads use public mirrors with direct fallback; use --download-source direct to bypass mirrors.
-Unknown manual deployments require explicit --migrate-from. Source data is retained.
+Legacy docker-manager deployments are refused; no automatic renaming is performed.
+Other manual deployments require explicit --migrate-from. Source data is retained.
 EOF
 }
 platform() {
@@ -134,17 +158,13 @@ if not valid:
         detail+='\nNo stable release could be verified. A stable release may be unpublished, or GitHub metadata access may be unavailable. Retry access or use --channel beta explicitly; no channel switch was performed.'
     raise SystemExit(detail)
 r=max(valid,key=lambda release:key(release['tag_name']));tag=r['tag_name']
-slim={'RELEASE-SHA256SUMS','install-online.sh','docker-manager-images.tar.gz','docker-manager-installation.tar.gz',
+slim={'RELEASE-SHA256SUMS','install-online.sh','docklane-images.tar.gz','docklane-installation.tar.gz',
       f'docklane-{tag}-linux-amd64.tar.gz',f'docklane-{tag}-linux-arm64.tar.gz'}
-legacy=['RELEASE-SHA256SUMS','LICENSE','SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt',
-        'docker-manager-images.tar.gz','docker-manager-installation.tar.gz',
-        f'docklane-{tag}-linux-{arch}.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz.sha256']
 assets=r.get('assets',[]);names=[asset.get('name') for asset in assets]
 if set(names)==slim and len(names)==6:
-    required=['RELEASE-SHA256SUMS','docker-manager-installation.tar.gz','docker-manager-images.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz']
+    required=['RELEASE-SHA256SUMS','docklane-installation.tar.gz','docklane-images.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz']
     validate=slim
     layout='slim'
-elif tag=='v0.3.0':required=legacy;validate=legacy;layout='legacy'
 else:raise SystemExit('Release must provide exactly the six supported assets')
 for name in validate:
     found=[asset for asset in assets if asset.get('name')==name]
@@ -222,13 +242,10 @@ for line in (root/'RELEASE-SHA256SUMS').read_text().splitlines():
     match=re.fullmatch(r'[a-fA-F0-9]{64} [ *]([A-Za-z0-9][A-Za-z0-9._-]*)',line)
     if not match or match[1] in names:raise SystemExit('Unsafe checksum manifest')
     names.add(match[1])
-slim={'install-online.sh','docker-manager-installation.tar.gz','docker-manager-images.tar.gz',f'docklane-{tag}-linux-amd64.tar.gz',f'docklane-{tag}-linux-arm64.tar.gz'}
-required=['RELEASE-SHA256SUMS','docker-manager-installation.tar.gz','docker-manager-images.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz']
+slim={'install-online.sh','docklane-installation.tar.gz','docklane-images.tar.gz',f'docklane-{tag}-linux-amd64.tar.gz',f'docklane-{tag}-linux-arm64.tar.gz'}
+required=['RELEASE-SHA256SUMS','docklane-installation.tar.gz','docklane-images.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz']
 layout='slim'
-if names!=slim:
-    layout='legacy'
-    required=['RELEASE-SHA256SUMS','LICENSE','SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt','docker-manager-images.tar.gz','docker-manager-installation.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz.sha256']
-    if tag!='v0.3.0' or not set(required[1:])<=names:raise SystemExit('Unsupported release asset layout')
+if names!=slim:raise SystemExit('Unsupported release asset layout')
 (root/'layout').write_text(layout)
 print(tag);print('\n'.join(required))
 PY
@@ -251,9 +268,9 @@ def manifest(path):
         result[m[2]]=m[1].lower()
     if not result:raise SystemExit('Empty checksum manifest')
     return result
-sums=manifest(root/'RELEASE-SHA256SUMS');slim=(root/'layout').read_text()=='slim'
-expected={'install-online.sh','docker-manager-installation.tar.gz','docker-manager-images.tar.gz',f'docklane-{version}-linux-amd64.tar.gz',f'docklane-{version}-linux-arm64.tar.gz'}
-if slim and set(sums)!=expected:raise SystemExit('Six-asset checksum manifest must cover exactly the other five assets')
+sums=manifest(root/'RELEASE-SHA256SUMS')
+expected={'install-online.sh','docklane-installation.tar.gz','docklane-images.tar.gz',f'docklane-{version}-linux-amd64.tar.gz',f'docklane-{version}-linux-arm64.tar.gz'}
+if set(sums)!=expected:raise SystemExit('Six-asset checksum manifest must cover exactly the other five assets')
 for name in (root/'release-selection').read_text().splitlines()[2:]:
     if name not in sums or digest(root/name)!=sums[name]:raise SystemExit('Checksum mismatch: '+name)
 def unpack(name,destination):
@@ -266,31 +283,26 @@ def unpack(name,destination):
             seen.add(str(p))
         archive.extractall(destination)
     return seen
-materials=root/'materials';unpack('docker-manager-installation.tar.gz',materials)
-for name in ['scripts/install-support.py','scripts/install.sh','scripts/upgrade.sh','scripts/uninstall.sh','deployments/docker-manager.service','deployments/config.example.json','LICENSE']:
+materials=root/'materials';unpack('docklane-installation.tar.gz',materials)
+for name in ['scripts/install-support.py','scripts/install.sh','scripts/upgrade.sh','scripts/uninstall.sh','deployments/docklane.service','deployments/config.example.json','LICENSE']:
     if not(materials/name).is_file():raise SystemExit('Missing installation material: '+name)
-if slim:
-    for name in ('VERSION','SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt','TOOL-VERSIONS.txt','release-ci-evidence.json','SECURITY-NOTES.md'):
-        if not(materials/name).is_file():raise SystemExit('Missing installation metadata: '+name)
-    if (materials/'VERSION').read_text().strip()!=version.removeprefix('v'):raise SystemExit('Material VERSION mismatch')
-    evidence=json.loads((materials/'release-ci-evidence.json').read_text())
-    if evidence.get('version')!=version[1:] or evidence.get('tag')!=version or not re.fullmatch(r'[a-fA-F0-9]{40}',evidence.get('head_sha','')):raise SystemExit('Release CI version/commit metadata mismatch')
-    if json.loads((materials/'deployments/config.example.json').read_text()).get('backup_worker_image')!='docker-manager:'+version:raise SystemExit('Configuration worker version mismatch')
-    image_lines=(materials/'IMAGES.txt').read_text().splitlines()
-    image_arches=[]
-    for line in image_lines:
-        match=re.fullmatch(r'\[docker-manager:'+re.escape(version)+r'-(amd64|arm64)\] sha256:[a-f0-9]{64} linux/\1',line)
-        if not match:raise SystemExit('Worker image metadata version/architecture mismatch')
-        image_arches.append(match[1])
-    if sorted(image_arches)!=['amd64','arm64']:raise SystemExit('Worker image metadata must identify both architectures once')
-    if not(materials/'TOOL-VERSIONS.txt').read_text().strip() or not(materials/'SECURITY-NOTES.md').read_text().strip():raise SystemExit('Empty required release metadata')
-    for name in ('SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt','LICENSE'):(root/name).write_bytes((materials/name).read_bytes())
-else:
-    sidecar=manifest(root/(f'docklane-{version}-linux-{arch}.tar.gz.sha256'))
-    archive_name=f'docklane-{version}-linux-{arch}.tar.gz'
-    if sidecar.get(archive_name)!=sums[archive_name]:raise SystemExit('Inconsistent manifest: binary sidecar')
+for name in ('VERSION','SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt','TOOL-VERSIONS.txt','release-ci-evidence.json','SECURITY-NOTES.md'):
+    if not(materials/name).is_file():raise SystemExit('Missing installation metadata: '+name)
+if (materials/'VERSION').read_text().strip()!=version.removeprefix('v'):raise SystemExit('Material VERSION mismatch')
+evidence=json.loads((materials/'release-ci-evidence.json').read_text())
+if evidence.get('version')!=version[1:] or evidence.get('tag')!=version or not re.fullmatch(r'[a-fA-F0-9]{40}',evidence.get('head_sha','')):raise SystemExit('Release CI version/commit metadata mismatch')
+if json.loads((materials/'deployments/config.example.json').read_text()).get('backup_worker_image')!='docklane:'+version:raise SystemExit('Configuration worker version mismatch')
+image_lines=(materials/'IMAGES.txt').read_text().splitlines()
+image_arches=[]
+for line in image_lines:
+    match=re.fullmatch(r'\[docklane:'+re.escape(version)+r'-(amd64|arm64)\] sha256:[a-f0-9]{64} linux/\1',line)
+    if not match:raise SystemExit('Worker image metadata version/architecture mismatch')
+    image_arches.append(match[1])
+if sorted(image_arches)!=['amd64','arm64']:raise SystemExit('Worker image metadata must identify both architectures once')
+if not(materials/'TOOL-VERSIONS.txt').read_text().strip() or not(materials/'SECURITY-NOTES.md').read_text().strip():raise SystemExit('Empty required release metadata')
+for name in ('SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt','LICENSE'):(root/name).write_bytes((materials/name).read_bytes())
 image_sums=manifest(root/'IMAGE-SHA256SUMS')
-if image_sums.get('docker-manager-images.tar.gz')!=sums['docker-manager-images.tar.gz']:raise SystemExit('Inconsistent manifest: IMAGE-SHA256SUMS')
+if image_sums.get('docklane-images.tar.gz')!=sums['docklane-images.tar.gz']:raise SystemExit('Inconsistent manifest: IMAGE-SHA256SUMS')
 binary_name=f'docklane-{version}-linux-{arch}.tar.gz'
 binary=root/'binary';members=unpack(binary_name,binary)
 if members!={'docklane','LICENSE'}:raise SystemExit('Unexpected binary archive layout')
@@ -391,11 +403,11 @@ install_tools() {
   /usr/local/lib/docklane/bin/restic version | grep -q '^restic 0\.19\.1 ' || die 'Restic version verification failed.'
 }
 install_worker() {
-  local native="docker-manager:$version-$arch"
-  local_docker load --input "$work/docker-manager-images.tar.gz"
+  local native="docklane:$version-$arch"
+  local_docker load --input "$work/docklane-images.tar.gz"
   local_docker image inspect "$native" > "$work/worker.json"
   local_docker image save --output "$work/worker-loaded.tar" "$native"
-  python3 - "$work/IMAGES.txt" "$work/worker.json" "$native" "$version" "$arch" "$work/docker-manager-images.tar.gz" "$work/worker-loaded.tar" <<'PY'
+  python3 - "$work/IMAGES.txt" "$work/worker.json" "$native" "$version" "$arch" "$work/docklane-images.tar.gz" "$work/worker-loaded.tar" <<'PY'
 import hashlib,json,re,sys,tarfile
 lines=open(sys.argv[1]).read().splitlines(); entries=[]
 for line in lines:
@@ -434,10 +446,10 @@ with tarfile.open(sys.argv[7], 'r:') as loaded:
         raise SystemExit('Loaded worker content differs from verified release')
 if entries[0][1]!=sys.argv[5] or not re.fullmatch(r'sha256:[a-f0-9]{64}',i.get('Id','')) or i.get('Architecture')!=sys.argv[5] or i.get('Os')!='linux':
     raise SystemExit('Worker image identity/architecture mismatch')
-if 'DM_BACKUP_WORKER_IMAGE=docker-manager:'+sys.argv[4] not in i.get('Config',{}).get('Env',[]):
+if 'DM_BACKUP_WORKER_IMAGE=docklane:'+sys.argv[4] not in i.get('Config',{}).get('Env',[]):
     raise SystemExit('Worker application version mismatch')
 PY
-  local_docker tag "$native" "docker-manager:$version"
+  local_docker tag "$native" "docklane:$version"
 }
 main() {
   version=; listen=; migrate=; config=; dry_run=false; download_source=mirror; channel=beta; explicit_version=false
@@ -468,6 +480,7 @@ main() {
     log 'Verify release assets; prepare missing dependencies; load matching worker; install/upgrade systemd service; enable and check /healthz. No changes made.'
     return
   fi
+  check_legacy_installation
   umask 077
   work=$(mktemp -d /tmp/docklane-install.XXXXXXXX)
   trap 'rm -rf -- "$work"' EXIT
@@ -491,7 +504,7 @@ main() {
   unset DOCKER_CONTEXT DOCKER_TLS_VERIFY DOCKER_CERT_PATH
   default_install_listen
   local args=(deploy --binary "$work/binary/docklane" --source-dir "$work/materials" --version "$version" --sha256 "$(cat "$work/binary.sha256")")
-  if $explicit_version && [[ $(cat "$work/layout") == slim ]]; then args+=(--explicit-version); fi
+  if $explicit_version; then args+=(--explicit-version); fi
   [[ -z $listen ]] || args+=(--listen "$listen")
   [[ -z $migrate ]] || args+=(--migrate-from "$migrate")
   [[ -z $config ]] || args+=(--config "$config")
@@ -499,6 +512,6 @@ main() {
   python3 "$work/materials/scripts/install-support.py" "${args[@]}"
   progress '[8/8] 安装完成 / Installation complete'
   log 'Installation complete. Open http://SERVER_IP:PORT to create the administrator on first access.'
-  log 'Config: /etc/docker-manager/config.json; status: systemctl status docker-manager; logs: journalctl -u docker-manager -f'
+  log 'Config: /etc/docklane/config.json; status: systemctl status docklane; logs: journalctl -u docklane -f'
 }
 if [[ ${BASH_SOURCE[0]:-} == "$0" || -z ${BASH_SOURCE[0]:-} ]]; then main "$@"; fi

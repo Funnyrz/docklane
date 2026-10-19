@@ -2,7 +2,7 @@
 
 > 本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。
 
-当前源码及最新 Beta 为 [v0.3.1-beta.2 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2)。旧 v0.3.0 Release 已撤回，目前没有正式版；正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
+当前源码及最新 Beta 为 [v0.3.2-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1)。旧 v0.3.1-beta.1、v0.3.1-beta.2 的 Release、附件及远端 Tag 已撤回；v0.3.0 Release 也已撤回，目前没有正式版；正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
 
 **Your containers. Under control.**
 
@@ -86,9 +86,11 @@ Docker 镜像包含 Docker CLI、Compose 和 Restic；在线安装脚本自动�
 
 ## 部署
 
-### 名称与升级兼容
+### 部署名称与安装边界
 
-**产品与可执行文件均命名为 Docklane（命令为 `docklane`）。** 为保持升级兼容，systemd 服务和账号、镜像标签、配置与数据目录、Go module、`DM_*` 环境变量及浏览器存储键仍保留现有技术标识。安装/升级脚本会将新二进制安装为 `docklane`，并继续使用 `docker-manager` 服务管理已有数据。
+**产品为 Docklane，命令、systemd 服务及专用账号统一为 `docklane`。** 配置、数据和安装备份目录分别为 `/etc/docklane`、`/var/lib/docklane`、`/var/backups/docklane`；镜像、Compose 服务和数据卷分别使用 `docklane`、`docklane`、`docklane-data`。Go module、`DM_*` 环境变量、浏览器存储键、HTTP API、数据库与加密格式保持原有兼容标识。
+
+本版面向全新安装，不自动将旧 `docker-manager` 部署更名或迁移。检测到旧服务、配置或数据残留时，安装器明确停止，不覆盖或删除旧内容。下方 `--migrate-from` 仅用于明确指定的一般手动 Docklane 实例，不用于绕过旧部署残留检查。
 
 ### 一键在线安装（推荐）
 
@@ -108,7 +110,7 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 
 安装过程显示 8 个阶段及当前下载文件、来源和尝试序号；交互式终端还会显示真实下载进度条，重定向日志时使用普通文本。
 
-本页命令从已发布元数据选择最新 Beta，或通过 `--version` 固定版本（当前为 [v0.3.1-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2)），并校验下载资产的 SHA-256、架构和归档路径，安装 `/usr/local/bin/docklane`，创建专用账号及 `docker-manager.service`，自动后台启动并设置开机自启。结束时检查服务状态、自启和 `/healthz`，输出访问地址；首次打开页面创建管理员。新装默认监听 `:9999`，不自动修改防火墙。已有配置保留原监听地址；需要改为 9999 时，在安装命令末尾显式追加 `--listen :9999`。
+本页命令从已发布元数据选择最新 Beta，或通过 `--version` 固定版本（当前为 [v0.3.2-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1)），并校验下载资产的 SHA-256、架构和归档路径，安装 `/usr/local/bin/docklane`，创建专用账号及 `docklane.service`，自动后台启动并设置开机自启。结束时检查服务状态、自启和 `/healthz`，输出访问地址；首次打开页面创建管理员。新装默认监听 `:9999`，不自动修改防火墙。已有配置保留原监听地址；需要改为 9999 时，在安装命令末尾显式追加 `--listen :9999`。
 
 Beta 安装需要可用的 GitHub API 元数据；API 不可达或限流时安全停止并提示稍后重试，不从网页推断 Beta 状态。当前没有可供正式通道使用的 Release。
 
@@ -118,7 +120,7 @@ Beta 安装需要可用的 GitHub API 元数据；API 不可达或限流时安�
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --channel beta --version v0.3.1-beta.2 --listen :9999 --dry-run
+  | sudo bash -s -- --channel beta --version v0.3.2-beta.1 --listen :9999 --dry-run
 ```
 
 若通过 `--config` 提供的配置中已设置 `listen`，未指定 `--listen` 时会保留该地址。去掉 `--dry-run` 执行安装；`--help` 查看参数。再次执行会保留现有配置与数据，同版本且校验和相同则跳过二进制替换；版本变化先停机备份再升级。已有手动运行实例必须显式迁移，不能直接当作全新安装：
@@ -131,11 +133,11 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
 脚本无法可靠取得旧启动配置或无法确认旧监听地址时，增加 `--config /绝对路径/config.json`，其中 `listen` 必须填写旧实例实际生效的监听地址；迁移不会自动改为 9999。迁移需要短暂停机，保留完整源数据和数据库/密钥配套备份；外部业务路径仍需专用账号可访问。服务保留 `ProtectHome=true`，位于 home 下的 Compose、仓库或备份源需先迁移到适当的授权目录。详见[迁移与恢复说明](docs/operations.md#手动实例迁移)。
 
 ```sh
-sudo systemctl status docker-manager       # 查看服务状态
-sudo journalctl -u docker-manager -f        # 查看日志
-sudo systemctl restart docker-manager      # 重启
-sudo systemctl stop docker-manager         # 停止
-sudo systemctl disable docker-manager      # 取消开机自启
+sudo systemctl status docklane       # 查看服务状态
+sudo journalctl -u docklane -f        # 查看日志
+sudo systemctl restart docklane      # 重启
+sudo systemctl stop docklane         # 停止
+sudo systemctl disable docklane      # 取消开机自启
 ```
 
 ### Beta 预发布安装与下载
@@ -144,17 +146,17 @@ sudo systemctl disable docker-manager      # 取消开机自启
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.1-beta.2
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.2-beta.1
 ```
 
 Beta Release 仅提供六个附件，`RELEASE-SHA256SUMS` 校验其余五个文件：
 
 | 附件 | 内容 |
 | --- | --- |
-| `docklane-v0.3.1-beta.2-linux-amd64.tar.gz` | amd64 的 `docklane` 与 `LICENSE` |
-| `docklane-v0.3.1-beta.2-linux-arm64.tar.gz` | arm64 的 `docklane` 与 `LICENSE` |
-| `docker-manager-installation.tar.gz` | 安装脚本、配置与文档；根目录含 `VERSION`、许可、内部二进制/镜像校验清单、`IMAGES.txt`、工具版本及 CI 证据 |
-| `docker-manager-images.tar.gz` | 双架构应用及备份 worker 镜像 |
+| `docklane-v0.3.2-beta.1-linux-amd64.tar.gz` | amd64 的 `docklane` 与 `LICENSE` |
+| `docklane-v0.3.2-beta.1-linux-arm64.tar.gz` | arm64 的 `docklane` 与 `LICENSE` |
+| `docklane-installation.tar.gz` | 安装脚本、配置与文档；根目录含 `VERSION`、许可、内部二进制/镜像校验清单、`IMAGES.txt`、工具版本及 CI 证据 |
+| `docklane-images.tar.gz` | 双架构应用及备份 worker 镜像 |
 | `install-online.sh` | 同版本在线入口 |
 | `RELEASE-SHA256SUMS` | 顶层附件 SHA-256 清单 |
 
@@ -162,25 +164,25 @@ Beta Release 仅提供六个附件，`RELEASE-SHA256SUMS` 校验其余五个文�
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.1-beta.2-linux-amd64.tar.gz
-tar -xzf docker-manager-installation.tar.gz
+tar -xzf docklane-v0.3.2-beta.1-linux-amd64.tar.gz
+tar -xzf docklane-installation.tar.gz
 sha256sum --check IMAGE-SHA256SUMS
-sudo docker load -i docker-manager-images.tar.gz
-sudo docker tag docker-manager:v0.3.1-beta.2-amd64 docker-manager:v0.3.1-beta.2
+sudo docker load -i docklane-images.tar.gz
+sudo docker tag docklane:v0.3.2-beta.1-amd64 docklane:v0.3.2-beta.1
 sudo ./scripts/install.sh ./docklane
 ```
 
-v0.3.1-beta.2 的在线入口、原生程序、离线安装配置和 Docker 部署统一默认使用 9999 端口；随包在线脚本默认选择最新 Beta，并包含安装阶段及下载进度提示。已有安装保留已配置的监听地址，只有显式 `--listen` 才覆盖。旧 v0.3.1-beta.1 附件保留发布时快照：默认端口为 8080，其附带在线脚本需显式传入 `--channel beta`。
+v0.3.2-beta.1 的在线入口、原生程序、离线安装配置和 Docker 部署统一默认使用 9999 端口；随包在线脚本默认选择最新 Beta，并包含安装阶段及下载进度提示。已有安装保留已配置的监听地址，只有显式 `--listen` 才覆盖。旧 v0.3.1-beta.1、v0.3.1-beta.2 已撤回，请使用本版完整材料，不混用历史附件。
 
-安装材料根目录的 `VERSION` 为 `0.3.1-beta.2`（无 `v` 前缀）；应用版本变化不改变配置或数据库的 schema v1。Beta 不再单独发布原始二进制、`.sha256`、`IMAGES.txt` 或许可附件；这些材料保留在安装归档内。已撤回版本的验收记录仅作历史留存，不提供当前下载入口。
+安装材料根目录的 `VERSION` 为 `0.3.2-beta.1`（无 `v` 前缀）；应用版本变化不改变配置或数据库的 schema v1。Beta 不再单独发布原始二进制、`.sha256`、`IMAGES.txt` 或许可附件；这些材料保留在安装归档内。已撤回版本的验收记录仅作历史留存，不提供当前下载入口。
 
 ### 原生二进制包：直接运行
 
-从 [v0.3.1-beta.2 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2) 下载本机架构包及 `RELEASE-SHA256SUMS`，放入空目录。以下以 amd64 为例，arm64 替换包名中的架构：
+从 [v0.3.2-beta.1 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1) 下载本机架构包及 `RELEASE-SHA256SUMS`，放入空目录。以下以 amd64 为例，arm64 替换包名中的架构：
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.1-beta.2-linux-amd64.tar.gz
+tar -xzf docklane-v0.3.2-beta.1-linux-amd64.tar.gz
 DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:9999 ./docklane
 ```
 
@@ -192,17 +194,17 @@ DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:9999 ./docklane
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docker-manager-installation.tar.gz
+tar -xzf docklane-installation.tar.gz
 sha256sum --check IMAGE-SHA256SUMS
-docker load -i docker-manager-images.tar.gz
-docker tag docker-manager:v0.3.1-beta.2-amd64 docker-manager:v0.3.1-beta.2
-export DM_BACKUP_HOST_DIR=/srv/docker-manager/backups
-export DM_RESTORE_HOST_DIR=/srv/docker-manager/restores
+docker load -i docklane-images.tar.gz
+docker tag docklane:v0.3.2-beta.1-amd64 docklane:v0.3.2-beta.1
+export DM_BACKUP_HOST_DIR=/srv/docklane/backups
+export DM_RESTORE_HOST_DIR=/srv/docklane/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
-归档提供两种架构镜像，启动前为本机架构设置通用标签；临时备份/恢复容器使用相同版本的本地 worker。v0.3.1-beta.2 包内 Compose 已设置 `127.0.0.1:9999:9999` 端口映射和 `DM_LISTEN: ":9999"`。
+归档提供两种架构镜像，启动前为本机架构设置通用标签；临时备份/恢复容器使用相同版本的本地 worker。v0.3.2-beta.1 包内 Compose 已设置 `127.0.0.1:9999:9999` 端口映射和 `DM_LISTEN: ":9999"`。
 
 ### Docker：从源码构建
 
@@ -211,9 +213,9 @@ docker compose -f deployments/docker-compose.yml up -d --no-build
 ```sh
 git clone https://github.com/Funnyrz/docklane.git
 cd docklane
-docker build -t docker-manager:v0.3.1-beta.2 .
-export DM_BACKUP_HOST_DIR=/srv/docker-manager/backups
-export DM_RESTORE_HOST_DIR=/srv/docker-manager/restores
+docker build -t docklane:v0.3.2-beta.1 .
+export DM_BACKUP_HOST_DIR=/srv/docklane/backups
+export DM_RESTORE_HOST_DIR=/srv/docklane/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
@@ -222,11 +224,11 @@ docker compose -f deployments/docker-compose.yml up -d --no-build
 
 ### Linux 二进制与 systemd
 
-当前 Release 提供双架构原生 `tar.gz`，安装后可执行文件为 `/usr/local/bin/docklane`，服务名为 `docker-manager`。安装步骤见上方 [Beta 预发布安装与下载](#beta-预发布安装与下载)，使用包内解出的 `./docklane`，不下载单独的原始二进制。
+当前 Release 提供双架构原生 `tar.gz`，安装后可执行文件为 `/usr/local/bin/docklane`，服务名为 `docklane`。安装步骤见上方 [Beta 预发布安装与下载](#beta-预发布安装与下载)，使用包内解出的 `./docklane`，不下载单独的原始二进制。
 
 先准备本地 Docker Engine 28/29、Compose v2（验证版本 v2.40.3）、服务 PATH 可用的 Restic 0.19.1、Python 3 与 `runuser`（util-linux）。`docker` 组须存在，服务账号须能通过该附加组访问 Docker Socket。已有受管安装升级使用同一版本材料的 `scripts/upgrade.sh ./docklane`，升级前保留配套备份。
 
-安装脚本创建专用账号及 systemd 服务，配置位于 `/etc/docker-manager/config.json`，应用数据位于 `/var/lib/docker-manager`。服务账号的 Docker 组访问仍属于高权限；备份源读取及仓库/恢复目录写入权限需另外配置。默认不授予 daemon 写入或服务重启权限。
+安装脚本创建专用账号及 systemd 服务，配置位于 `/etc/docklane/config.json`，应用数据位于 `/var/lib/docklane`。服务账号的 Docker 组访问仍属于高权限；备份源读取及仓库/恢复目录写入权限需另外配置。默认不授予 daemon 写入或服务重启权限。
 
 ### 首次访问与语言
 

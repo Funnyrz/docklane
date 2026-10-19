@@ -71,10 +71,10 @@ def migration_class(harness):
             if self.args.resume:
                 return self.resume_migration()
             self.check(not self.control, 'migration test already has state; inspect retained fixtures instead of overwriting')
-            for path in (harness.DATA, Path('/etc/docker-manager'), harness.BINARY, harness.UNIT,
+            for path in (harness.DATA, Path('/etc/docklane'), harness.BINARY, harness.UNIT,
                          Path('/usr/local/bin/docker-manager'), Path('/var/lib/docklane-installer')):
                 self.check(not path.exists() and not path.is_symlink(), 'refusing existing installation path: ' + str(path))
-            self.check(self.unit().get('LoadState') == 'not-found', 'refusing an existing docker-manager service')
+            self.check(self.unit().get('LoadState') == 'not-found', 'refusing an existing docklane service')
             self.check((self.args.assets / 'install-online.sh').read_bytes() ==
                        (self.args.source / 'scripts/install-online.sh').read_bytes(),
                        'candidate online entrypoint differs from supplied source')
@@ -127,7 +127,7 @@ def migration_class(harness):
                 self.record('manual instance uses Go defaults, no configuration file and no business-path grants',
                             source_data=str(source_data), cwd=str(fixture), pid=manual.pid,
                             listen=listen, administrator_id=self.control['admin_id'])
-                backup_root = Path('/var/backups/docker-manager')
+                backup_root = Path('/var/backups/docklane')
                 old_backups = set(backup_root.iterdir()) if backup_root.exists() else set()
                 installer_log = self.invoke_migration(source_data)
                 try:
@@ -195,7 +195,7 @@ def migration_class(harness):
                 # The earlier production attempt may have gracefully stopped
                 # this recorded fixture before a later pre-deploy check failed.
                 # Restart only our unchanged original source, never any service.
-                for target in (harness.DATA, Path('/etc/docker-manager'), harness.BINARY, harness.UNIT):
+                for target in (harness.DATA, Path('/etc/docklane'), harness.BINARY, harness.UNIT):
                     self.check(not target.exists() and not target.is_symlink(),
                                'target installation exists; inspect recovery before restarting the retained source')
                 binary = fixture / 'docklane'
@@ -235,7 +235,7 @@ def migration_class(harness):
             before_docker = self.docker()
             self.check(before_docker == self.control['docker_before'], 'existing Docker changed since initial attempt')
             target_sha = self.verified_manual_binary(self.state / ('retry-candidate-' + secrets.token_hex(4)))
-            backup_root = Path('/var/backups/docker-manager')
+            backup_root = Path('/var/backups/docklane')
             previous = set(backup_root.iterdir()) if backup_root.exists() else set()
             descriptor = os.pidfd_open(pid)
             try:

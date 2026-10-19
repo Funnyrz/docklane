@@ -22,7 +22,7 @@ if [ -z "$binary" ]; then
     exit 1
   fi
   build_dir=$(mktemp -d "${TMPDIR:-/tmp}/dm-e2e-build.XXXXXX")
-  binary="$build_dir/docker-manager"
+  binary="$build_dir/docklane"
   (cd "$repo" && "$go_bin" build -trimpath -o "$binary" ./cmd/server)
 fi
 if [ ! -x "$binary" ]; then

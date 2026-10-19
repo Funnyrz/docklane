@@ -51,8 +51,8 @@ def main():
     result = command('sh', str(args.source / 'scripts/upgrade.sh'), str(invalid), check=False)
     (state / 'failure.log').write_text(result.stdout + result.stderr)
     assert result.returncode != 0, 'invalid binary unexpectedly upgraded successfully'
-    assert command('systemctl', 'is-active', '--quiet', 'docker-manager', check=False).returncode != 0, 'failed new service still active'
-    assert command('systemctl', 'show', 'docker-manager', '--property=MainPID', '--value').stdout.strip() == '0', 'failed service process remains'
+    assert command('systemctl', 'is-active', '--quiet', 'docklane', check=False).returncode != 0, 'failed new service still active'
+    assert command('systemctl', 'show', 'docklane', '--property=MainPID', '--value').stdout.strip() == '0', 'failed service process remains'
     groups = set(support.BACKUPS.iterdir()) - existing
     assert len(groups) == 1, 'expected exactly one paired stopped backup'
     backup = groups.pop()
@@ -61,21 +61,21 @@ def main():
     assert support.tree_hashes(backup / 'data') == hashes, 'backup data checksum mismatch'
     assert digest(backup / 'data/master.key') == key, 'backup master key changed'
     assert restore['data_dir'] == str(data), 'backup refers to another effective data directory'
-    for name in ('docklane', 'docker-manager.service', 'config/config.json', 'startup-config.json', 'effective-config.json'):
+    for name in ('docklane', 'docklane.service', 'config/config.json', 'startup-config.json', 'effective-config.json'):
         assert (backup / name).is_file(), 'incomplete recovery group: ' + name
-    command('systemctl', 'stop', 'docker-manager')
+    command('systemctl', 'stop', 'docklane')
     data.rename(state / 'failed-data')
     support.copy_tree(backup / 'data', data)
     config_dir = support.CONFIG.parent
     config_dir.rename(state / 'failed-config')
     support.copy_tree(backup / 'config', config_dir)
     shutil.copy2(backup / 'docklane', support.BINARY)
-    shutil.copy2(backup / 'docker-manager.service', support.UNIT)
+    shutil.copy2(backup / 'docklane.service', support.UNIT)
     if (backup / 'release.json').exists():
         shutil.copy2(backup / 'release.json', support.STATE)
     assert support.tree_hashes(data) == hashes, 'restored data differs before startup'
     command('systemctl', 'daemon-reload')
-    command('systemctl', 'start', 'docker-manager')
+    command('systemctl', 'start', 'docklane')
     support.health_check(config['listen'])
     assert digest(data / 'master.key') == key
     with sqlite3.connect(f'file:{data}/docker-manager.db?mode=ro', uri=True) as db:

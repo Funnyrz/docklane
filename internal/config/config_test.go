@@ -51,7 +51,7 @@ func TestApplicationReleaseDoesNotChangeConfigurationSchema(t *testing.T) {
 	if c.Version != 1 {
 		t.Fatalf("configuration schema changed: %d", c.Version)
 	}
-	if c.BackupWorkerImage != "docker-manager:v"+buildinfo.Version {
+	if c.BackupWorkerImage != "docklane:v"+buildinfo.Version {
 		t.Fatal(c.BackupWorkerImage)
 	}
 }

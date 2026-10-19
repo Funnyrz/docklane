@@ -44,7 +44,7 @@ class ReleasePreflightTests(unittest.TestCase):
             for item in sorted(names)))
 
     def refresh(self):
-        self.manifest('RELEASE-SHA256SUMS', preflight.release_assets('v0.3.1-beta.1'))
+        self.manifest('RELEASE-SHA256SUMS', preflight.release_assets('v0.3.2-beta.1'))
 
     def run_command(self, args, root, timeout=30):
         if args[:2] == ['git', 'rev-parse']:
@@ -83,7 +83,7 @@ class ReleasePreflightTests(unittest.TestCase):
 
     def inspect(self, *options):
         args = ['release-preflight.py', '--root', str(self.root), '--artifacts', str(self.artifacts),
-                '--tag', 'v0.3.1-beta.1', '--actionlint', '/mock/actionlint', *options]
+                '--tag', 'v0.3.2-beta.1', '--actionlint', '/mock/actionlint', *options]
         stream = io.StringIO()
         with mock.patch.object(sys, 'argv', args), mock.patch.object(preflight, 'run', self.run_command), \
                 mock.patch.object(preflight.shutil, 'which', return_value='/mock/gh'), contextlib.redirect_stdout(stream):
@@ -128,7 +128,7 @@ class ReleasePreflightTests(unittest.TestCase):
 
     def test_existing_release_is_never_overwritten(self):
         for draft in (True, False):
-            self.releases = [[{'tag_name': 'v0.3.1-beta.1', 'draft': draft}]]
+            self.releases = [[{'tag_name': 'v0.3.2-beta.1', 'draft': draft}]]
             code, _ = self.inspect('--online')
             self.assertEqual(code, 2)
 

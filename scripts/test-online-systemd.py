@@ -23,9 +23,9 @@ import time
 import urllib.request
 
 
-DATA = Path('/var/lib/docker-manager')
+DATA = Path('/var/lib/docklane')
 BINARY = Path('/usr/local/bin/docklane')
-UNIT = Path('/etc/systemd/system/docker-manager.service')
+UNIT = Path('/etc/systemd/system/docklane.service')
 _ROOT = Path(__file__).resolve().parent.parent
 _VERSION_FILE = _ROOT / 'VERSION'
 VERSION = 'v' + (_VERSION_FILE.read_text().strip() if _VERSION_FILE.is_file() else json.loads((_ROOT / 'web/package.json').read_text())['version']).removeprefix('v')
@@ -107,7 +107,7 @@ class Acceptance:
             private_json(self.credentials_path, self.credentials)
 
     def unit(self):
-        text = self.command('systemctl', 'show', 'docker-manager',
+        text = self.command('systemctl', 'show', 'docklane',
                             '--property=LoadState,ActiveState,UnitFileState,MainPID,User,Group,ProtectHome').stdout.decode()
         return dict(line.split('=', 1) for line in text.splitlines() if '=' in line)
 
@@ -126,7 +126,7 @@ class Acceptance:
         unit = self.unit()
         self.check(unit.get('ActiveState') == 'active' and unit.get('UnitFileState') == 'enabled',
                    'service must be active and enabled')
-        self.check(unit.get('User') == 'docker-manager' and unit.get('Group') == 'docker-manager',
+        self.check(unit.get('User') == 'docklane' and unit.get('Group') == 'docklane',
                    'service must use its dedicated account')
         self.check(unit.get('ProtectHome') == 'yes', 'ProtectHome must remain enabled')
         return unit
@@ -201,15 +201,9 @@ fetch() {
 resolve_release() {
   version=${version:-$TEST_VERSION}
   [[ $version == "$TEST_VERSION" ]] || die 'Unexpected acceptance version.'
-  local required=(RELEASE-SHA256SUMS docker-manager-installation.tar.gz docker-manager-images.tar.gz
+  local required=(RELEASE-SHA256SUMS docklane-installation.tar.gz docklane-images.tar.gz
     "docklane-$version-linux-$arch.tar.gz")
   printf slim > "$work/layout"
-  if [[ $version == v0.3.0 ]]; then
-    required=(RELEASE-SHA256SUMS LICENSE SHA256SUMS IMAGE-SHA256SUMS IMAGES.txt
-      docker-manager-images.tar.gz docker-manager-installation.tar.gz
-      "docklane-$version-linux-$arch.tar.gz" "docklane-$version-linux-$arch.tar.gz.sha256")
-    printf legacy > "$work/layout"
-  fi
   printf '%s\\n' "$version" "${required[@]}" > "$work/release-selection"
   local name
   for name in "${required[@]}"; do
@@ -237,9 +231,9 @@ main "$@"
 
     def install(self):
         self.check(not self.control, 'install phase already has state; use resume after an actual guest reboot')
-        for path in (DATA, Path('/etc/docker-manager'), BINARY, UNIT, Path('/usr/local/bin/docker-manager')):
+        for path in (DATA, Path('/etc/docklane'), BINARY, UNIT, Path('/usr/local/bin/docker-manager')):
             self.check(not path.exists() and not path.is_symlink(), 'refusing existing installation path: ' + str(path))
-        self.check(self.unit().get('LoadState') == 'not-found', 'refusing an existing docker-manager service')
+        self.check(self.unit().get('LoadState') == 'not-found', 'refusing an existing docklane service')
         with socket.socket() as probe:
             probe.bind(('127.0.0.1', 9999))
         self.check((self.args.assets / 'install-online.sh').read_bytes() ==

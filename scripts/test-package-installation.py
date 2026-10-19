@@ -17,7 +17,7 @@ SOURCE = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location('release_preflight', SOURCE / 'scripts/release-preflight.py')
 HELPER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(HELPER)
-VERSION = '0.3.1-beta.1'
+VERSION = '0.3.2-beta.1'
 SHA = 'a' * 40
 
 
@@ -39,7 +39,7 @@ def fixture(root, version=VERSION):
     build.mkdir()
     output.mkdir()
     sources = ['scripts/install-online.sh', 'scripts/install-support.py', 'scripts/install.sh',
-               'scripts/upgrade.sh', 'scripts/uninstall.sh', 'deployments/docker-manager.service',
+               'scripts/upgrade.sh', 'scripts/uninstall.sh', 'deployments/docklane.service',
                'deployments/config.example.json', 'README.md', 'README.en.md', 'LICENSE',
                'docker-manager-prd-v0.3.md', 'docs/security-notes.md', 'docs/images/zh/promo.png',
                'web/qa/release-browser-results.json', '.tool-versions']
@@ -61,9 +61,9 @@ def fixture(root, version=VERSION):
         tar_bytes(build / name, {'docklane': bytes(content), 'LICENSE': license})
         manifest(build, name + '.sha256', [name])
     manifest(build, 'SHA256SUMS', ['docklane-linux-amd64', 'docklane-linux-arm64', 'LICENSE'])
-    (build / 'docker-manager-images.tar.gz').write_bytes(b'image fixture')
-    manifest(build, 'IMAGE-SHA256SUMS', ['docker-manager-images.tar.gz'])
-    (build / 'IMAGES.txt').write_text(''.join(f'[docker-manager:v{version}-{arch}] sha256:{"1" * 64} linux/{arch}\n' for arch in ('amd64', 'arm64')))
+    (build / 'docklane-images.tar.gz').write_bytes(b'image fixture')
+    manifest(build, 'IMAGE-SHA256SUMS', ['docklane-images.tar.gz'])
+    (build / 'IMAGES.txt').write_text(''.join(f'[docklane:v{version}-{arch}] sha256:{"1" * 64} linux/{arch}\n' for arch in ('amd64', 'arm64')))
     (build / 'release-ci-evidence.json').write_text(json.dumps({'version': version, 'tag': 'v' + version,
         'head_sha': SHA, 'ci_run_id': 123, 'ci_run_url': 'https://github.com/example/project/actions/runs/123', 'publication': 'candidate'}))
     return build, output
@@ -87,7 +87,7 @@ class PackageTests(unittest.TestCase):
         return result
 
     def rewrite_metadata(self, name, value):
-        path = self.output / 'docker-manager-installation.tar.gz'
+        path = self.output / 'docklane-installation.tar.gz'
         with tarfile.open(path) as archive:
             entries = {member.name: archive.extractfile(member).read() for member in archive.getmembers() if member.isfile()}
         if value is None:
@@ -102,7 +102,7 @@ class PackageTests(unittest.TestCase):
         self.assertEqual({p.name for p in self.output.iterdir()}, HELPER.release_assets('v' + VERSION) | {'RELEASE-SHA256SUMS'})
         result = HELPER.validate_candidate(self.output, 'v' + VERSION, SHA)
         self.assertTrue(result['prerelease'])
-        with tarfile.open(self.output / 'docker-manager-installation.tar.gz') as archive:
+        with tarfile.open(self.output / 'docklane-installation.tar.gz') as archive:
             for name in ('VERSION', 'SHA256SUMS', 'IMAGE-SHA256SUMS', 'IMAGES.txt', 'TOOL-VERSIONS.txt',
                          'release-ci-evidence.json', 'SECURITY-NOTES.md', 'LICENSE'):
                 self.assertTrue(archive.getmember(name).isfile())

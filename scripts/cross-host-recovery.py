@@ -2,7 +2,7 @@
 """Restore an encrypted repository on a different, fresh Linux installation.
 
 Place this file beside integration.py. Run as root with Python >= 3.11:
-  cross-host-recovery.py --binary /path/docker-manager --root /private/recovery \
+  cross-host-recovery.py --binary /path/docklane --root /private/recovery \
     --offline /private/recovery/offline.json --expected /private/recovery/expected.json \
     --report /path/cross-host-report.json
 
