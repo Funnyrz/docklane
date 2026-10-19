@@ -1,0 +1,34 @@
+{
+  "built_at": "2026-10-19T02:25:22.659837+00:00",
+  "output_directory": "/Users/fuyangyang/Projects/Private/docker-manager/bin/release/20261019-102445",
+  "source_commit": "34ab749cc50c88c82117f53be0ed34751386859f",
+  "includes_uncommitted_changes": true,
+  "version": "0.3.0",
+  "assets": {
+    "assets/index-lH7VVTBV.css": "78d4f68fc6b92a89a16fdb73ececae4c51a3848407fd566d47be0d7b896a46ae",
+    "assets/index-u2j8g2jC.js": "651f2b2da0d72745c3c191a16cbcb721d2cbdec868b2d2bd9c85b8bc3df6b2c9",
+    "index.html": "4160c4c52f3e51d6896d5cc8d0571d945574063214e1e22f4e1ba21c988fe0d8"
+  },
+  "packages": {
+    "amd64": {
+      "archive": "/Users/fuyangyang/Projects/Private/docker-manager/bin/release/20261019-102445/docklane-v0.3.0-linux-amd64.tar.gz",
+      "sha256": "ae166aa09b6bbb54dc22a7337af2ef229db975aee94b64e47bf368a0fd2fa5ae",
+      "bytes": 10633611,
+      "binary_sha256": "910a26b492e99615ec88b5fa49f06731342e564006ff23856d26141d1d1c72be",
+      "elf_machine": 62,
+      "frontend_embedded": "byte-for-byte pass",
+      "archive_contents": "pass"
+    },
+    "arm64": {
+      "archive": "/Users/fuyangyang/Projects/Private/docker-manager/bin/release/20261019-102445/docklane-v0.3.0-linux-arm64.tar.gz",
+      "sha256": "d2ea4cc39f5455d9e37ad007fd193a5e1f26e9a780ee0b0604c7d6f129e61ad0",
+      "bytes": 9606587,
+      "binary_sha256": "8ee683a9f54264e7a9f8da8cc18b610974c108ee24cd9ef84309d8f536a46bd4",
+      "elf_machine": 183,
+      "frontend_embedded": "byte-for-byte pass",
+      "archive_contents": "pass"
+    }
+  },
+  "manifests": "all SHA-256 values verified",
+  "limitation": "Linux binaries cross-compiled on macOS; not executed on Linux. Same-source native embedded app smoke tested."
+}

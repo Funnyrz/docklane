@@ -75,9 +75,8 @@ func New(a *platform.App, assets fs.FS, features ...Register) *gin.Engine {
 	p.GET("/hosts/:host_id/capabilities", func(c *gin.Context) {
 		c.JSON(200, gin.H{"host_id": "local", "mode": a.Config.Mode, "capabilities": capabilities(c.Request.Context(), a)})
 	})
-	p.GET("/settings", func(c *gin.Context) {
-		c.JSON(200, gin.H{"version": "0.3.0", "mode": a.Config.Mode, "listen": a.Config.Listen, "data_dir": a.Config.DataDir, "allowed_paths": a.Config.AllowedPaths, "path_mappings": a.Config.PathMappings, "capabilities": capabilities(c.Request.Context(), a)})
-	})
+	p.GET("/settings", func(c *gin.Context) { getSettings(c, a) })
+	p.POST("/settings/capabilities", func(c *gin.Context) { updateCapabilitySettings(c, a, au) })
 	p.GET("/tasks", func(c *gin.Context) {
 		limit, offset := pagination(c)
 		v, e := a.Tasks.List(limit, offset)

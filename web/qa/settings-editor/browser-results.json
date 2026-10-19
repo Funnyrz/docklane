@@ -1,0 +1,116 @@
+{
+  "kind": "browser fixtures only",
+  "checks": [
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflow": false,
+      "saveRequiresConfirmation": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "overflow": false,
+      "saveRequiresConfirmation": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "overflow": false,
+      "saveRequiresConfirmation": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "overflow": false,
+      "saveRequiresConfirmation": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "overflow": false,
+      "saveRequiresConfirmation": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflow": false,
+      "saveRequiresConfirmation": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "overflow": false,
+      "saveRequiresConfirmation": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "overflow": false,
+      "saveRequiresConfirmation": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "overflow": false,
+      "saveRequiresConfirmation": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "overflow": false,
+      "saveRequiresConfirmation": true
+    },
+    {
+      "scenario": "password error, draft preservation, saved pending state and reset",
+      "pass": true
+    },
+    {
+      "scenario": "container deployment cannot enable host authorization",
+      "pass": true
+    }
+  ],
+  "writes": [
+    {
+      "endpoint": "/settings/capabilities",
+      "method": "POST",
+      "passwordProvided": true
+    },
+    {
+      "endpoint": "/settings/capabilities",
+      "method": "POST",
+      "passwordProvided": true
+    }
+  ],
+  "browserErrors": []
+}

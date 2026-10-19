@@ -1,0 +1,18 @@
+{
+  "score": 93,
+  "verdict": "pass",
+  "category_match": true,
+  "differences": [],
+  "suggestions": [],
+  "reasoning": "针对用户截图的拥挤问题进行设计目标自评：主机信息改为桌面两列分组，标签和值分离；指标、备份摘要和任务列的层次更清楚。中英文1440×900五条任务仍在首屏，移动端和单任务状态通过；不是对旧截图的像素还原评分。",
+  "threshold": 90,
+  "next_actions": [],
+  "evidence": [
+    "single-task-1440.png",
+    "single-task-390.png",
+    "fixture-dashboard-en-1440x900.png",
+    "first-screen.json",
+    "fixture-results.json",
+    "single-task-results.json"
+  ]
+}

@@ -5,14 +5,16 @@ import { resourcesZh, resourcesEn } from './resources'
 import { backupZh, backupEn } from './backup'
 import { viewsZh, viewsEn } from './views'
 import { errorsZh, errorsEn } from './errors'
+import { capabilitiesZh, capabilitiesEn } from './capabilities'
+import { settingsEditorZh, settingsEditorEn } from './settings-editor'
 
 export type Locale = 'zh-CN' | 'en'
 export type TextParams = Record<string, string | number>
 export interface LocalizedText { i18nKey: string; params?: TextParams }
 export type Text = string | LocalizedText
 export const localeStorageKey = 'docker-manager:locale'
-export const zhMessages = { ...commonZh, resources: resourcesZh, backup: backupZh, ...viewsZh, errors: errorsZh }
-export const enMessages: MessageSchema<typeof zhMessages> = { ...commonEn, resources: resourcesEn, backup: backupEn, ...viewsEn, errors: errorsEn }
+export const zhMessages = { ...commonZh, resources: resourcesZh, backup: backupZh, ...viewsZh, errors: errorsZh, capabilities: capabilitiesZh, settingsEditor: settingsEditorZh }
+export const enMessages: MessageSchema<typeof zhMessages> = { ...commonEn, resources: resourcesEn, backup: backupEn, ...viewsEn, errors: errorsEn, capabilities: capabilitiesEn, settingsEditor: settingsEditorEn }
 export const i18n = createI18n({
   legacy: false, locale: 'zh-CN' as Locale, fallbackLocale: 'zh-CN',
   messages: { 'zh-CN': zhMessages, en: enMessages },

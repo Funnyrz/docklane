@@ -1,0 +1,8 @@
+*.png
+!editor-zh-CN-1440.png
+!editor-zh-CN-390.png
+!editor-en-1440.png
+!pending-desktop.png
+!unsupported-mobile.png
+!real-pending.png
+!real-active.png

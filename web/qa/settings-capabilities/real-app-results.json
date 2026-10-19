@@ -1,0 +1,55 @@
+{
+  "kind": "real embedded Go app, disposable initialized database, deliberately unavailable Docker socket",
+  "mode": "binary",
+  "capabilities": {
+    "backup.bind_mount": {
+      "available": false,
+      "reason": "Configure explicit allowed paths and container path mappings",
+      "reason_code": "ALLOWED_PATHS_MISSING"
+    },
+    "backup.local": {
+      "available": false,
+      "reason": "Restic is not installed",
+      "reason_code": "RESTIC_MISSING",
+      "reason_params": {
+        "tool": "restic"
+      }
+    },
+    "compose.manage": {
+      "available": false,
+      "reason": "Docker Compose v2 plugin is unavailable",
+      "reason_code": "COMPOSE_V2_UNAVAILABLE",
+      "reason_params": {
+        "tool": "docker"
+      }
+    },
+    "docker.manage": {
+      "available": false,
+      "reason": "Docker Engine is unavailable",
+      "reason_code": "DOCKER_UNAVAILABLE"
+    },
+    "host.daemon_config": {
+      "available": false,
+      "reason": "daemon changes require binary mode and explicit enable_daemon_write authorization; Docker mode must use the manual host guide",
+      "reason_code": "HOST_OS_UNSUPPORTED",
+      "reason_params": {
+        "os": "darwin"
+      }
+    },
+    "host.service_restart": {
+      "available": false,
+      "reason": "daemon changes require binary mode and explicit enable_daemon_write authorization; Docker mode must use the manual host guide",
+      "reason_code": "HOST_OS_UNSUPPORTED",
+      "reason_params": {
+        "os": "darwin"
+      }
+    }
+  },
+  "localizedSettings": "pass",
+  "hostWriteControls": "disabled",
+  "manualGuide": "localized",
+  "browserErrors": [],
+  "assets": [
+    "/assets/index-u2j8g2jC.js"
+  ]
+}

@@ -1,0 +1,19 @@
+# Keep representative evidence in Git; all matrix screenshots remain locally available.
+*.png
+!preview.png
+!fixture-dashboard-en-1440x900.png
+!fixture-dashboard-zh-CN-390x844.png
+!fixture-containers-zh-CN-1440x900.png
+!fixture-containers-en-1440x900.png
+!fixture-containers-zh-CN-390x844.png
+!fixture-settings-zh-CN-1440x900.png
+!fixture-settings-zh-CN-390x844.png
+!fixture-restore-risk-confirm-zh-CN-390x844.png
+!fixture-container-config-zh-CN-1440x900.png
+!fixture-task-filter-menu-zh-CN-390x844.png
+!fixture-long-values-error-zh-CN-1440x900.png
+!fixture-unknown-empty-zh-CN-390x844.png
+!fixture-offline-zh-CN-390x844.png
+!login-1440.png
+!login-390.png
+!short-screen-navigation.png

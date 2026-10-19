@@ -1,0 +1,17 @@
+{
+  "score": 94,
+  "verdict": "pass",
+  "category_match": true,
+  "differences": [],
+  "suggestions": [],
+  "reasoning": "折叠后的64px图标栏与现有浅色控制台一致，图标居中且内容区同步扩宽；中英文标签通过可访问名称和原生悬停提示保留，手机抽屉保持完整文字。依据功能目标自评，无外部复刻参考。",
+  "threshold": 90,
+  "next_actions": [],
+  "evidence": [
+    "collapsed-zh-CN.png",
+    "collapsed-en.png",
+    "mobile-drawer.png",
+    "collapse-results.json",
+    "fixture-results.json"
+  ]
+}

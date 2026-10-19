@@ -23,10 +23,10 @@ const disk = computed(() => host.value.disk as Row | null | undefined)
 const docker = computed(() => (data.value.docker ?? {}) as Row)
 const version = computed(() => (docker.value.version ?? {}) as Row)
 const metrics = computed(() => [
-  { label: t('dashboard.allContainers'), value: counts.value.total, caption: t('dashboard.containersCaption'), route: 'containers', icon: 'containers', tone: 'blue' },
-  { label: t('dashboard.running'), value: counts.value.running, caption: t('dashboard.runningCaption'), route: 'containers', icon: 'activity', tone: 'green' },
-  { label: t('dashboard.images'), value: data.value.images, caption: t('dashboard.imagesCaption'), route: 'images', icon: 'images', tone: 'violet' },
-  { label: t('dashboard.volumes'), value: data.value.volumes, caption: t('dashboard.volumesCaption'), route: 'volumes', icon: 'volumes', tone: 'slate' },
+  { label: t('dashboard.allContainers'), value: counts.value.total, route: 'containers', icon: 'containers' },
+  { label: t('dashboard.running'), value: counts.value.running, route: 'containers', icon: 'activity' },
+  { label: t('dashboard.images'), value: data.value.images, route: 'images', icon: 'images' },
+  { label: t('dashboard.volumes'), value: data.value.volumes, route: 'volumes', icon: 'volumes' },
 ])
 const facts = computed(() => [
   { label: t('dashboard.osArchitecture'), value: `${str(host.value.os)} / ${str(host.value.architecture)}` },
@@ -57,35 +57,32 @@ onUnmounted(() => clearInterval(timer))
 </script>
 
 <template>
-  <section class="host-banner">
+  <section class="host-summary" :aria-label="t('dashboard.hostOverview')">
     <div class="host-identity">
-      <span class="host-symbol"><AppIcon name="server" /></span>
-      <div class="host-copy">
-        <span class="eyebrow">{{ t('dashboard.hostEyebrow') }}</span>
-        <h2>{{ host.hostname ?? t('dashboard.localHost') }}<span class="tag" :class="busy ? 'pending' : error ? 'danger' : updated ? 'success' : 'pending'">{{ busy ? t('dashboard.reading') : error ? t('dashboard.connectionError') : updated ? t('dashboard.loaded') : t('dashboard.connecting') }}</span></h2>
-        <p>{{ error ? t('dashboard.waitingDocker') : t('dashboard.discoveryInfo') }}</p>
-      </div>
+      <h1>{{ t('nav.dashboard') }}</h1>
+      <span class="host-name" :title="str(host.hostname ?? t('dashboard.localHost'))"><AppIcon name="server" />{{ host.hostname ?? t('dashboard.localHost') }}</span>
+      <span class="tag" :class="busy ? 'pending' : error ? 'danger' : updated ? 'success' : 'pending'">{{ busy ? t('dashboard.reading') : error ? t('dashboard.connectionError') : updated ? t('dashboard.loaded') : t('dashboard.connecting') }}</span>
     </div>
     <n-button :loading="busy" @click="load"><template #icon><AppIcon name="refresh" /></template>{{ t('dashboard.refresh') }}</n-button>
   </section>
+  <p v-if="error" class="muted host-error-note">{{ t('dashboard.waitingDocker') }}</p>
   <Notice :error="error" :busy="busy && !updated" />
   <Notice v-if="data.resource_error" :error="t('dashboard.resourceError', { error: str(data.resource_error) })" />
   <div v-if="!error && updated" class="metrics">
-    <button v-for="metric in metrics" :key="metric.label" class="metric-card" :class="`metric-${metric.tone}`" @click="emit('navigate', metric.route)">
-      <span class="metric-heading"><span>{{ metric.label }}</span><span class="metric-icon"><AppIcon :name="metric.icon" /></span></span>
+    <button v-for="metric in metrics" :key="metric.label" class="metric-card" @click="emit('navigate', metric.route)">
+      <span class="metric-heading"><span>{{ metric.label }}</span><AppIcon :name="metric.icon" /></span>
       <strong class="metric-value">{{ numeric(metric.value) }}</strong>
-      <span class="metric-caption"><span>{{ metric.caption }}</span><AppIcon class="metric-link" name="arrow-up-right" /></span>
+      <AppIcon class="metric-link" name="arrow-up-right" />
     </button>
   </div>
-  <div class="dashboard-grid">
-    <section class="panel">
-      <div class="panel-title"><div class="panel-heading"><span class="panel-icon"><AppIcon name="server" /></span><h3>{{ t('dashboard.hostOverview') }}</h3></div><span class="eyebrow">{{ t('dashboard.systemProfile') }}</span></div>
+  <div class="dashboard-grid dashboard-details">
+    <section class="panel host-facts">
+      <div class="panel-title"><div class="panel-heading"><span class="panel-icon"><AppIcon name="server" /></span><h3>{{ t('dashboard.hostOverview') }}</h3></div></div>
       <dl class="facts"><div v-for="fact in facts" :key="fact.label"><dt>{{ fact.label }}</dt><dd :class="{ mono: fact.mono }">{{ fact.value }}</dd></div></dl>
       <p class="footnote">{{ t('dashboard.missingMetric') }}</p>
     </section>
     <section class="panel protection">
-      <div class="panel-title"><div class="panel-heading"><span class="panel-icon"><AppIcon name="shield" /></span><h3>{{ t('dashboard.protection') }}</h3></div><span class="eyebrow">{{ t('dashboard.backupRecovery') }}</span></div>
-      <h2>{{ latest ? t('dashboard.recoveryPoint') : t('dashboard.backupStart') }}</h2>
+      <div class="panel-title"><div class="panel-heading"><span class="panel-icon"><AppIcon name="shield" /></span><h3>{{ t('dashboard.protection') }}</h3></div></div>
       <div class="backup-summary">
         <div><span>{{ t('dashboard.unprotected') }}</span><strong>{{ numeric(backup.unprotected) }}</strong></div>
         <div><span>{{ t('dashboard.latestVerified') }}</span><strong class="small-value">{{ latest ? formatDateTime(latest.created_at) : t('dashboard.noRecord') }}</strong></div>
@@ -97,12 +94,12 @@ onUnmounted(() => clearInterval(timer))
     </section>
   </div>
   <section class="panel recent-tasks">
-    <div class="panel-title"><div class="panel-heading"><span class="panel-icon"><AppIcon name="tasks" /></span><h3>{{ t('dashboard.recentTasks') }}</h3></div><n-button text @click="emit('navigate', 'tasks')">{{ t('dashboard.allTasks') }}<AppIcon name="arrow-up-right" /></n-button></div>
+    <div class="panel-title"><div class="panel-heading"><span class="panel-icon"><AppIcon name="tasks" /></span><h3>{{ t('dashboard.recentTasks') }}<span class="count">{{ formatNumber(tasks.length) }}</span></h3></div><n-button text @click="emit('navigate', 'tasks')">{{ t('dashboard.allTasks') }}<AppIcon name="arrow-up-right" /></n-button></div>
     <div v-if="!tasks.length" class="quiet-empty"><AppIcon name="inbox" /><span>{{ t('dashboard.noTasks') }}</span></div>
     <div v-for="task in tasks" :key="str(task.id)" class="activity-row">
       <span class="activity-icon"><AppIcon name="tasks" /></span>
       <strong class="activity-title">{{ displayTaskType(task.type ?? task.kind) }}</strong>
-      <span class="muted activity-target">{{ str(task.target) }}</span>
+      <span class="muted activity-target" :title="str(task.target)" tabindex="0">{{ str(task.target) }}</span>
       <span class="tag" :class="state(task).toLowerCase()">{{ displayState(state(task)) }}</span>
     </div>
   </section>

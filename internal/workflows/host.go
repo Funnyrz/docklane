@@ -82,41 +82,81 @@ func mergeMirrors(original []byte, mirrors []string) ([]byte, error) {
 	v["registry-mirrors"] = b
 	return json.MarshalIndent(v, "", "  ")
 }
+
+// CapabilityError identifies an unmet prerequisite without changing the policy that
+// guards host operations. Reason remains suitable for existing API consumers.
+type CapabilityError struct {
+	Code   string
+	Params map[string]string
+	Reason string
+}
+
+func (e *CapabilityError) Error() string { return e.Reason }
+
 func (s *Service) daemonAllowed() error {
-	if runtime.GOOS != "linux" || s.app.Config.Mode != "binary" || !s.app.Config.EnableDaemonWrite {
-		return errors.New("daemon changes require binary mode and explicit enable_daemon_write authorization; Docker mode must use the manual host guide")
+	return s.daemonAllowedOn(runtime.GOOS)
+}
+
+func (s *Service) daemonAllowedOn(goos string) error {
+	deploymentReason := "daemon changes require binary mode and explicit enable_daemon_write authorization; Docker mode must use the manual host guide"
+	if goos != "linux" {
+		return &CapabilityError{Code: "HOST_OS_UNSUPPORTED", Params: map[string]string{"os": goos}, Reason: deploymentReason}
+	}
+	if s.app.Config.Mode != "binary" {
+		return &CapabilityError{Code: "HOST_MODE_UNSUPPORTED", Params: map[string]string{"mode": s.app.Config.Mode}, Reason: deploymentReason}
+	}
+	if !s.app.Config.EnableDaemonWrite {
+		return &CapabilityError{Code: "DAEMON_WRITE_NOT_AUTHORIZED", Reason: deploymentReason}
 	}
 	if !strings.HasPrefix(s.app.Config.DockerEndpoint, "unix://") {
-		return errors.New("daemon writes require a local Unix Docker endpoint")
+		return &CapabilityError{Code: "LOCAL_DOCKER_ENDPOINT_REQUIRED", Reason: "daemon writes require a local Unix Docker endpoint"}
 	}
-	if !filepath.IsAbs(s.app.Config.DaemonConfigPath) {
-		return errors.New("daemon configuration path must be absolute")
+	path := s.app.Config.DaemonConfigPath
+	params := map[string]string{"path": path}
+	if !filepath.IsAbs(path) {
+		return &CapabilityError{Code: "DAEMON_CONFIG_PATH_INVALID", Params: params, Reason: "daemon configuration path must be absolute"}
 	}
-	st, e := os.Lstat(s.app.Config.DaemonConfigPath)
+	st, e := os.Lstat(path)
 	if e == nil && (st.Mode()&os.ModeSymlink != 0 || !st.Mode().IsRegular()) {
-		return errors.New("daemon configuration must be a regular file, not a symlink")
+		return &CapabilityError{Code: "DAEMON_CONFIG_NOT_REGULAR", Params: params, Reason: "daemon configuration must be a regular file, not a symlink"}
 	}
 	if e != nil && !os.IsNotExist(e) {
-		return e
+		return daemonInspectionError(path, e)
 	}
 	for _, tool := range []string{"dockerd", "systemctl"} {
 		if _, e := exec.LookPath(tool); e != nil {
-			return fmt.Errorf("required host tool %s is unavailable", tool)
+			return &CapabilityError{Code: "HOST_TOOL_MISSING", Params: map[string]string{"tool": tool}, Reason: fmt.Sprintf("required host tool %s is unavailable", tool)}
 		}
 	}
-	parent := filepath.Dir(s.app.Config.DaemonConfigPath)
+	parent := filepath.Dir(path)
 	st, e = os.Stat(parent)
+	if e != nil && !os.IsNotExist(e) {
+		return daemonInspectionError(parent, e)
+	}
 	if e != nil || !st.IsDir() {
-		return errors.New("daemon configuration parent directory is unavailable")
+		return &CapabilityError{Code: "DAEMON_CONFIG_DIRECTORY_MISSING", Params: map[string]string{"path": parent}, Reason: "daemon configuration parent directory is unavailable"}
 	}
 	if syscall.Access(parent, 2) != nil {
-		return errors.New("daemon configuration directory is not writable")
+		return &CapabilityError{Code: "DAEMON_CONFIG_NOT_WRITABLE", Params: map[string]string{"path": parent}, Reason: "daemon configuration directory is not writable"}
 	}
-	if st, e := os.Stat(s.app.Config.DaemonConfigPath); e == nil && st.Mode().Perm()&0200 == 0 {
-		return errors.New("daemon configuration file is not writable")
+	if st, e := os.Stat(path); e == nil {
+		if st.Mode().Perm()&0200 == 0 {
+			return &CapabilityError{Code: "DAEMON_CONFIG_NOT_WRITABLE", Params: params, Reason: "daemon configuration file is not writable"}
+		}
+	} else if !os.IsNotExist(e) {
+		return daemonInspectionError(path, e)
 	}
 	return nil
 }
+
+func daemonInspectionError(path string, err error) error {
+	code := "DAEMON_CONFIG_INSPECTION_FAILED"
+	if errors.Is(err, os.ErrPermission) {
+		code = "HOST_PERMISSION_DENIED"
+	}
+	return &CapabilityError{Code: code, Params: map[string]string{"path": path}, Reason: err.Error()}
+}
+
 func manualGuide() string {
 	return "On the host, back up /etc/docker/daemon.json; merge registry-mirrors while retaining all other fields; run dockerd --validate --config-file /etc/docker/daemon.json; review downtime, then systemctl restart docker; verify docker info and perform an explicit pull. Restore the backup and restart if verification fails. registry-mirrors mainly applies to Docker Hub."
 }

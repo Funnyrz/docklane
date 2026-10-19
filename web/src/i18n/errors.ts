@@ -1,5 +1,12 @@
 import type { MessageSchema } from './common'
 export const errorsZh = {
+  "SETTINGS_INVALID_PATH": "目录必须为有效的绝对路径，不能为根目录，也不能重复。",
+  "SETTINGS_INVALID_MAPPING": "请检查路径映射：宿主机和容器路径均须为明确的绝对目录，不能重复或指向根目录。",
+  "SETTINGS_LIMIT_EXCEEDED": "允许目录或路径映射最多填写 128 项。",
+  "SETTINGS_DAEMON_UNSUPPORTED": "当前运行环境不支持宿主机操作授权，需要 Linux 二进制部署。",
+  "PASSWORD_CONFIRMATION_FAILED": "当前管理员密码不正确，请重新输入。",
+  "SETTINGS_READ_FAILED": "无法读取已保存的功能配置，请检查服务日志。",
+  "SETTINGS_SAVE_FAILED": "功能配置保存失败，请重试并检查服务日志。",
   "AUTH_REQUIRED": "请先登录。",
   "INVALID_CREDENTIALS": "账号或密码不正确。",
   "LOGIN_RATE_LIMIT": "登录尝试过于频繁，请稍后重试。",
@@ -53,6 +60,13 @@ export const errorsZh = {
   "AUDIT_WRITE_FAILED": "无法记录操作审计。"
 }
 export const errorsEn: MessageSchema<typeof errorsZh> = {
+  "SETTINGS_INVALID_PATH": "Directories must be unique absolute paths and cannot point to filesystem root.",
+  "SETTINGS_INVALID_MAPPING": "Check that host and container mappings are explicit absolute directories without duplicates or filesystem root.",
+  "SETTINGS_LIMIT_EXCEEDED": "Allowed directories and mappings are limited to 128 entries each.",
+  "SETTINGS_DAEMON_UNSUPPORTED": "Host-operation authorization requires a Linux binary deployment.",
+  "PASSWORD_CONFIRMATION_FAILED": "The current administrator password is incorrect. Enter it again.",
+  "SETTINGS_READ_FAILED": "Saved feature settings could not be read. Check the service logs.",
+  "SETTINGS_SAVE_FAILED": "Feature settings could not be saved. Retry and check the service logs.",
   "AUTH_REQUIRED": "Please sign in.",
   "INVALID_CREDENTIALS": "Incorrect username or password.",
   "LOGIN_RATE_LIMIT": "Too many sign-in attempts. Please try again later.",

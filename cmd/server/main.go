@@ -92,6 +92,10 @@ func serve() error {
 		return e
 	}
 	defer db.Close()
+	cfg, e = config.ApplySavedCapabilitySettings(db, cfg)
+	if e != nil {
+		return e
+	}
 	var expectedFingerprint string
 	_ = db.QueryRow("SELECT value FROM settings WHERE key='master_key_fingerprint'").Scan(&expectedFingerprint)
 	if expectedFingerprint != "" {

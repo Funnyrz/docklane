@@ -1,0 +1,41 @@
+{
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "documentHeight": 900,
+  "panels": {
+    ".host-summary": {
+      "top": 72,
+      "bottom": 120,
+      "height": 48
+    },
+    ".metrics": {
+      "top": 132,
+      "bottom": 216,
+      "height": 84
+    },
+    ".dashboard-details": {
+      "top": 228,
+      "bottom": 483.25,
+      "height": 255.25
+    },
+    ".recent-tasks": {
+      "top": 495.25,
+      "bottom": 727.640625,
+      "height": 232.390625
+    },
+    ".page-footer": {
+      "top": 765.234375,
+      "bottom": 793.828125,
+      "height": 28.59375
+    }
+  },
+  "taskBottoms": [
+    570.640625,
+    606.640625,
+    642.640625,
+    678.640625,
+    714.640625
+  ]
+}

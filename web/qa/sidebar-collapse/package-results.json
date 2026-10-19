@@ -1,0 +1,34 @@
+{
+  "directory": "/Users/fuyangyang/Projects/Private/docker-manager/bin/release/20261019-101059",
+  "built_at": "2026-10-19T02:11:32.511541+00:00",
+  "version": "v0.3.0",
+  "source_commit": "34ab749cc50c88c82117f53be0ed34751386859f",
+  "includes_uncommitted_sidebar_collapse": true,
+  "frontend_assets": {
+    "index.html": "6ae63c8407987363dd55f1a78863362f6e04399f0235cddea8463d51f5d8f041",
+    "assets/index-D8Sd_C6H.js": "534fc7c43014454927c8a846d32a7342e3592a97fa06ada83601543abeb568f1",
+    "assets/index-4AUGO5-g.css": "cbd6d300a1c867d158d2960a0f274a6a1a7bcc55fa21be44bf28ee0010daa82e"
+  },
+  "packages": [
+    {
+      "architecture": "linux/amd64",
+      "archive": "docklane-v0.3.0-linux-amd64.tar.gz",
+      "bytes": 10626874,
+      "sha256": "c1471929b31f9839d482c4816ee810aba61905dbb50b881148ae4760277862a9"
+    },
+    {
+      "architecture": "linux/arm64",
+      "archive": "docklane-v0.3.0-linux-arm64.tar.gz",
+      "bytes": 9596907,
+      "sha256": "0fa1f493c14a5275d868c6417090f853a9a9156a8885eff493a07d6e82f02879"
+    }
+  ],
+  "verification": [
+    "ELF architecture",
+    "archive binary and LICENSE",
+    "executable permissions",
+    "SHA256 manifests",
+    "all latest frontend files embedded byte-for-byte"
+  ],
+  "runtime_execution": "cross-compiled Linux binaries; not executed on this macOS host"
+}

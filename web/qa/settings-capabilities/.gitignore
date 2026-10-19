@@ -1,0 +1,8 @@
+# Retain representative screenshots; the full matrix remains locally available.
+*.png
+!settings-zh-CN-1440.png
+!settings-zh-CN-390.png
+!settings-en-1440.png
+!resolution-desktop.png
+!resolution-mobile.png
+!real-settings.png

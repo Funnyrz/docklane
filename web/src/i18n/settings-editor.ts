@@ -1,0 +1,43 @@
+import type { MessageSchema } from './common'
+
+export const settingsEditorZh = {
+  configure: '配置功能', title: '功能配置与授权',
+  description: '在页面配置备份目录和宿主机操作授权。保存到 Docklane 数据库，重启 Docklane 后生效。',
+  precedence: '页面保存的值优先于配置文件和环境变量中的对应字段。其余部署配置保持不变。',
+  pending: '已保存，等待重启 Docklane 生效。当前功能检测仍显示正在使用的配置。',
+  saved: '配置已保存。请在合适时间重启 Docklane，再重新检测功能状态。',
+  restored: '已保存，与当前运行配置一致，无需重启。',
+  active: '当前生效', pendingLabel: '待生效',
+  paths: '允许访问的目录', pathsHint: '每行一个绝对路径，填写需要的备份源、仓库和恢复目录。留空将关闭目录访问授权，不能授权根目录 /。',
+  mappings: '宿主机与容器目录映射', mappingsHint: '填写已挂载目录的对应关系。此处保存路径关系，容器的实际挂载仍由部署配置提供。二进制部署无需填写。',
+  host: '宿主机路径', local: '容器内路径', addMapping: '添加映射', removeMapping: '删除第 {index} 条映射',
+  daemon: '允许修改 Docker 配置和重启服务',
+  daemonHint: '适用于 Linux 二进制部署。开启后，具体修改仍需预览和确认；运行账号也须具备相应系统权限。',
+  unsupported: '当前系统或容器部署不支持宿主机操作授权。目录配置仍可保存。',
+  password: '当前管理员密码', passwordHint: '用于确认本次授权变更。',
+  acknowledge: '我已检查目录范围和授权内容，了解配置将在重启 Docklane 后生效。',
+  save: '保存配置', reset: '使用当前生效值',
+  restartNote: '这里只保存 Docklane 的设置。Docker 的重启仍由单独的预览与确认流程执行。',
+  emptyMapping: '尚未添加目录映射。',
+}
+
+export const settingsEditorEn: MessageSchema<typeof settingsEditorZh> = {
+  configure: 'Configure features', title: 'Feature configuration and authorization',
+  description: 'Configure backup directories and host-operation authorization here. Changes are saved in the Docklane database and take effect after restarting Docklane.',
+  precedence: 'Saved values override the corresponding configuration-file and environment fields. Other deployment settings are unchanged.',
+  pending: 'Saved, awaiting a Docklane restart. Feature checks still report the currently active configuration.',
+  saved: 'Configuration saved. Restart Docklane when appropriate, then check feature availability again.',
+  restored: 'Saved values match the active configuration. No restart is needed.',
+  active: 'Active', pendingLabel: 'Pending restart',
+  paths: 'Allowed directories', pathsHint: 'One absolute path per line for source, repository and restore directories. Leave empty to revoke directory access. Filesystem root / is not allowed.',
+  mappings: 'Host-to-container directory mappings', mappingsHint: 'Map directories that are already mounted. Actual container mounts come from your deployment configuration. Binary deployments do not need mappings.',
+  host: 'Host path', local: 'Container path', addMapping: 'Add mapping', removeMapping: 'Remove mapping {index}',
+  daemon: 'Allow Docker configuration changes and service restart',
+  daemonHint: 'For Linux binary deployments. Each change still requires a preview and confirmation, and the runtime account needs the required operating-system permissions.',
+  unsupported: 'This system or container deployment does not support host-operation authorization. Directory settings can still be saved.',
+  password: 'Current administrator password', passwordHint: 'Confirms this authorization change.',
+  acknowledge: 'I have reviewed the directory scope and authorization, and understand that changes take effect after restarting Docklane.',
+  save: 'Save configuration', reset: 'Use active values',
+  restartNote: 'This saves Docklane settings. Restarting Docker requires its separate preview and confirmation flow.',
+  emptyMapping: 'No directory mappings have been added.',
+}

@@ -1,0 +1,112 @@
+{
+  "kind": "browser fixtures matching user screenshot; no resource actions",
+  "checks": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "documentHeight": 900,
+        "taskBottom": 655.6875,
+        "fields": [
+          {
+            "labelTop": 301.796875,
+            "labelBottom": 319.796875,
+            "valueTop": 322.796875
+          },
+          {
+            "labelTop": 301.796875,
+            "labelBottom": 319.796875,
+            "valueTop": 322.796875
+          },
+          {
+            "labelTop": 352.796875,
+            "labelBottom": 370.796875,
+            "valueTop": 373.796875
+          },
+          {
+            "labelTop": 352.796875,
+            "labelBottom": 370.796875,
+            "valueTop": 373.796875
+          },
+          {
+            "labelTop": 403.796875,
+            "labelBottom": 421.796875,
+            "valueTop": 424.796875
+          },
+          {
+            "labelTop": 403.796875,
+            "labelBottom": 421.796875,
+            "valueTop": 424.796875
+          },
+          {
+            "labelTop": 454.796875,
+            "labelBottom": 472.796875,
+            "valueTop": 475.796875
+          },
+          {
+            "labelTop": 454.796875,
+            "labelBottom": 472.796875,
+            "valueTop": 475.796875
+          }
+        ]
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "geometry": {
+        "documentWidth": 390,
+        "documentHeight": 1295,
+        "taskBottom": 1212.546875,
+        "fields": [
+          {
+            "labelTop": 441.390625,
+            "labelBottom": 459.390625,
+            "valueTop": 441.390625
+          },
+          {
+            "labelTop": 476.390625,
+            "labelBottom": 494.390625,
+            "valueTop": 476.390625
+          },
+          {
+            "labelTop": 511.390625,
+            "labelBottom": 529.390625,
+            "valueTop": 511.390625
+          },
+          {
+            "labelTop": 546.390625,
+            "labelBottom": 564.390625,
+            "valueTop": 546.390625
+          },
+          {
+            "labelTop": 581.390625,
+            "labelBottom": 599.390625,
+            "valueTop": 581.390625
+          },
+          {
+            "labelTop": 616.390625,
+            "labelBottom": 634.390625,
+            "valueTop": 616.390625
+          },
+          {
+            "labelTop": 651.390625,
+            "labelBottom": 669.390625,
+            "valueTop": 651.390625
+          },
+          {
+            "labelTop": 686.390625,
+            "labelBottom": 704.390625,
+            "valueTop": 686.390625
+          }
+        ]
+      }
+    }
+  ],
+  "browserErrors": []
+}

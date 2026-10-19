@@ -19,6 +19,8 @@ const paths: Record<string, string[]> = {
   refresh: ['M20 7v5h-5M4 17v-5h5', 'M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 18 17'],
   shield: ['m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z', 'm8 12 3 3 5-6'],
   menu: ['M4 6h16M4 12h16M4 18h16'],
+  'panel-collapse': ['M3 4h18v16H3zM9 4v16', 'm16 9-3 3 3 3'],
+  'panel-expand': ['M3 4h18v16H3zM9 4v16', 'm13 9 3 3-3 3'],
   logout: ['M9 4H4v16h5M9 12h12m-5-5 5 5-5 5'],
   'chevron-right': ['m9 5 7 7-7 7'],
   clock: ['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z', 'M12 7v5l3 2'],

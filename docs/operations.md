@@ -4,6 +4,8 @@
 
 `DM_CONFIG` 指定 JSON 配置文件。环境变量可覆盖 listen、data_dir、docker_endpoint、mode、compose_path、restic_path、backup_worker_image；`DM_ALLOWED_PATHS` 为逗号分隔的显式绝对路径；`DM_PATH_MAPPINGS` 为 host/local 对象数组的 JSON。根目录 `/` 不能作为授权路径。
 
+也可在“系统设置 → 配置功能”编辑允许目录、目录映射，以及 Linux 二进制部署下的宿主机操作授权。输入当前管理员密码并确认后，保存到应用数据库的 `capability_settings_v1` 设置项；**页面保存的这三个字段优先于配置文件和环境变量，重启 Docklane 后生效**，其他配置仍按原加载方式处理。页面分别显示当前生效值与待生效值；“使用当前生效值”并保存可撤销待生效修改。运行中的备份/恢复沿用本次启动时的配置。容器实际挂载、运行工具和系统账号权限由部署环境提供，页面授权不替代这些条件，也不触发 Docker 重启。
+
 `log_level` / `DM_LOG_LEVEL` 接受 debug、info、warn、error，服务向标准错误输出结构化日志。`backup_temp_dir` / `DM_BACKUP_TEMP_DIR` 默认是数据目录内的 `tmp`，应用建立私有目录并将子进程临时文件和 Restic 缓存放入其中。目录必须有足够空间；不要指向宿主机根目录或公用业务目录。应用数据目录持有进程锁，同一目录不能同时运行两个实例。
 
 数据目录必须可写，应用设置权限 0700，数据库和主密钥 0600。不要将已有通用业务目录用作 data_dir。应用支持的密钥文件必须随应用数据备份。

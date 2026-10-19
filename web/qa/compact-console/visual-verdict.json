@@ -1,0 +1,30 @@
+{
+  "score": 94,
+  "verdict": "pass",
+  "category_match": true,
+  "differences": [],
+  "suggestions": [],
+  "reasoning": "依据已批准的浅色紧凑控制台标准进行截图自评：中英文1440x900完整展示八项主机信息、保护状态及五条任务，浅色单行导航与中性组件一致；窄屏、长值和风险确认无裁切。无外部参考图，分数不是像素还原评分。",
+  "threshold": 90,
+  "next_actions": [],
+  "iterations": [
+    {
+      "score": 87,
+      "issue": "主机面板过高，移动默认控件点击高度不足"
+    },
+    {
+      "score": 89,
+      "issue": "英文选中菜单的重复箭头挤占长名称"
+    },
+    {
+      "score": 94,
+      "issue": "均已修正；中英文五视口与120项检查通过"
+    }
+  ],
+  "evidence": [
+    "first-screen.json",
+    "fixture-results.json",
+    "browser-results.json",
+    "preview.png"
+  ]
+}

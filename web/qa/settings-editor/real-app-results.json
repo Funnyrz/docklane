@@ -1,0 +1,14 @@
+{
+  "kind": "actual embedded Go app, disposable DB, unavailable Engine socket",
+  "savedPending": "pass",
+  "activeAfterDocklaneRestart": "pass",
+  "revokedAfterRestart": "pass",
+  "auditEntries": 2,
+  "passwordAbsentFromSettingsAndAudit": true,
+  "operatingSystem": "darwin",
+  "hostAuthorizationToggle": false,
+  "browserErrors": [],
+  "assets": [
+    "/assets/index-DklcgPWD.js"
+  ]
+}

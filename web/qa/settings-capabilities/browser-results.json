@@ -1,0 +1,207 @@
+{
+  "checks": [
+    {
+      "scenario": "mixed",
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "scenario": "mixed",
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "scenario": "mixed",
+      "language": "zh-CN",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "scenario": "mixed",
+      "language": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "mixed",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "scenario": "mixed",
+      "language": "en",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "scenario": "mixed",
+      "language": "en",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "scenario": "mixed",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "DOCKER_UNAVAILABLE",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "DOCKER_CLI_MISSING",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "COMPOSE_V2_UNAVAILABLE",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "RESTIC_MISSING",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "ALLOWED_PATHS_MISSING",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "PATH_MAPPINGS_MISSING",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "HOST_OS_UNSUPPORTED",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "HOST_MODE_UNSUPPORTED",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "DAEMON_WRITE_NOT_AUTHORIZED",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "LOCAL_DOCKER_ENDPOINT_REQUIRED",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "DAEMON_CONFIG_PATH_INVALID",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "DAEMON_CONFIG_NOT_REGULAR",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "DAEMON_CONFIG_INSPECTION_FAILED",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "DAEMON_CONFIG_DIRECTORY_MISSING",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "HOST_TOOL_MISSING",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "HOST_PERMISSION_DENIED",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "DAEMON_CONFIG_NOT_WRITABLE",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "scenario": "container mode and localized manual guide"
+    },
+    {
+      "scenario": "unknown code safe raw diagnostic"
+    },
+    {
+      "scenario": "both backend permissions required"
+    },
+    {
+      "scenario": "preview and explicit confirmation preserved"
+    }
+  ],
+  "writes": [
+    {
+      "endpoint": "/host/daemon/preview",
+      "method": "POST"
+    }
+  ],
+  "confirmationGate": "pass",
+  "browserErrors": []
+}

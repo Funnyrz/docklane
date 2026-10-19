@@ -1,0 +1,1 @@
+{"score":93,"verdict":"pass","category_match":true,"differences":[],"suggestions":[],"reasoning":"设置表单沿用浅色控制台，目录字段、映射、授权及密码分组清楚；390px 下映射自然纵排，弹窗可纵向滚动到确认和保存，五种尺寸均无页面或弹窗横向溢出。按用户功能与可读性目标自评，无像素复刻参考。"}

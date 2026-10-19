@@ -5,7 +5,7 @@ import { useAuth } from './stores/auth'
 import { message, str } from './api'
 import { t, locale } from './i18n'
 import LanguageSelect from './components/LanguageSelect.vue'
-import { theme } from './theme'
+import { theme, mobileTheme } from './theme'
 import AppIcon from './components/AppIcon.vue'
 import DashboardView from './views/DashboardView.vue'
 import ResourcesView from './views/ResourcesView.vue'
@@ -21,25 +21,34 @@ const username = ref('')
 const password = ref('')
 const mobile = ref(false)
 const isSmallScreen = ref(false)
+const sidebarCollapsed = ref(false)
+const sidebarStorageKey = 'docker-manager:sidebar-collapsed'
+const desktopCollapsed = computed(() => !isSmallScreen.value && sidebarCollapsed.value)
 const sidebar = ref<HTMLElement | null>(null)
 const menuButton = ref<HTMLButtonElement | null>(null)
+const sidebarToggle = ref<HTMLButtonElement | null>(null)
 const navigationOpen = computed(() => isSmallScreen.value && mobile.value)
 let mobileQuery: MediaQueryList | undefined
 const nav = computed(() => [
-  { key: 'dashboard', title: t('nav.dashboard'), sub: t('navSub.dashboard') },
-  { key: 'containers', title: t('nav.containers'), sub: t('navSub.containers') },
-  { key: 'compose', title: t('nav.compose'), sub: t('navSub.compose') },
-  { key: 'images', title: t('nav.images'), sub: t('navSub.images') },
-  { key: 'networks', title: t('nav.networks'), sub: t('navSub.networks') },
-  { key: 'volumes', title: t('nav.volumes'), sub: t('navSub.volumes') },
-  { key: 'backups', title: t('nav.backups'), sub: t('navSub.backups') },
-  { key: 'tasks', title: t('nav.tasks'), sub: t('navSub.tasks') },
-  { key: 'settings', title: t('nav.settings'), sub: t('navSub.settings') },
+  { key: 'dashboard', title: t('nav.dashboard') },
+  { key: 'containers', title: t('nav.containers') },
+  { key: 'compose', title: t('nav.compose') },
+  { key: 'images', title: t('nav.images') },
+  { key: 'networks', title: t('nav.networks') },
+  { key: 'volumes', title: t('nav.volumes') },
+  { key: 'backups', title: t('nav.backups') },
+  { key: 'tasks', title: t('nav.tasks') },
+  { key: 'settings', title: t('nav.settings') },
 ])
 const page = ref(location.hash.slice(1) || 'dashboard')
 const active = computed(() => nav.value.find(item => item.key === page.value) ?? nav.value[0]!)
 const userInitial = computed(() => str(auth.user.username).slice(0, 1).toUpperCase())
 
+function toggleSidebar() {
+  sidebarCollapsed.value = !sidebarCollapsed.value
+  try { localStorage.setItem(sidebarStorageKey, String(sidebarCollapsed.value)) }
+  catch { /* Keep the current choice when browser storage is unavailable. */ }
+}
 function navigate(key: string) {
   page.value = key
   location.hash = key
@@ -69,9 +78,12 @@ function navigationKeyboard(event: KeyboardEvent) {
   }
 }
 function updateScreenSize() {
+  const focused = document.activeElement
   isSmallScreen.value = mobileQuery?.matches ?? false
-  if (!isSmallScreen.value) mobile.value = false
-  else if (!mobile.value && sidebar.value?.contains(document.activeElement)) {
+  if (!isSmallScreen.value) {
+    mobile.value = false
+    if (focused === menuButton.value) void nextTick(() => sidebarToggle.value?.focus())
+  } else if (!mobile.value && (sidebar.value?.contains(focused) || focused === sidebarToggle.value)) {
     void nextTick(() => menuButton.value?.focus())
   }
 }
@@ -102,6 +114,8 @@ async function logout() {
   catch (reason) { error.value = reason }
 }
 onMounted(() => {
+  try { sidebarCollapsed.value = localStorage.getItem(sidebarStorageKey) === 'true' }
+  catch { /* Expanded navigation remains available without browser storage. */ }
   void load()
   mobileQuery = window.matchMedia('(max-width: 800px)')
   updateScreenSize()
@@ -117,7 +131,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <n-config-provider :theme-overrides="theme" :locale="locale === 'en' ? enUS : zhCN" :date-locale="locale === 'en' ? dateEnUS : dateZhCN">
+  <n-config-provider :theme-overrides="isSmallScreen ? mobileTheme : theme" :locale="locale === 'en' ? enUS : zhCN" :date-locale="locale === 'en' ? dateEnUS : dateZhCN">
     <div v-if="!auth.ready || !auth.authenticated" class="auth-shell">
       <aside class="auth-story">
         <div class="brand"><span class="brand-mark"><AppIcon name="containers" /></span><span class="brand-copy"><b>DOCKLANE</b></span></div>
@@ -158,24 +172,23 @@ onUnmounted(() => {
         </div>
       </main>
     </div>
-    <div v-else class="shell">
+    <div v-else class="shell" :class="{ 'sidebar-collapsed': desktopCollapsed }">
       <aside id="main-navigation" ref="sidebar" class="sidebar" :class="{ open: navigationOpen }" :inert="isSmallScreen && !navigationOpen" :role="navigationOpen ? 'dialog' : undefined" :aria-modal="navigationOpen ? true : undefined" :aria-label="t('nav.main')">
-        <a class="brand sidebar-brand" href="#dashboard" @click.prevent="navigate('dashboard')">
+        <a class="brand sidebar-brand" href="#dashboard" aria-label="Docklane" :title="desktopCollapsed ? 'Docklane' : undefined" @click.prevent="navigate('dashboard')">
           <span class="brand-mark"><AppIcon name="containers" /></span>
           <span class="brand-copy"><b>DOCKLANE</b></span>
         </a>
         <div class="host-label"><AppIcon name="server" />{{ t('nav.localHost') }}<span>01</span></div>
         <p class="sidebar-caption">{{ t('nav.caption') }}</p>
         <nav :aria-label="t('nav.main')">
-          <button v-for="item in nav" :key="item.key" :class="{ active: active.key === item.key }" :aria-current="active.key === item.key ? 'page' : undefined" @click="navigate(item.key)">
+          <button v-for="item in nav" :key="item.key" :class="{ active: active.key === item.key }" :aria-label="item.title" :title="desktopCollapsed ? item.title : undefined" :aria-current="active.key === item.key ? 'page' : undefined" @click="navigate(item.key)">
             <AppIcon class="nav-icon" :name="item.key" />
-            <span class="nav-label">{{ item.title }}<small>{{ item.sub }}</small></span>
-            <AppIcon v-if="active.key === item.key" class="nav-chevron" name="chevron-right" />
+            <span class="nav-label">{{ item.title }}</span>
           </button>
         </nav>
         <div class="sidebar-bottom">
           <span class="version">v0.3 <span>{{ t('nav.platform') }}</span></span>
-          <button class="sidebar-user" @click="logout">
+          <button class="sidebar-user" :aria-label="`${t('nav.logout')} · ${str(auth.user.username)}`" :title="desktopCollapsed ? `${t('nav.logout')} · ${str(auth.user.username)}` : undefined" @click="logout">
             <span class="avatar">{{ userInitial }}</span>
             <span class="sidebar-user-copy"><strong>{{ str(auth.user.username) }}</strong><small>{{ t('nav.logout') }}</small></span>
             <AppIcon class="logout-icon" name="logout" />
@@ -186,15 +199,15 @@ onUnmounted(() => {
       <div class="workspace" :inert="navigationOpen">
         <header class="topbar">
           <div class="topbar-title">
+            <button v-if="!isSmallScreen" ref="sidebarToggle" class="sidebar-toggle" :aria-label="t(desktopCollapsed ? 'nav.expand' : 'nav.collapse')" :title="t(desktopCollapsed ? 'nav.expand' : 'nav.collapse')" :aria-expanded="!desktopCollapsed" aria-controls="main-navigation" @click="toggleSidebar"><AppIcon :name="desktopCollapsed ? 'panel-expand' : 'panel-collapse'" /></button>
             <button ref="menuButton" class="mobile-menu" :aria-label="navigationOpen ? t('nav.close') : t('nav.open')" :aria-expanded="navigationOpen" aria-controls="main-navigation" @click="mobile = !mobile"><AppIcon name="menu" /></button>
             <div><span class="breadcrumb">{{ t('nav.console') }} <span>/</span></span>{{ active.title }}</div>
           </div>
           <div class="topbar-end"><LanguageSelect /><span class="host-pill"><AppIcon name="server" />{{ t('nav.localHost') }}</span><span class="avatar" :title="str(auth.user.username)">{{ userInitial }}</span></div>
         </header>
         <main class="page">
-          <div class="page-heading">
-            <div><p class="eyebrow">{{ active.sub }}</p><h1>{{ active.title }}</h1></div>
-            <span class="page-caption">DOCKLANE <b>/</b> {{ t('common.localOperations') }}</span>
+          <div v-if="active.key !== 'dashboard'" class="page-heading">
+            <h1>{{ active.title }}</h1>
           </div>
           <p v-if="error" class="notice error" role="alert">{{ message(error) }}</p>
           <DashboardView v-if="page === 'dashboard'" @navigate="navigate" />

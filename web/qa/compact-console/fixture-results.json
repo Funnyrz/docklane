@@ -1,0 +1,871 @@
+{
+  "kind": "browser route fixtures only; no real resource actions",
+  "checks": [
+    {
+      "scenario": "dashboard",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "dashboard",
+      "locale": "zh-CN",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "locale": "zh-CN",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "locale": "zh-CN",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "locale": "zh-CN",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "locale": "zh-CN",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "locale": "zh-CN",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "locale": "zh-CN",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "locale": "zh-CN",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "locale": "zh-CN",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "dashboard",
+      "locale": "zh-CN",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "locale": "zh-CN",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "locale": "zh-CN",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "locale": "zh-CN",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "locale": "zh-CN",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "locale": "zh-CN",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "locale": "zh-CN",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "locale": "zh-CN",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "locale": "zh-CN",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "dashboard",
+      "locale": "zh-CN",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "locale": "zh-CN",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "locale": "zh-CN",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "locale": "zh-CN",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "locale": "zh-CN",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "locale": "zh-CN",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "locale": "zh-CN",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "locale": "zh-CN",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "locale": "zh-CN",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "dashboard",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "dashboard",
+      "locale": "en",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "locale": "en",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "locale": "en",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "locale": "en",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "locale": "en",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "locale": "en",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "locale": "en",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "locale": "en",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "locale": "en",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "dashboard",
+      "locale": "en",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "locale": "en",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "locale": "en",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "locale": "en",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "locale": "en",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "locale": "en",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "locale": "en",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "locale": "en",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "locale": "en",
+      "width": 1366,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "scenario": "dashboard",
+      "locale": "en",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "locale": "en",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "locale": "en",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "locale": "en",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "locale": "en",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "locale": "en",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "locale": "en",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "locale": "en",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "locale": "en",
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "scenario": "dashboard",
+      "locale": "en",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "locale": "en",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "locale": "en",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "locale": "en",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "locale": "en",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "locale": "en",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "locale": "en",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "locale": "en",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "locale": "en",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "scenario": "dashboard",
+      "locale": "en",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "containers",
+      "locale": "en",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "compose",
+      "locale": "en",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "images",
+      "locale": "en",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "networks",
+      "locale": "en",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "volumes",
+      "locale": "en",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "backups",
+      "locale": "en",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "tasks",
+      "locale": "en",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "settings",
+      "locale": "en",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "container-config",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "container-logs",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "container-terminal",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "container-risk-confirm",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "compose-editor",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "form-error",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "task-filter-menu",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "task-detail",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "backup-policy",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "snapshots",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "unverified-restore",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "restore-risk-confirm",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "container-config",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "container-logs",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "container-terminal",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "container-risk-confirm",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "compose-editor",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "form-error",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "task-filter-menu",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "task-detail",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "backup-policy",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "snapshots",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "unverified-restore",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "restore-risk-confirm",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "offline",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "loading",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "unknown-empty",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "long-values-error",
+      "locale": "zh-CN",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "scenario": "unknown-empty",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "scenario": "long-values-error",
+      "locale": "zh-CN",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    }
+  ],
+  "writes": [
+    {
+      "endpoint": "/hosts/local/images/pull",
+      "method": "POST",
+      "intercepted": true
+    },
+    {
+      "endpoint": "/backup/restore/preview",
+      "method": "POST",
+      "intercepted": true
+    },
+    {
+      "endpoint": "/hosts/local/images/pull",
+      "method": "POST",
+      "intercepted": true
+    },
+    {
+      "endpoint": "/backup/restore/preview",
+      "method": "POST",
+      "intercepted": true
+    }
+  ],
+  "mobileFocus": "pass",
+  "confirmationSafety": "pass",
+  "editorFont": "pass",
+  "browserErrors": []
+}

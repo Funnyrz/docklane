@@ -1,0 +1,658 @@
+{
+  "checks": [
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "dashboard",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "containers",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "compose",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "images",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "networks",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "volumes",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "backups",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "tasks",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "settings",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "dashboard",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "containers",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "compose",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "images",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "networks",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "volumes",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "backups",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "tasks",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "settings",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "dashboard",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "containers",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "compose",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "images",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "networks",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "volumes",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "backups",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "tasks",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "settings",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "dashboard",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "containers",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "compose",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "images",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "networks",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "volumes",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "backups",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "tasks",
+      "collapsed": true
+    },
+    {
+      "language": "zh-CN",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "settings",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "dashboard",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "containers",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "compose",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "images",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "networks",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "volumes",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "backups",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "tasks",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "route": "settings",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "dashboard",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "containers",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "compose",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "images",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "networks",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "volumes",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "backups",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "tasks",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "route": "settings",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "dashboard",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "containers",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "compose",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "images",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "networks",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "volumes",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "backups",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "tasks",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "route": "settings",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "dashboard",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "containers",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "compose",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "images",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "networks",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "volumes",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "backups",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "tasks",
+      "collapsed": true
+    },
+    {
+      "language": "en",
+      "viewport": {
+        "width": 801,
+        "height": 900
+      },
+      "route": "settings",
+      "collapsed": true
+    }
+  ],
+  "keyboard": "Enter/Space/focus retained passed",
+  "persistence": "reload/navigation and breakpoint return passed",
+  "mobile": "independent full labels, inert, focus loop, Escape and route close passed",
+  "storageDenied": "pass",
+  "shortScreen": "logout visible",
+  "browserErrors": []
+}

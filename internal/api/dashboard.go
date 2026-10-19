@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/docker-manager/docker-manager/internal/platform"
 	"github.com/docker-manager/docker-manager/internal/workflows"
@@ -22,45 +23,53 @@ import (
 )
 
 type capability struct {
-	Available bool   `json:"available"`
-	Reason    string `json:"reason"`
+	Available    bool              `json:"available"`
+	Reason       string            `json:"reason"`
+	ReasonCode   string            `json:"reason_code,omitempty"`
+	ReasonParams map[string]string `json:"reason_params,omitempty"`
 }
 
 func capabilities(ctx context.Context, a *platform.App) map[string]capability {
 	c, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 	_, e := a.Docker.Ping(c)
-	docker := capability{true, ""}
+	docker := capability{Available: true}
 	if e != nil {
-		docker = capability{false, "Docker Engine is unavailable"}
+		docker = capability{Reason: "Docker Engine is unavailable", ReasonCode: "DOCKER_UNAVAILABLE"}
 	}
 	compose := docker
 	if _, e = exec.LookPath(a.Config.ComposePath); e != nil {
-		compose = capability{false, "Docker Compose v2 CLI is not installed"}
+		compose = capability{Reason: "Docker Compose v2 CLI is not installed", ReasonCode: "DOCKER_CLI_MISSING", ReasonParams: map[string]string{"tool": a.Config.ComposePath}}
 	} else {
 		check, stop := context.WithTimeout(ctx, 2*time.Second)
 		b, err := exec.CommandContext(check, a.Config.ComposePath, "compose", "version", "--short").Output()
 		stop()
 		if err != nil || !strings.HasPrefix(strings.TrimPrefix(strings.TrimSpace(string(b)), "v"), "2.") {
-			compose = capability{false, "Docker Compose v2 plugin is unavailable"}
+			compose = capability{Reason: "Docker Compose v2 plugin is unavailable", ReasonCode: "COMPOSE_V2_UNAVAILABLE", ReasonParams: map[string]string{"tool": a.Config.ComposePath}}
 		}
 	}
-	restic := capability{true, ""}
+	restic := capability{Available: true}
 	if _, e = exec.LookPath(a.Config.ResticPath); e != nil {
-		restic = capability{false, "Restic is not installed"}
+		restic = capability{Reason: "Restic is not installed", ReasonCode: "RESTIC_MISSING", ReasonParams: map[string]string{"tool": a.Config.ResticPath}}
 	}
-	daemon := capability{false, "Requires explicitly authorized Linux binary deployment"}
-	if err := workflows.DaemonCapability(a); err == nil {
-		daemon = capability{true, ""}
-	} else {
-		daemon.Reason = err.Error()
+	daemon := capability{Available: true}
+	if err := workflows.DaemonCapability(a); err != nil {
+		daemon = capability{Reason: err.Error(), ReasonCode: "DAEMON_CONFIG_INSPECTION_FAILED"}
+		var prerequisite *workflows.CapabilityError
+		if errors.As(err, &prerequisite) {
+			daemon.ReasonCode = prerequisite.Code
+			daemon.ReasonParams = prerequisite.Params
+		}
 	}
-	bind := capability{len(a.Config.AllowedPaths) > 0 && (a.Config.Mode != "docker" || len(a.Config.PathMappings) > 0), "Configure explicit allowed paths and container path mappings"}
-	if bind.Available {
-		bind.Reason = ""
+	bind := capability{Available: true}
+	if len(a.Config.AllowedPaths) == 0 {
+		bind = capability{Reason: "Configure explicit allowed paths and container path mappings", ReasonCode: "ALLOWED_PATHS_MISSING"}
+	} else if a.Config.Mode == "docker" && len(a.Config.PathMappings) == 0 {
+		bind = capability{Reason: "Configure explicit allowed paths and container path mappings", ReasonCode: "PATH_MAPPINGS_MISSING"}
 	}
 	return map[string]capability{"docker.manage": docker, "compose.manage": compose, "backup.local": restic, "backup.bind_mount": bind, "host.daemon_config": daemon, "host.service_restart": daemon}
 }
+
 func dashboard(c *gin.Context, a *platform.App) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 8*time.Second)
 	defer cancel()
