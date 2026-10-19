@@ -4,9 +4,12 @@ set -Eeuo pipefail
 
 die() { printf 'Docklane: %s\n' "$*" >&2; exit 1; }
 log() { printf 'Docklane: %s\n' "$*"; }
+progress() { printf 'Docklane: %s\n' "$*" >&2; }
 fetch_url() {
   local url=$1 output=$2 effective_file=${3:-} timeout=${4:-1800}
-  local prefix effective status=1
+  local prefix effective status=1 attempt=0
+  local progress_options=(--silent --show-error)
+  if [[ -t 2 ]]; then progress_options=(--progress-bar --show-error); fi
   local prefixes=('')
   if [[ ${download_source:-mirror} == mirror ]]; then
     case "$url" in
@@ -16,12 +19,15 @@ fetch_url() {
     esac
   fi
   for prefix in "${prefixes[@]}"; do
+    attempt=$((attempt+1))
+    progress "下载 / Download: ${output##*/} via ${prefix:-direct HTTPS} (attempt $attempt/${#prefixes[@]})"
     # Never expose a partial download to validation or a subsequent installation.
     rm -f -- "$output.part"
-    if effective=$(curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+    if effective=$(curl --fail "${progress_options[@]}" --location --proto '=https' --proto-redir '=https' \
       --connect-timeout 10 --max-time "$timeout" --speed-limit 1024 --speed-time 30 --retry 1 \
       --output "$output.part" --write-out '%{url_effective}' "$prefix$url"); then
       mv -- "$output.part" "$output" || return $?
+      progress "下载完成 / Downloaded: ${output##*/}"
       if [[ -n $effective_file ]]; then
         # Only remove the exact transport prefix used for this request. Release
         # selection still validates the canonical repository and stable tag.
@@ -445,13 +451,19 @@ main() {
   work=$(mktemp -d /tmp/docklane-install.XXXXXXXX)
   trap 'rm -rf -- "$work"' EXIT
   trap 'status=$?; printf "Docklane: installation failed (exit %s). Review the preceding error; existing source data and recovery backups are retained.\n" "$status" >&2; exit "$status"' ERR
+  progress '[1/8] 准备基础依赖 / Preparing base dependencies'
   bootstrap_tools
+  progress "[2/8] 查询版本并下载安装包 / Resolving ${version:-latest $channel} and downloading release assets"
   resolve_release
+  progress '[3/8] 校验安装包、架构与升级条件 / Verifying assets, architecture and upgrade eligibility'
   verify_release
   log "Verified $version for $arch."
   check_selected_downgrade
+  progress '[4/8] 检查或安装 Docker / Checking or installing Docker'
   install_docker
+  progress '[5/8] 准备 Compose 和 Restic / Preparing Compose and Restic'
   install_tools
+  progress '[6/8] 加载并校验备份镜像 / Loading and verifying backup worker image'
   install_worker
   export DOCKER_HOST=unix:///var/run/docker.sock
   export DOCKER_CONFIG="$work/docker-config"
@@ -461,7 +473,9 @@ main() {
   [[ -z $listen ]] || args+=(--listen "$listen")
   [[ -z $migrate ]] || args+=(--migrate-from "$migrate")
   [[ -z $config ]] || args+=(--config "$config")
+  progress '[7/8] 安装服务并检查自启和健康状态 / Installing service and checking boot enablement and health'
   python3 "$work/materials/scripts/install-support.py" "${args[@]}"
+  progress '[8/8] 安装完成 / Installation complete'
   log 'Installation complete. Open http://SERVER_IP:PORT to create the administrator on first access.'
   log 'Config: /etc/docker-manager/config.json; status: systemctl status docker-manager; logs: journalctl -u docker-manager -f'
 }

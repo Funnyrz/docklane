@@ -10,6 +10,7 @@ import hashlib
 import io
 import json
 import os
+import pty
 from pathlib import Path
 import shlex
 import shutil
@@ -223,6 +224,35 @@ install_docker() { echo "selected:$version:$channel"; exit 0; }
         self.assertIn('release latest stable', self.bash('main --channel stable --dry-run').stdout)
         self.assertFalse(self.trace.exists())
 
+    def progress_prelude(self, fail_worker=False):
+        return '''
+bootstrap_tools() { :; }
+resolve_release() {
+ version=v0.3.1-beta.1
+ printf slim > "$work/layout"
+ printf fixture > "$work/binary.sha256"
+}
+verify_release() { :; }
+check_selected_downgrade() { :; }
+install_docker() { :; }
+install_tools() { :; }
+python3() { echo deployment-complete; }
+''' + ('install_worker() { return 23; }' if fail_worker else 'install_worker() { :; }')
+
+    def test_installation_progress_stages_are_ordered_and_complete_after_deployment(self):
+        result = self.bash('main 2>&1', prelude=self.progress_prelude())
+        positions = [result.stdout.index(f'[{step}/8]') for step in range(1, 9)]
+        self.assertEqual(positions, sorted(positions))
+        self.assertLess(result.stdout.index('do not use it in production'), positions[0])
+        self.assertLess(result.stdout.index('deployment-complete'), positions[-1])
+
+    def test_failed_installation_does_not_report_later_stages_or_completion(self):
+        result = self.bash('main', prelude=self.progress_prelude(fail_worker=True), ok=False)
+        self.assertIn('[6/8]', result.stderr)
+        self.assertIn('installation failed', result.stderr)
+        self.assertNotIn('[7/8]', result.stderr)
+        self.assertNotIn('[8/8]', result.stderr)
+
     def test_stable_web_fallback_detects_new_layout_from_manifest(self):
         self.make_slim_release('v0.3.1')
         prelude = '''
@@ -406,6 +436,7 @@ download_source=mirror
 attempt=0
 curl() {{
   local output= url=${{!#}}
+  printf '%s\\n' "$*" >> {quote(self.root / 'curl-options')}
   printf '%s\\n' "$url" >> "$trace"
   while (($#)); do
     if [[ $1 == --output ]]; then output=$2; shift; fi
@@ -419,6 +450,41 @@ curl() {{
   printf '%s' {quote(effective) if effective else '"$url"'}
 }}
 '''
+
+    def test_redirected_download_progress_stays_out_of_captured_metadata(self):
+        url = f'https://github.com/Funnyrz/docklane/releases/download/{TAG}/LICENSE'
+        result = self.bash(f'fetch_url {quote(url)} "$work/payload" "$work/effective"; cat "$work/effective"',
+                           prelude=self.transport_mock(failures=1))
+        self.assertEqual(result.stdout, url)
+        self.assertIn('Download: payload via https://gh-proxy.com/ (attempt 1/3)', result.stderr)
+        self.assertIn('Download: payload via https://ghfast.top/ (attempt 2/3)', result.stderr)
+        self.assertIn('Downloaded: payload', result.stderr)
+        options = (self.root / 'curl-options').read_text()
+        self.assertIn('--silent', options)
+        self.assertNotIn('--progress-bar', options)
+        self.assertNotIn('\r', result.stderr)
+
+    def test_terminal_download_enables_real_progress_bar(self):
+        # The mocked curl emits only a few lines, well below the PTY buffer.
+        master, slave = pty.openpty()
+        self.addCleanup(os.close, master)
+        self.addCleanup(os.close, slave)
+        url = 'https://github.com/a/b/releases/download/v1/file'
+        command = f'''
+source {quote(self.script)}
+trace={quote(self.trace)}
+{self.transport_mock()}
+fetch_url {quote(url)} {quote(self.work / 'payload')} {quote(self.work / 'effective')}
+cat {quote(self.work / 'effective')}
+'''
+        result = subprocess.run([BASH, '-c', command], stdout=subprocess.PIPE,
+                                stderr=slave, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, url)
+        options = (self.root / 'curl-options').read_text()
+        self.assertIn('--progress-bar', options)
+        self.assertIn('--show-error', options)
+        self.assertNotIn('--silent', options)
 
     def test_release_compose_restic_and_raw_use_mirror(self):
         for url in [

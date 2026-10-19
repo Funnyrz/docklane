@@ -20,6 +20,8 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 
 两者都是第三方公共服务，不保证所有地区或网络均可达；项目自有短域名入口暂缓提供。安装器默认 `--download-source mirror`：GitHub API 依次尝试 `gh-proxy.com`、官方直连；GitHub 网页、Release 资产及 Compose / Restic 等文件依次尝试 `gh-proxy.com`、`ghfast.top`、官方直连。服务能力参见 [公共镜像服务文档](https://gh-proxy.com/docs/github-accelerator)。追加 `--download-source direct` 可使安装器后续下载完全绕过镜像；入口本身也需直连时，使用[原始脚本地址](https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh)。镜像只改变传输路径，仍使用同一 Release 的版本、SHA-256、架构与归档校验。Docker apt 软件源保持官方地址，不保证整个依赖安装流程都在国内网络可达。
 
+安装过程显示 `[1/8]` 到 `[8/8]` 的阶段提示，下载时显示文件、来源及尝试序号。交互式终端显示 curl 的真实下载进度条，重定向日志时仅输出普通文本；阶段编号不代表整体耗时百分比。
+
 脚本在修改前检查系统与架构，下载后检查 SHA-256、架构及归档路径；缺少资产、下载中断、校验不符或不安全归档时停止。检查和安装过程不依赖交互输入，可用于 `curl | sudo bash`。首次访问页面仍需自行创建管理员，不创建默认密码。
 
 | 参数 | 行为 |
