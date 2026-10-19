@@ -11,17 +11,17 @@
 
 ## Actual screenshots / 真实界面截图
 
-Captured on 2026-10-17 from the current production frontend build using a local read-only API proxy to the real test environment. No mock resources or metrics were added. The test server was not redeployed.
+Captured on 2026-10-19 directly from the deployed Docklane test application using an authenticated browser. The screenshots show the current compact console, dashboard, sidebar and capability settings. Resources and metrics come from the test environment without API interception or fixtures.
 
-截图来自本地生产构建，通过只读代理读取测试环境真实 API。未添加模拟资源或指标，未重新部署测试服务器。仅登录、退出及读取页面，不执行 Docker 资源变更。
+截图于 2026-10-19 直接采集自已部署的 Docklane 测试环境，展示新版控制台、工作台、侧栏及功能配置界面。资源和指标均来自真实环境，没有 API 拦截或模拟数据。采集期间仅登录、浏览页面、切换浏览器语言并退出，不执行 Docker 资源或配置变更。
 
 - `zh/`: Simplified Chinese / 简体中文
 - `en/`: English / 英文
 - Six pages per language: overview, containers, Compose, images, backups, settings.
-- Original browser JPEG captures are retained without image edits. Viewport: 1265 × 712 CSS pixels; selected pages use full-page capture.
-- Compose and settings use viewport captures to omit raw discovery configuration and audit details. Empty states and restricted capabilities reflect the real host.
+- Original browser JPEG captures are retained without image edits at their native exported dimensions. The default browser viewport is 1280 × 720 CSS pixels.
+- Compose uses a shorter 1280 × 500 viewport to exclude raw discovery configuration. Settings uses the default viewport to omit lower diagnostics and audit details. Empty states and restricted capabilities reflect the real host.
 - No login credentials or test-service address are included. Historical QA screenshots retain their original brand as evidence.
 
-Visual review passed at 95/100 after correcting English container action-column clipping and sidebar footer spacing. All 12 captures were checked for brand, language, layout and excluded sensitive detail. This is a self-assessment of the new design direction, not an external certification or pixel-equivalence claim.
+All 12 captures were visually checked for the Docklane brand, correct language, readable page headings, resource state and excluded sensitive detail. The supplied promotional images above remain unchanged.
 
-Validation for this capture: `make check` passed (Go tests, race, vet, frontend typecheck and 54 frontend tests), production frontend build passed, and a newly compiled Go server served the embedded JavaScript/CSS byte-for-byte from that build. The existing large-bundle advisory remains.
+Validation for this update covers JPEG integrity, matching image language and page, changed image hashes, unchanged promotional image hashes and README image/link targets. This screenshot update does not change application code; broader product verification is documented in [the verification report](../verification.md).

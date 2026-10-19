@@ -31,7 +31,7 @@ Docklane currently manages a single host. See [Current limitations](#current-lim
 
 ## Screenshots
 
-These screenshots use the latest local Docklane frontend connected to the test environment’s real APIs through a read-only proxy; the frontend was not deployed to the test server. Empty lists show actual empty states. Logs, terminal output, raw configuration and audit details are excluded.
+Captured directly from the deployed Docklane test environment on 2026-10-19, these screenshots show real resources, empty states and feature availability. The Compose capture includes only the upper section, excluding raw configuration; Settings shows the first screen only. Logs, terminal output, raw configuration and audit details are excluded.
 
 ![Docklane English overview](docs/images/en/overview.jpg)
 
