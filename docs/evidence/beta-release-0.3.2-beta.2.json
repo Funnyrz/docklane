@@ -1,0 +1,215 @@
+{
+  "version": "v0.3.2-beta.2",
+  "source_commit": "e1219b24317ce7fff4c1b67fac4e4be652f82d14",
+  "verified_at": "2026-10-19T16:32:53.910272+00:00",
+  "local_checks": {
+    "make_check": "passed",
+    "python_checks": 184,
+    "python_linux_only_skip_on_macos": 1,
+    "frontend_tests": 98,
+    "go_race_vet": "passed",
+    "shell_python_syntax": "passed",
+    "actionlint": "passed"
+  },
+  "ci_matrix": [
+    {
+      "engine": "29.5.2",
+      "architecture": "aarch64",
+      "tests_passed": 16,
+      "cleanup_errors": []
+    },
+    {
+      "engine": "28.5.1",
+      "architecture": "aarch64",
+      "tests_passed": 16,
+      "cleanup_errors": []
+    },
+    {
+      "engine": "29.5.2",
+      "architecture": "x86_64",
+      "tests_passed": 16,
+      "cleanup_errors": []
+    },
+    {
+      "engine": "28.5.1",
+      "architecture": "x86_64",
+      "tests_passed": 16,
+      "cleanup_errors": []
+    }
+  ],
+  "remote": {
+    "release": {
+      "id": 417499822,
+      "url": "https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2",
+      "draft": false,
+      "prerelease": true,
+      "assets": 7,
+      "published_at": "2026-10-19T16:24:30Z"
+    },
+    "runs": [
+      {
+        "id": 39280589806,
+        "head_sha": "e1219b24317ce7fff4c1b67fac4e4be652f82d14",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/Funnyrz/docklane/actions/runs/39280589806"
+      },
+      {
+        "id": 39284333735,
+        "head_sha": "e1219b24317ce7fff4c1b67fac4e4be652f82d14",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/Funnyrz/docklane/actions/runs/39284333735"
+      }
+    ],
+    "tag_commit": "e1219b24317ce7fff4c1b67fac4e4be652f82d14",
+    "prior_beta1_release_assets_body_and_tag": "unchanged",
+    "stable_latest": "HTTP 404",
+    "v0_3_0_tag": {
+      "sha": "8d3357e6d76ec9eed872e9a1f0052b154b5dc736",
+      "type": "tag",
+      "url": "https://api.github.com/repos/Funnyrz/docklane/git/tags/8d3357e6d76ec9eed872e9a1f0052b154b5dc736"
+    }
+  },
+  "publication_log": {
+    "result": "Published verified release: https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2",
+    "timestamp": "2026-10-19T16:24:31.5989812Z",
+    "note": "Actions metadata initially lagged behind completed publish logs/public assets, then converged to completed/success before final evidence commit. Exact-source CI was completed/success before tagging and rechecked by publication gates."
+  },
+  "published_assets": {
+    "status": "passed",
+    "tag": "v0.3.2-beta.2",
+    "source_sha": "e1219b24317ce7fff4c1b67fac4e4be652f82d14",
+    "url": "https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2",
+    "prerelease": true,
+    "asset_count": 7,
+    "asset_sizes": {
+      "docklane-images-amd64.tar.gz": 92059215,
+      "docklane-images-arm64.tar.gz": 86573371,
+      "docklane-installation.tar.gz": 4839026,
+      "docklane-v0.3.2-beta.2-linux-amd64.tar.gz": 10687859,
+      "docklane-v0.3.2-beta.2-linux-arm64.tar.gz": 9651458,
+      "install-online.sh": 28105,
+      "RELEASE-SHA256SUMS": 585
+    },
+    "asset_digests": {
+      "docklane-images-amd64.tar.gz": "sha256:454fdfa0d0c7bc34015e4ddd4b8ee198db28b82eda828c979f29fd4966adeaf1",
+      "docklane-images-arm64.tar.gz": "sha256:02851256021e9a7a19890050c6da2321f6889d89a9a1203ee02100379a8c9673",
+      "docklane-installation.tar.gz": "sha256:f09c440e03a33e7cd44410270ae059c513634e6510f858ef79de9f1244dd1bce",
+      "docklane-v0.3.2-beta.2-linux-amd64.tar.gz": "sha256:f8c17f16d372486f672e5af187344aa24d96f644ecd89f56efabddb86eb18c30",
+      "docklane-v0.3.2-beta.2-linux-arm64.tar.gz": "sha256:9ac39e279aa35c4448f8dfdc36cce274955e5c870a0cbef7d57efa4bbb61aab5",
+      "install-online.sh": "sha256:1c2cc3714a378e07bd002bd7b0e251ad93b38253aec61438c597d17eabdfd774",
+      "RELEASE-SHA256SUMS": "sha256:53c5c15b21ab7e682d48939f9c2fe4c98c2683f8fb118ec25174714f59e1da70"
+    },
+    "candidate_validation": {
+      "names": [
+        "RELEASE-SHA256SUMS",
+        "docklane-images-amd64.tar.gz",
+        "docklane-images-arm64.tar.gz",
+        "docklane-installation.tar.gz",
+        "docklane-v0.3.2-beta.2-linux-amd64.tar.gz",
+        "docklane-v0.3.2-beta.2-linux-arm64.tar.gz",
+        "install-online.sh"
+      ],
+      "version": "0.3.2-beta.2",
+      "prerelease": true,
+      "evidence": {
+        "version": "0.3.2-beta.2",
+        "tag": "v0.3.2-beta.2",
+        "head_sha": "e1219b24317ce7fff4c1b67fac4e4be652f82d14",
+        "ci_run_url": "https://github.com/Funnyrz/docklane/actions/runs/39280589806",
+        "ci_run_id": 39280589806,
+        "publication": "candidate"
+      }
+    },
+    "source_file_bytes": "matched",
+    "native_default_port": 9999,
+    "same_release_materials": true,
+    "architecture_archives_and_mit": "both validated"
+  },
+  "public_installation": {
+    "environment": "Ubuntu 24.04 native arm64 Lima systemd clone",
+    "source_vm": "docklane-032-public-ubuntu24-arm64 (unchanged, stopped)",
+    "target_vm": "docklane-032-beta2-public-arm64",
+    "dependencies": "Preinstalled dependencies retained; this acceptance does not cover missing-dependency provisioning",
+    "docker_version": "29.9.1",
+    "docker_pid_before": "848",
+    "existing_images": [
+      "docklane:v0.3.2-beta.1",
+      "docklane:v0.3.2-beta.1-arm64",
+      "docklane:v0.3.2-beta.1-amd64",
+      "docker-manager:v0.3.1-beta.2",
+      "docker-manager:v0.3.1-beta.2-arm64",
+      "docker-manager:v0.3.1-beta.2-amd64",
+      "docker-manager:v0.3.1-beta.1",
+      "docker-manager:v0.3.1-beta.1-arm64",
+      "docker-manager:v0.3.1-beta.1-amd64",
+      "docker-manager:v0.3.0",
+      "docker-manager:v0.3.0-arm64",
+      "docker-manager:v0.3.0-amd64"
+    ],
+    "prepared_at": "2026-10-19T15:33:35.053216+00:00",
+    "phase": "completed",
+    "installed_version": "v0.3.2-beta.2",
+    "settings_version": "0.3.2-beta.2",
+    "default_port": 9999,
+    "installer_downloaded_images": false,
+    "binary_sha256": "64dd2ce32bbe5384c67f8d29bb8b96da8675dae870c6f17563375a1226790281",
+    "fresh_service": "active/enabled",
+    "docker_retained": true,
+    "ordinary_directory_backup_without_worker": true,
+    "worker_mit_license": "exact project MIT text",
+    "first_task": "2953e597edae2ac0bd521d861f2cedbb",
+    "worker_arch": "linux/arm64",
+    "worker_image_id": "sha256:39213aed8c0555b8186f8a775a7a14b0b0fbd7e01c230a71492b279e5af12801",
+    "only_native_archive_downloaded": true,
+    "worker_verification_logged": true,
+    "writer_observed_running_during_download": true,
+    "second_task": "32768f2fcfc818b488618e08897e0de7",
+    "second_backup_reused_worker": true,
+    "restore_task": "f4cc5d7c43a870ea6118249dacb7a43b",
+    "restored_payload_sha256": "d5aef6a4c4b4b9e579fa99e10be13cbf3b725cd3ad5de3dcd0c102f2d80c174f",
+    "restored_uid_gid_mode": "1002:1002:600",
+    "restore_reused_worker": true,
+    "result": "passed",
+    "repeat_install": "binary inode, key, config, receipt, administrator preserved; no image download",
+    "completed_at": "2026-10-19T16:30:13.191076+00:00",
+    "fixture_retention": "Own writer removed; own volume, repository, restored data and private credentials retained. Other Docker resources unchanged.",
+    "cold_reboot": {
+      "result": "passed",
+      "new_kernel_boot_id": true,
+      "service": "active/enabled",
+      "healthz": 200,
+      "port": 9999,
+      "version": "0.3.2-beta.2",
+      "administrator_login": "preserved",
+      "key_config_binary_receipt": "exact bytes retained",
+      "native_worker": "same localimage persisted; amd64 tag absent"
+    },
+    "worker_download_progress": "86,573,371 bytes; 5% through100% logged",
+    "worker_download_asset": "docklane-images-arm64.tar.gz",
+    "worker_download_source": "source1/3 (public GitHub mirror)",
+    "harness_note": "Own new fixture parents initially received0700 from umask077; corrected their traversal permission to0755, then resumed after fresh install without resetting application state."
+  },
+  "public_command": "curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --",
+  "cleanup": {
+    "new_acceptance_vm": "Stopped",
+    "source_vm": "Stopped, unchanged",
+    "private_fixtures": "Retained in isolated guest; credentials excluded from evidence",
+    "unrelated_workspace_changes": "Excluded from isolated release worktree",
+    "temporary_recovery_branch": "codex/beta2-ci-recovery deleted after verifying it still pointed to the exact release source commit"
+  },
+  "limitations": [
+    "Fresh native arm64 Ubuntu 24.04 systemd application install uses preinstalled Docker/Compose/Restic; missing dependency provisioning was not revalidated in this public acceptance.",
+    "No new complete Debian/Ubuntu by architecture systemd matrix, cross-architecture remote Docker Engine support, or independent mainland ISP measurement.",
+    "CI integration binaries and final release binaries are separate builds; public installed arm64 binary matches its actual released archive.",
+    "Beta only for learning and testing; do not use in production."
+  ],
+  "initial_publication_run_metadata_snapshot": {
+    "id": 39284333735,
+    "head_sha": "e1219b24317ce7fff4c1b67fac4e4be652f82d14",
+    "status": "queued",
+    "conclusion": null,
+    "html_url": "https://github.com/Funnyrz/docklane/actions/runs/39284333735"
+  }
+}
