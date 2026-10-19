@@ -53,7 +53,7 @@ class LifecycleTests(unittest.TestCase):
         patch.object(m, 'check_port').start()
         patch.object(m, 'health_check').start()
         patch.object(m, 'check_external_paths').start()
-        patch.object(m, 'checked_worker_image', side_effect=lambda configured, version: 'docklane:' + version).start()
+        patch.object(m, 'checked_worker_image', side_effect=REAL_CHECK_WORKER).start()
         patch.object(m, 'service_groups', return_value=['docker']).start()
         self.args = argparse.Namespace(binary=str(self.binary), source_dir=str(self.material), version='v0.3.0', sha256=m.digest(self.binary), listen=None, migrate_from=None, config=None)
 
@@ -80,7 +80,7 @@ class LifecycleTests(unittest.TestCase):
         (self.material / 'web/package.json').write_text('{"version":"0.3.1-beta.10"}')
         self.assertEqual(m.material_version(self.material), 'v0.3.1-beta.10')
         (self.material / 'web/package.json').unlink()
-        self.assertEqual(m.material_version(self.material), 'v0.3.2-beta.1')
+        self.assertEqual(m.material_version(self.material), 'v0.3.2-beta.2')
 
     def test_numeric_version_order_places_stable_after_same_core_beta(self):
         self.assertGreater(m.version_key('v0.3.1-beta.10'), m.version_key('v0.3.1-beta.2'))
@@ -201,10 +201,10 @@ class LifecycleTests(unittest.TestCase):
         self.assertEqual(set(DEFAULT_LEGACY_PATHS), expected)
 
     def test_new_beta_installation_records_version_and_canonical_worker(self):
-        (self.material / 'VERSION').write_text('0.3.2-beta.1\n')
-        self.args.version = 'v0.3.2-beta.1'
+        (self.material / 'VERSION').write_text('0.3.2-beta.2\n')
+        self.args.version = 'v0.3.2-beta.2'
         self.deploy()
-        self.assertEqual(json.loads(m.CONFIG.read_text())['backup_worker_image'], 'docklane:v0.3.2-beta.1')
+        self.assertEqual(json.loads(m.CONFIG.read_text())['backup_worker_image'], 'docklane:v0.3.2-beta.2')
         self.assertEqual(json.loads(m.STATE.read_text())['version'], self.args.version)
         self.assertEqual(m.material_version(self.material), self.args.version)
 
@@ -328,6 +328,22 @@ class LifecycleTests(unittest.TestCase):
             install.assert_not_called()
         self.assertEqual(json.loads(m.CONFIG.read_text()), config)
 
+    def test_binary_install_and_repeat_never_inspect_load_or_download_worker(self):
+        self.example['backup_worker_image'] = 'registry.example/custom-worker:managed'
+        (self.material / 'deployments/config.example.json').write_text(json.dumps(self.example))
+        self.deploy()
+        self.assertEqual(json.loads(m.CONFIG.read_text())['backup_worker_image'], self.example['backup_worker_image'])
+        patch.object(m, 'service_context', return_value=({'DM_CONFIG': str(m.CONFIG)}, m.DATA, 2)).start()
+        patch.object(m.DataLock, 'inspect', return_value=2).start()
+        inode = m.BINARY.stat().st_ino
+        self.deploy()
+        self.assertEqual(m.BINARY.stat().st_ino, inode)
+        self.assertEqual(json.loads(m.CONFIG.read_text())['backup_worker_image'], self.example['backup_worker_image'])
+        for call in self.run.call_args_list:
+            command = call.args[0]
+            self.assertFalse('image' in command or 'load' in command or 'pull' in command, command)
+        self.assertFalse(m.BACKUPS.exists())
+
     def test_status_only_health_failure_does_not_stop_old_service(self):
         self.deploy()
         patch.object(m, 'service_context', return_value=({'DM_CONFIG': str(m.CONFIG)}, m.DATA, 2)).start()
@@ -406,17 +422,18 @@ class LifecycleTests(unittest.TestCase):
         self.run.return_value = subprocess.CompletedProcess([], 0, 'sha256:' + 'a' * 64 + '\n', '')
         self.assertEqual(REAL_CHECK_WORKER('docklane:v0.2.0', 'v0.3.0'), 'docklane:v0.3.0')
 
-    def test_custom_worker_requires_same_image_identity(self):
-        self.run.side_effect = [subprocess.CompletedProcess([], 0, 'sha256:' + 'a' * 64, ''), subprocess.CompletedProcess([], 0, 'sha256:' + 'b' * 64, '')]
-        with self.assertRaisesRegex(m.InstallError, 'does not match'):
-            REAL_CHECK_WORKER('private/custom-worker:latest', 'v0.3.0')
-        self.run.side_effect = [subprocess.CompletedProcess([], 0, 'sha256:' + 'a' * 64, ''), subprocess.CompletedProcess([], 0, 'sha256:' + 'a' * 64, '')]
-        self.assertEqual(REAL_CHECK_WORKER('private/custom-worker:matching', 'v0.3.0'), 'private/custom-worker:matching')
+    def test_custom_worker_is_preserved_without_image_inspection_or_download(self):
+        for reference in ('private/custom-worker:latest', 'docklane:custom', 'registry.example/worker@sha256:' + 'a' * 64):
+            with self.subTest(reference=reference):
+                self.run.reset_mock()
+                self.assertEqual(REAL_CHECK_WORKER(reference, 'v0.3.0'), reference)
+                self.run.assert_not_called()
 
-    def test_missing_selected_worker_refused_before_deploy(self):
+    def test_missing_release_worker_does_not_block_binary_deploy(self):
         self.run.return_value = subprocess.CompletedProcess([], 1, '', 'image missing')
-        with self.assertRaisesRegex(m.InstallError, 'unavailable'):
-            REAL_CHECK_WORKER('docklane:v0.2.0', 'v0.3.0')
+        self.run.reset_mock()
+        self.assertEqual(REAL_CHECK_WORKER('docklane:v0.2.0', 'v0.3.0'), 'docklane:v0.3.0')
+        self.run.assert_not_called()
 
     def test_nonlocal_engine_refused_before_source_stop_or_config_write(self):
         old = self.root / 'data'

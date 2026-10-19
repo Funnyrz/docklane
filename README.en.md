@@ -2,7 +2,9 @@
 
 > This program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use.
 
-The current source version is [v0.3.2-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1), also the newest beta prerelease. The v0.3.1-beta.1 and v0.3.1-beta.2 Releases, attachments and remote tags have been withdrawn. The old v0.3.0 Release has also been withdrawn and no formal release is currently available. The stable channel is unavailable until a future formal release. Online installation without parameters defaults to the newest beta and displays the testing-only, no-production warning before making system changes. You can still explicitly select `--channel beta` or pin a version.
+The current version is [v0.3.2-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2). The v0.3.1-beta.1 and v0.3.1-beta.2 Releases, attachments and remote tags have been withdrawn. The old v0.3.0 Release has also been withdrawn and no formal release is currently available. The stable channel is unavailable until a future formal release. Online installation without parameters defaults to the newest beta and displays the testing-only, no-production warning before making system changes. You can still explicitly select `--channel beta` or pin a version.
+
+The online installer installs the native binary without downloading worker images. The first backup/restore task that needs a worker prepares the same version for the native architecture.
 
 **Your containers. Under control.**
 
@@ -108,19 +110,19 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 
 These entrypoints use public third-party services and cannot guarantee access from every region or network. A project-owned short-domain entrypoint is deferred. The installer defaults to `--download-source mirror`: GitHub API requests try `gh-proxy.com`, then the official direct endpoint; GitHub pages, Release assets, and files such as Compose / Restic try `gh-proxy.com`, `ghfast.top`, then the official direct endpoint ([public mirror documentation](https://gh-proxy.com/docs/github-accelerator)). Append `--download-source direct` to bypass all mirrors for subsequent installer downloads; use the [original script URL](https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh) if the entrypoint must also be fetched directly. Release, version, SHA-256 and archive checks remain unchanged. Docker's apt repository remains the official source, so access to every dependency from mainland China is not guaranteed.
 
-Installation shows eight stages and the current download, source and retry attempt. Interactive terminals also show a real download progress bar; redirected logs use plain text.
+Installation shows its stages and the current download, source and retry attempt. Interactive terminals also show a real download progress bar; redirected logs use plain text.
 
-These commands select the newest published beta, or pin a version with `--version` (currently [v0.3.2-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1)), using release metadata and verify asset SHA-256 checksums, architecture and archive paths. The installer installs `/usr/local/bin/docklane`, creates a dedicated account and `docklane.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. New installations listen on `:9999` by default; the script does not change firewall rules. Existing configurations retain their listener. Append `--listen :9999` to the installation command to change an existing installation to port 9999.
+These commands select the newest published beta, or pin a version with `--version` (currently [v0.3.2-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2)), using release metadata and verify asset SHA-256 checksums, architecture and archive paths. The installer installs `/usr/local/bin/docklane`, creates a dedicated account and `docklane.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. New installations listen on `:9999` by default; the script does not change firewall rules. Existing configurations retain their listener. Append `--listen :9999` to the installation command to change an existing installation to port 9999.
 
 Beta installation requires available GitHub API metadata. If the API is unreachable or rate-limited, installation stops safely and asks you to retry later; beta status is never inferred from HTML. No Release is currently available for the stable channel.
 
-If Docker is absent, the script installs stable 29.x from the official repository and enables startup at boot. An existing usable Docker 28/29 is neither upgraded nor restarted; conflicting installations fail explicitly. Existing Compose v2 is reused; otherwise v2.40.3 is installed. Restic 0.19.1 is provided through a dedicated tools directory without overwriting versions used by other applications. The matching release's backup worker image is downloaded and loaded. The script installs base dependencies, including Python 3; downloads and package management require network access.
+If Docker is absent, the script installs stable 29.x from the official repository and enables startup at boot. An existing usable Docker 28/29 is neither upgraded nor restarted; conflicting installations fail explicitly. Existing Compose v2 is reused; otherwise v2.40.3 is installed. Restic 0.19.1 is provided through a dedicated tools directory without overwriting versions used by other applications. The installer skips all worker image downloads and imports. It prepares the binary and ordinary dependencies; the worker is handled when a task needs it. The script installs base dependencies, including Python 3; downloads and package management require network access.
 
 Choose a version and listener, or preview the actions first:
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --channel beta --version v0.3.2-beta.1 --listen :9999 --dry-run
+  | sudo bash -s -- --channel beta --version v0.3.2-beta.2 --listen :9999 --dry-run
 ```
 
 A configuration supplied with `--config` that sets `listen` retains that address unless `--listen` overrides it. Remove `--dry-run` to install; use `--help` for parameters. Repeated execution preserves configuration and data, and skips replacing an identical binary with the same version and checksum. A version change stops the service and creates a backup before upgrading. Explicitly migrate an existing manually started instance rather than treating it as a fresh installation:
@@ -142,69 +144,81 @@ sudo systemctl disable docklane      # Disable startup at boot
 
 ### Beta prerelease installation and downloads
 
-For learning and testing only. Select the published beta channel or pin this version:
+For learning and testing only. Pin this version explicitly:
 
 ```sh
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.2-beta.1
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.2-beta.2
 ```
 
-The beta Release has exactly six attachments; `RELEASE-SHA256SUMS` covers the other five:
+[v0.3.2-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2) uses seven attachments; `RELEASE-SHA256SUMS` covers the other six. GitHub's automatically generated Source code archives are not uploaded attachments.
 
 | Attachment | Contents |
 | --- | --- |
-| `docklane-v0.3.2-beta.1-linux-amd64.tar.gz` | amd64 `docklane` and `LICENSE` |
-| `docklane-v0.3.2-beta.1-linux-arm64.tar.gz` | arm64 `docklane` and `LICENSE` |
-| `docklane-installation.tar.gz` | Installation scripts, configuration and documentation; root-level `VERSION`, license, internal binary/image checksums, `IMAGES.txt`, tool versions and CI evidence |
-| `docklane-images.tar.gz` | Application and backup worker images for both architectures |
+| `docklane-v0.3.2-beta.2-linux-amd64.tar.gz` | amd64 `docklane` and `LICENSE` |
+| `docklane-v0.3.2-beta.2-linux-arm64.tar.gz` | arm64 `docklane` and `LICENSE` |
+| `docklane-installation.tar.gz` | Scripts, configuration, documentation, `VERSION`, MIT, internal executable/image checksums, image identities, tool versions and CI provenance |
+| `docklane-images-amd64.tar.gz` | amd64 application and backup worker image |
+| `docklane-images-arm64.tar.gz` | arm64 application and backup worker image |
 | `install-online.sh` | Version-matched online entrypoint |
 | `RELEASE-SHA256SUMS` | Top-level attachment SHA-256 manifest |
 
-Offline systemd installation requires the Docker, Compose, Restic, Python and account permissions listed below. Download the native package, installation materials, image archive and top-level manifest into an empty directory, then run these commands. On arm64, replace `amd64` with `arm64` in the package name and image tag:
+Offline systemd installation requires the Docker, Compose, Restic, Python and account permissions listed below. Download only the native package, installation materials and top-level manifest into an empty directory. Replace `amd64` in the package name with `arm64` on arm64. Neither installation nor upgrade requires a preloaded worker:
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.2-beta.1-linux-amd64.tar.gz
+tar -xzf docklane-v0.3.2-beta.2-linux-amd64.tar.gz
 tar -xzf docklane-installation.tar.gz
-sha256sum --check IMAGE-SHA256SUMS
-sudo docker load -i docklane-images.tar.gz
-sudo docker tag docklane:v0.3.2-beta.1-amd64 docklane:v0.3.2-beta.1
 sudo ./scripts/install.sh ./docklane
 ```
 
-The v0.3.2-beta.1 online entrypoint, native executable, offline installation configuration and Docker deployment all default to port 9999. The attached online script defaults to the newest beta and includes installation stages and download progress. Existing installations retain their configured listener unless `--listen` explicitly overrides it. The v0.3.1-beta.1 and v0.3.1-beta.2 releases have been withdrawn. Use this release’s complete materials without mixing historical attachments.
+The materials' `VERSION` contains `0.3.2-beta.2` without a `v` prefix. Configuration and database schemas remain v1. Use materials from the same Release, without mixing configuration, service files or helpers from other versions.
 
-The materials archive's root-level `VERSION` contains `0.3.2-beta.1` without a `v` prefix. The application version changes while configuration and database schemas remain v1. Raw binaries, `.sha256` sidecars, `IMAGES.txt` and the license are no longer separate beta attachments; these materials remain inside the installation archive. Evidence for withdrawn versions remains historical and is not a current download entrypoint.
+Historical v0.3.2-beta.1 retains its Release, Tag and six attachments, including eager loading of both image architectures during installation. To install that historical version, use its Tag-pinned script with an explicit `--version v0.3.2-beta.1`; never use an old script without a version to install newer layouts. Earlier v0.3.1-beta.1 and v0.3.1-beta.2 releases have been withdrawn.
 
-### Native binary package: run directly
+### On-demand workers and offline preload
 
-Download the native package and `RELEASE-SHA256SUMS` from the [v0.3.2-beta.1 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1) into an empty directory. This example is for amd64; replace the architecture in the package name for arm64:
+When a task needs a worker, an available local image is reused. Otherwise, only the default versioned reference triggers a download, verification and load of the same application version for the executable's architecture (matching the local Docker Engine). Preparation finishes before stopping writers or writing restored data. Task logs show preparation, download progress and failure reasons. Fix connectivity or disk space and retry after a failed preparation. Ordinary directory backups that do not require a worker, previews and preflight do not download images. Custom image references require manual preparation and never trigger arbitrary downloads.
+
+To use workers without network access, additionally download and preload the same version's native image. This example is for amd64; replace the architecture in both the archive name and tag for arm64:
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.2-beta.1-linux-amd64.tar.gz
+sha256sum --check --ignore-missing IMAGE-SHA256SUMS
+sudo docker load -i docklane-images-amd64.tar.gz
+sudo docker tag docklane:v0.3.2-beta.2-amd64 docklane:v0.3.2-beta.2
+```
+
+`IMAGE-SHA256SUMS` comes from the verified materials archive. Verify the downloaded native image only; the other architecture is not required. See [operations](docs/operations.md#按需工作镜像) for details.
+
+### Native binary package: run directly
+
+Download the native package and `RELEASE-SHA256SUMS` from the [v0.3.2-beta.2 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2) into an empty directory. This example is for amd64; replace the architecture in the package name for arm64:
+
+```sh
+sha256sum --check --ignore-missing RELEASE-SHA256SUMS
+tar -xzf docklane-v0.3.2-beta.2-linux-amd64.tar.gz
 DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:9999 ./docklane
 ```
 
-The frontend is embedded. The package contains only `docklane` and `LICENSE`, without Docker CLI, Compose or Restic. Direct execution requires preparing the relevant tools and access permissions; volume backup/restore also requires loading the matching worker. On macOS, use `shasum -a 256 -c` for verification; the executable still requires Linux.
+The frontend is embedded. The package contains only `docklane` and `LICENSE`, without Docker CLI, Compose or Restic. Direct execution requires preparing the relevant tools and access permissions; tasks that need a worker prepare the matching image on first use; preload it for fully offline operation. On macOS, use `shasum -a 256 -c` for verification; the executable still requires Linux.
 
 ### Docker: offline installation
 
-Download the current beta's installation materials, image archive and top-level checksum manifest into an empty directory; verify before extracting. This example is for amd64; replace the architecture in the image tag for arm64:
+Download the current beta's installation materials, native image archive and top-level checksum manifest into an empty directory; verify before extracting. This example is for amd64; replace the architecture in both the image archive name and tag for arm64:
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
 tar -xzf docklane-installation.tar.gz
-sha256sum --check IMAGE-SHA256SUMS
-docker load -i docklane-images.tar.gz
-docker tag docklane:v0.3.2-beta.1-amd64 docklane:v0.3.2-beta.1
+sha256sum --check --ignore-missing IMAGE-SHA256SUMS
+docker load -i docklane-images-amd64.tar.gz
+docker tag docklane:v0.3.2-beta.2-amd64 docklane:v0.3.2-beta.2
 export DM_BACKUP_HOST_DIR=/srv/docklane/backups
 export DM_RESTORE_HOST_DIR=/srv/docklane/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
-The archive includes both architectures. Set the common tag for the native architecture before starting; temporary backup/restore containers use the same version of the local worker. The Compose file inside v0.3.2-beta.1 already maps `127.0.0.1:9999:9999` and sets `DM_LISTEN: ":9999"`.
+Each archive contains one architecture. Set the common tag for the native architecture before starting; temporary backup/restore containers use the same version of the local worker. The Compose file inside v0.3.2-beta.2 already maps `127.0.0.1:9999:9999` and sets `DM_LISTEN: ":9999"`.
 
 ### Docker: build from source
 
@@ -213,7 +227,7 @@ Install Git, Docker Engine, Docker Buildx (for BuildKit builds) and Compose v2, 
 ```sh
 git clone https://github.com/Funnyrz/docklane.git
 cd docklane
-docker build -t docklane:v0.3.2-beta.1 .
+docker build -t docklane:v0.3.2-beta.2 .
 export DM_BACKUP_HOST_DIR=/srv/docklane/backups
 export DM_RESTORE_HOST_DIR=/srv/docklane/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
@@ -266,10 +280,10 @@ For frontend development, run `pnpm --dir web dev`. Vite proxies `/api` to local
 make check          # Formatting, static checks, Go/frontend tests and race checks
 make integration    # Run only on an isolated Linux Docker test host
 make release        # Both Linux binary architectures, slim tar.gz packages and checksums
-make release-images # Both image architectures and offline archive; requires Docker Buildx
+make release-images # Separate amd64/arm64 image archives; requires Docker Buildx
 ```
 
-Raw source-build binaries and internal checksums default to `bin/release-internal/`, overridden by `RELEASE_BUILD_DIR`; the final six attachments go to `bin/release/`, overridden by `RELEASE_OUTPUT_DIR`. To install from source, use `sudo ./scripts/install.sh ./bin/release-internal/docklane-linux-amd64`. For a beta Release, install the `./docklane` extracted from the native package.
+Raw source-build binaries and internal checksums default to `bin/release-internal/`, overridden by `RELEASE_BUILD_DIR`; the final seven attachments go to `bin/release/`, overridden by `RELEASE_OUTPUT_DIR`. To install from source, use `sudo ./scripts/install.sh ./bin/release-internal/docklane-linux-amd64`. For a beta Release, install the `./docklane` extracted from the native package.
 
 Translations live in `web/src/i18n/`. Add both languages with matching interpolation parameters for new text. `pnpm --dir web test` covers dictionary consistency and language switching.
 

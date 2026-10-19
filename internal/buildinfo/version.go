@@ -2,4 +2,4 @@
 package buildinfo
 
 // Version is set by release builds with -ldflags; source builds use this default.
-var Version = "0.3.2-beta.1"
+var Version = "0.3.2-beta.2"

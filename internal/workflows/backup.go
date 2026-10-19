@@ -768,10 +768,22 @@ func (s *Service) backup(t *task.Run, p Policy, approval ...backupApproval) (err
 		return e
 	}
 	unmodifiedSources := append([]backupSource{}, sources...)
-	worker := s.app.Config.Mode == "docker"
-	for _, source := range sources {
-		if source.Volume != "" {
-			worker = true
+	worker := backupNeedsWorker(s.app.Config.Mode, sources)
+	if worker {
+		if e = s.prepareWorker(t); e != nil {
+			return e
+		}
+		// Preparing an image may take minutes. Re-read the sources before
+		// approving any writer stop against the originally confirmed scope.
+		sources, cts, projects, e = s.sources(t.Context(), p)
+		if e != nil {
+			return e
+		}
+		if jsonString(sources) != jsonString(unmodifiedSources) {
+			return errors.New("backup sources changed while preparing the worker image; preview again")
+		}
+		if e = s.validateSources(r, sources); e != nil {
+			return e
 		}
 	}
 	if !worker {
@@ -931,12 +943,7 @@ func (s *Service) backup(t *task.Run, p Policy, approval ...backupApproval) (err
 	return e
 }
 func (s *Service) backupFiles(t *task.Run, r Repository, sources []backupSource, stage, secret string, cp *stopCheckpoint, p Policy) (output []byte, err error) {
-	worker := s.app.Config.Mode == "docker"
-	for _, src := range sources {
-		if src.Volume != "" {
-			worker = true
-		}
-	}
+	worker := backupNeedsWorker(s.app.Config.Mode, sources)
 	args := []string{"backup", "--json", "--tag", "dm-policy:" + p.ID}
 	for _, ex := range p.Excludes {
 		if strings.HasPrefix(ex, "-") {

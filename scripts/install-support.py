@@ -25,6 +25,9 @@ import time
 import urllib.request
 
 
+# Checked by the online bootstrap before Docker, tool or service changes.
+LAZY_WORKER_DOWNLOAD = True
+
 DATA = Path('/var/lib/docklane')
 CONFIG = Path('/etc/docklane/config.json')
 BINARY = Path('/usr/local/bin/docklane')
@@ -55,7 +58,7 @@ GO_DEFAULTS = {
     'version': 1, 'log_level': 'info', 'listen': ':9999', 'data_dir': './data',
     'docker_endpoint': 'unix:///var/run/docker.sock', 'mode': 'binary',
     'daemon_config_path': '/etc/docker/daemon.json', 'compose_path': 'docker',
-    'restic_path': 'restic', 'backup_worker_image': 'docklane:v0.3.2-beta.1',
+    'restic_path': 'restic', 'backup_worker_image': 'docklane:v0.3.2-beta.2',
     'allowed_paths': [], 'path_mappings': [], 'enable_daemon_write': False,
     'session_secure': False, 'backup_temp_dir': '',
 }
@@ -81,7 +84,7 @@ def refuse_legacy_installation():
 def material_version(source_dir):
     version_file = Path(source_dir) / 'VERSION'
     package = Path(source_dir) / 'web/package.json'
-    value = version_file.read_text().strip() if version_file.is_file() else (read_json(package).get('version') if package.is_file() else '0.3.2-beta.1')
+    value = version_file.read_text().strip() if version_file.is_file() else (read_json(package).get('version') if package.is_file() else '0.3.2-beta.2')
     version_key(value)
     return 'v' + value.removeprefix('v')
 
@@ -505,27 +508,19 @@ def tree_hashes(directory):
 
 
 def checked_worker_image(configured, version):
-    """Online bootstrap has verified and loaded the release's canonical image."""
-    expected = 'docklane:' + version
+    """Advance release defaults without inspecting or downloading Docker images.
 
-    def image_id(reference):
-        result = run(['docker', 'image', 'inspect', '--format', '{{.Id}}', reference], check=False)
-        value = result.stdout.strip()
-        if result.returncode or not re.fullmatch(r'sha256:[0-9a-f]{64}', value):
-            raise InstallError(f'The release worker image {reference} is unavailable; load the verified image archive and tag it before deployment.')
-        return value
-
-    expected_id = image_id(expected)
+    The application verifies and prepares its native worker when a task needs
+    one. Custom references remain under the administrator's control.
+    """
     if re.fullmatch(r'docklane:v\d+\.\d+\.\d+(?:-beta\.\d+)?(?:-(?:amd64|arm64))?', configured or ''):
-        return expected
-    if image_id(configured) != expected_id:
-        raise InstallError('The custom backup_worker_image does not match the verified worker from the selected release; provide a matching alias or the release default.')
+        return 'docklane:' + version
     return configured
 
 
 def check_engine_endpoint(config):
     if config.get('docker_endpoint', GO_DEFAULTS['docker_endpoint']) != GO_DEFAULTS['docker_endpoint']:
-        raise InstallError('This installer prepares only unix:///var/run/docker.sock and its local release worker. A different docker_endpoint is unsupported; source configuration and process were not changed.')
+        raise InstallError('This installer prepares only unix:///var/run/docker.sock. A different docker_endpoint is unsupported; source configuration and process were not changed.')
 
 
 def listen_address(value):
@@ -761,6 +756,7 @@ def _deploy_locked(args, source_dir, candidate):
         write_json(STATE, {'version': args.version, 'sha256': args.sha256.lower(), 'data_dir': str(effective_data)})
         print(f'Docklane {args.version} is healthy and enabled at {config["listen"]}.')
         print(f'Config: {CONFIG}; logs: journalctl -u {SERVICE} -f')
+        print('Backup worker images are downloaded only when a backup or restore task first needs one. Offline hosts must import a matching native image beforehand.')
     except Exception:
         stop_message = 'No new service was started.'
         if service_touched:

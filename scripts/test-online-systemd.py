@@ -2,8 +2,8 @@
 """Run ONLY as root inside a disposable systemd VM (DM_PLATFORM_ISOLATED=1).
 
 The install phase uses verified local candidate downloads, with real dependency,
-worker-image and systemd installation. It leaves the service installed. Reboot
-the actual guest before resume. Credentials remain in a private sibling state
+binary and systemd installation; worker images are deferred. It leaves the
+service installed. Reboot the actual guest before resume. Credentials remain in a private sibling state
 directory, never in the report. No cleanup or guest reboot is performed here.
 """
 import argparse
@@ -182,7 +182,7 @@ class Acceptance:
 
     def install_wrapper(self):
         # Override download transport/selection only. Verification, dependencies,
-        # worker load, deploy helper, and service lifecycle are production code.
+        # binary deployment helper and service lifecycle are production code.
         wrapper = self.state / 'run-online.sh'
         wrapper.write_text('''#!/usr/bin/env bash
 set -euo pipefail
@@ -201,9 +201,9 @@ fetch() {
 resolve_release() {
   version=${version:-$TEST_VERSION}
   [[ $version == "$TEST_VERSION" ]] || die 'Unexpected acceptance version.'
-  local required=(RELEASE-SHA256SUMS docklane-installation.tar.gz docklane-images.tar.gz
+  local required=(RELEASE-SHA256SUMS docklane-installation.tar.gz
     "docklane-$version-linux-$arch.tar.gz")
-  printf slim > "$work/layout"
+  if [[ -f $TEST_ASSETS/docklane-images-amd64.tar.gz ]]; then printf split; else printf slim; fi > "$work/layout"
   printf '%s\\n' "$version" "${required[@]}" > "$work/release-selection"
   local name
   for name in "${required[@]}"; do
@@ -314,7 +314,7 @@ main "$@"
             self.report['limitations'] = [
                 'Candidate Release selection/downloads are redirected to local files; public HTTP is a separate smoke test.',
                 'Existing Docker is preserved; explicit --allow-missing-docker additionally verifies stable 29.x installation and Docker boot startup.',
-                'Worker loading uses production code; real volume backup/restore is verified separately.',
+                'Binary installation defers worker images; real lazy provisioning and volume backup/restore are verified separately.',
                 'Installation intentionally remains in the disposable guest for reboot/resume verification.',
             ]
             private_json(self.args.report, self.report)

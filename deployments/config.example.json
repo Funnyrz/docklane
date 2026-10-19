@@ -13,5 +13,5 @@
   "restic_path": "restic",
   "daemon_config_path": "/etc/docker/daemon.json",
   "enable_daemon_write": false,
-  "backup_worker_image": "docklane:v0.3.2-beta.1"
+  "backup_worker_image": "docklane:v0.3.2-beta.2"
 }

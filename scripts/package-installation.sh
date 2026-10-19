@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Build exactly six public assets from a separate, version-bound staging directory.
+# Build exactly seven public assets from a separate, version-bound staging directory.
 set -eu
 cd "$(dirname "$0")/.."
 python3 - "${RELEASE_BUILD_DIR:-bin/release-internal}" "${RELEASE_OUTPUT_DIR:-bin/release}" <<'PY'
@@ -32,7 +32,7 @@ for path in output.iterdir():
     if path.name not in public or not path.is_file() or path.is_symlink():
         raise SystemExit('Refusing contaminated public output directory: ' + str(path))
 required = {'SHA256SUMS', 'IMAGE-SHA256SUMS', 'IMAGES.txt', 'release-ci-evidence.json',
-            'docklane-linux-amd64', 'docklane-linux-arm64', 'LICENSE', 'docklane-images.tar.gz'}
+            'docklane-linux-amd64', 'docklane-linux-arm64', 'LICENSE', 'docklane-images-amd64.tar.gz', 'docklane-images-arm64.tar.gz'}
 for arch in ('amd64', 'arm64'):
     required |= {f'docklane-{tag}-linux-{arch}.tar.gz', f'docklane-{tag}-linux-{arch}.tar.gz.sha256'}
 allowed = required | {'VERSION'}
@@ -88,5 +88,5 @@ with tempfile.TemporaryDirectory(prefix='.docklane-candidate-', dir=output.paren
     helper.validate_candidate(candidate, tag)
     for name in sorted(public):
         os.replace(candidate / name, output / name)
-print(f'Prepared exactly six verified public assets for {tag}: {output}')
+print(f'Prepared exactly seven verified public assets for {tag}: {output}')
 PY

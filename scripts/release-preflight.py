@@ -8,6 +8,7 @@ import argparse
 import base64
 import datetime
 import hashlib
+import gzip
 import json
 import pathlib
 import re
@@ -60,7 +61,8 @@ def checksum_manifest(root, manifest, required):
 
 def release_assets(tag):
     return {f"docklane-{tag}-linux-{arch}.tar.gz" for arch in ("amd64", "arm64")} | {
-        "docklane-installation.tar.gz", "docklane-images.tar.gz", "install-online.sh"}
+        "docklane-installation.tar.gz", "install-online.sh"} | {
+        f"docklane-images-{arch}.tar.gz" for arch in ("amd64", "arm64")}
 
 
 def parsed_manifest(content):
@@ -105,6 +107,128 @@ def member_bytes(archive, members, name):
     return archive.extractfile(entry).read()
 
 
+def worker_identity_matches(archive, members, identity, config_bytes, arch):
+    """Docker classic IDs are config hashes; containerd IDs may be OCI indexes."""
+    config_digest = 'sha256:' + hashlib.sha256(config_bytes).hexdigest()
+    if identity == config_digest:
+        return True
+    visited = set()
+
+    def visit(digest):
+        if not isinstance(digest, str) or not re.fullmatch(r'sha256:[a-f0-9]{64}', digest) or digest in visited or len(visited) >= 32:
+            return False
+        visited.add(digest)
+        name = 'blobs/sha256/' + digest.split(':')[1]
+        if name not in members:
+            return False
+        content = member_bytes(archive, members, name)
+        if 'sha256:' + hashlib.sha256(content).hexdigest() != digest:
+            raise ValueError('Worker OCI descriptor checksum mismatch')
+        node = json.loads(content)
+        if not isinstance(node, dict):
+            return False
+        if isinstance(node.get('config'), dict):
+            return node['config'].get('digest') == config_digest
+        descriptors = node.get('manifests', [])
+        if not isinstance(descriptors, list):
+            return False
+        for descriptor in descriptors:
+            if not isinstance(descriptor, dict):
+                continue
+            platform = descriptor.get('platform', {})
+            if platform and (not isinstance(platform, dict) or platform.get('architecture') != arch or platform.get('os') != 'linux'):
+                continue
+            if visit(descriptor.get('digest')):
+                return True
+        return False
+
+    return visit(identity)
+
+
+def validate_worker_archive(path, image, arch, identity, license_content):
+    """Inspect one Docker save image without loading or extracting untrusted bytes."""
+    with tarfile.open(path, 'r:gz') as archive:
+        members = archive_members(archive)
+        manifest = json.loads(member_bytes(archive, members, 'manifest.json'))
+        if not isinstance(manifest, list) or len(manifest) != 1 or not isinstance(manifest[0], dict):
+            raise ValueError('Worker archive must contain exactly one image')
+        entry = manifest[0]
+        if entry.get('RepoTags') != [image]:
+            raise ValueError('Worker archive tag disagrees with release')
+        if not isinstance(entry.get('Config'), str):
+            raise ValueError('Invalid worker image config path')
+        config_bytes = member_bytes(archive, members, entry['Config'])
+        if not worker_identity_matches(archive, members, identity, config_bytes, arch):
+            raise ValueError('Worker image identity disagrees with inventory')
+        config = json.loads(config_bytes)
+        if not isinstance(config, dict) or not isinstance(config.get('config'), dict) or not isinstance(config.get('rootfs'), dict):
+            raise ValueError('Invalid worker image config')
+        runtime = config['config']
+        if config.get('os') != 'linux' or config.get('architecture') != arch:
+            raise ValueError('Worker archive architecture mismatch')
+        if runtime.get('Entrypoint') != ['/usr/local/bin/docklane'] or not isinstance(runtime.get('Env'), list) or \
+                f'DM_BACKUP_WORKER_IMAGE={image.rsplit("-", 1)[0]}' not in runtime['Env']:
+            raise ValueError('Worker archive runtime version mismatch')
+        layers = entry.get('Layers', [])
+        diff_ids = config.get('rootfs', {}).get('diff_ids', [])
+        if not isinstance(layers, list) or not isinstance(diff_ids, list) or not 0 < len(layers) <= 128 or \
+                len(layers) != len(diff_ids) or any(not isinstance(name, str) for name in layers):
+            raise ValueError('Invalid worker image layer inventory')
+        targets = {'usr/share/licenses/docklane/LICENSE': None, 'usr/local/bin/docklane': None}
+        total_layer_size = 0
+        for name, expected in zip(layers, diff_ids):
+            layer = members.get(name)
+            if not layer or not layer.isfile():
+                raise ValueError('Missing worker image layer')
+            raw_digest = hashlib.sha256()
+            stream = archive.extractfile(layer)
+            for block in iter(lambda: stream.read(1 << 20), b''):
+                raw_digest.update(block)
+            if name.startswith('blobs/sha256/') and name != 'blobs/sha256/' + raw_digest.hexdigest():
+                raise ValueError('Worker image layer blob checksum mismatch')
+            stream = archive.extractfile(layer)
+            compressed = stream.read(2) == b'\x1f\x8b'
+            stream.seek(0)
+            if compressed:
+                stream = gzip.GzipFile(fileobj=stream)
+            value = hashlib.sha256()
+            layer_size = 0
+            for block in iter(lambda: stream.read(1 << 20), b''):
+                layer_size += len(block)
+                total_layer_size += len(block)
+                if layer_size > 1024 * 1024 * 1024 or total_layer_size > 4 * 1024 * 1024 * 1024:
+                    raise ValueError('Worker image layer exceeds decompression limit')
+                value.update(block)
+            if 'sha256:' + value.hexdigest() != expected:
+                raise ValueError('Worker image layer checksum mismatch')
+            with tarfile.open(fileobj=archive.extractfile(layer), mode='r|*') as contents:
+                for item in contents:
+                    part = pathlib.PurePosixPath(item.name)
+                    if part.is_absolute() or '..' in part.parts:
+                        raise ValueError('Unsafe worker layer entry')
+                    current = str(part)
+                    for target in targets:
+                        target_path = pathlib.PurePosixPath(target)
+                        whiteout = str(part.parent / part.name.removeprefix('.wh.'))
+                        opaque = part.name == '.wh..wh..opq' and part.parent in target_path.parents
+                        if opaque or (part.name.startswith('.wh.') and
+                                      (whiteout == target or pathlib.PurePosixPath(whiteout) in target_path.parents)):
+                            targets[target] = None
+                        elif current == target:
+                            if not item.isfile() or item.size > 128 * 1024 * 1024:
+                                raise ValueError('Invalid worker executable or license member')
+                            stream = contents.extractfile(item)
+                            targets[target] = stream.read() if target.endswith('LICENSE') else stream.read(20)
+                        elif part in target_path.parents and not item.isdir():
+                            targets[target] = None
+        if targets['usr/share/licenses/docklane/LICENSE'] != license_content:
+            raise ValueError('Worker image MIT license mismatch')
+        header = targets['usr/local/bin/docklane'] or b''
+        machine = {'amd64': 62, 'arm64': 183}[arch]
+        if len(header) != 20 or header[:6] != b'\x7fELF\x02\x01' or int.from_bytes(header[18:20], 'little') != machine:
+            raise ValueError('Wrong worker ELF architecture')
+
+
 def validate_candidate(directory, tag, expected_sha=None):
     """Validate exact public inventory and nested metadata without extracting archives."""
     import tarfile
@@ -113,13 +237,13 @@ def validate_candidate(directory, tag, expected_sha=None):
     expected = release_assets(tag)
     actual = {path.name for path in directory.iterdir()}
     if actual != expected | {'RELEASE-SHA256SUMS'}:
-        raise ValueError('Candidate must contain exactly the six public assets')
+        raise ValueError('Candidate must contain exactly the seven public assets')
     for path in directory.iterdir():
         if not path.is_file() or path.is_symlink():
             raise ValueError('Unsafe candidate asset: ' + path.name)
     sums = parsed_manifest((directory / 'RELEASE-SHA256SUMS').read_bytes())
     if set(sums) != expected:
-        raise ValueError('Release checksum manifest must list exactly the other five assets')
+        raise ValueError('Release checksum manifest must list exactly the other six assets')
     for name, value in sums.items():
         if file_digest(directory / name) != value:
             raise ValueError('Checksum mismatch: ' + name)
@@ -136,6 +260,8 @@ def validate_candidate(directory, tag, expected_sha=None):
         raise ValueError('Public entrypoint differs from versioned installation material')
     if not metadata['TOOL-VERSIONS.txt'].strip() or not metadata['SECURITY-NOTES.md'].strip() or not metadata['LICENSE'].strip():
         raise ValueError('Empty release documentation metadata')
+    if metadata['LICENSE'] != (pathlib.Path(__file__).resolve().parents[1] / 'LICENSE').read_bytes():
+        raise ValueError('Release MIT license differs from source')
     evidence = json.loads(metadata['release-ci-evidence.json'])
     if not isinstance(evidence, dict) or not re.fullmatch(r'[0-9a-f]{40}', evidence.get('head_sha', '')):
         raise ValueError('Invalid candidate source evidence')
@@ -168,18 +294,21 @@ def validate_candidate(directory, tag, expected_sha=None):
             if value.hexdigest() != binary_sums['docklane-linux-' + arch]:
                 raise ValueError('Internal binary checksum mismatch: ' + arch)
     image_sums = parsed_manifest(metadata['IMAGE-SHA256SUMS'])
-    if image_sums != {'docklane-images.tar.gz': sums['docklane-images.tar.gz']}:
+    if image_sums != {f'docklane-images-{arch}.tar.gz': sums[f'docklane-images-{arch}.tar.gz'] for arch in ('amd64', 'arm64')}:
         raise ValueError('Internal image checksum manifest mismatch')
     image_lines = metadata['IMAGES.txt'].decode().splitlines()
     wanted = {f'docklane:{tag}-{arch}': arch for arch in ('amd64', 'arm64')}
     seen = {}
     for line in image_lines:
-        match = re.fullmatch(r'\[([^]]+)\] sha256:[a-f0-9]{64} linux/(amd64|arm64)', line)
+        match = re.fullmatch(r'\[([^]]+)\] (sha256:[a-f0-9]{64}) linux/(amd64|arm64)', line)
         if not match or match[1] in seen:
             raise ValueError('Invalid internal image inventory')
-        seen[match[1]] = match[2]
+        seen[match[1]] = match[3]
     if seen != wanted:
         raise ValueError('Worker image versions or architectures do not match the release')
+    identities = {line.split('] ')[0][1:]: line.split('] ')[1].split()[0] for line in image_lines}
+    for image, arch in wanted.items():
+        validate_worker_archive(directory / f'docklane-images-{arch}.tar.gz', image, arch, identities[image], metadata['LICENSE'])
     return {'names': sorted(actual), 'version': tag[1:], 'prerelease': '-beta.' in tag, 'evidence': evidence}
 
 
@@ -198,13 +327,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=pathlib.Path, default=pathlib.Path(__file__).resolve().parents[1])
     parser.add_argument("--repo", help="Explicit GitHub OWNER/REPO, otherwise inspect origin")
-    parser.add_argument("--tag", help="Exact release tag, for example v0.3.2-beta.1")
+    parser.add_argument("--tag", help="Exact release tag, for example v0.3.2-beta.2")
     parser.add_argument("--registry", help="Optional future GHCR destination; not required or published by the archive-based release")
     parser.add_argument("--artifacts", type=pathlib.Path, help="Prepared candidate directory; defaults to ROOT/bin/release")
     parser.add_argument("--online", action="store_true", help="Read GitHub account, repo settings, CI and tag using gh; never write")
     parser.add_argument("--actionlint", help="Optional existing actionlint executable")
     parser.add_argument("--report", type=pathlib.Path, help="JSON output path; stdout always receives the report")
-    parser.add_argument('--validate-candidate', type=pathlib.Path, help='Only validate a six-asset candidate, without git or network')
+    parser.add_argument('--validate-candidate', type=pathlib.Path, help='Only validate a seven-asset candidate, without git or network')
     parser.add_argument('--expected-sha', help='Required source SHA in nested CI evidence')
     args = parser.parse_args()
     if args.validate_candidate:
@@ -238,7 +367,7 @@ def main():
     expected = "v" + json.loads((root / "web/package.json").read_text())["version"]
     record("release_tag", "passed" if tag == expected else "blocked", "Requested " + tag if tag == expected else "Select existing tag " + expected + "; current build scripts use this fixed version", "publication")
     registry_valid = bool(args.registry and re.fullmatch(r"ghcr\.io/[a-z0-9][a-z0-9_.-]*/[a-z0-9][a-z0-9_./-]*", args.registry))
-    record("distribution", "passed", "Public GitHub Release with dual-architecture offline worker archive; no registry publication is required", "publication")
+    record("distribution", "passed", "Public GitHub Release with architecture-specific offline worker archives; no registry publication is required", "publication")
     record("registry_target", "failed" if args.registry and not registry_valid else "passed",
            "Optional future destination: " + args.registry if registry_valid else
            "Invalid optional GHCR destination" if args.registry else "Not requested; the installer loads the Release worker archive", "publication")
@@ -246,7 +375,7 @@ def main():
     try:
         candidate = validate_candidate(artifacts, expected, head)
         evidence = candidate['evidence']
-        record('release_candidate', 'passed', 'Exactly six public assets and all version-bound internal metadata verified', 'local_artifacts')
+        record('release_candidate', 'passed', 'Exactly seven public assets and all version-bound internal metadata verified', 'local_artifacts')
     except (OSError, ValueError, KeyError, UnicodeError, tarfile.TarError) as error:
         record('release_candidate', 'failed', str(error), 'local_artifacts')
     if args.actionlint:

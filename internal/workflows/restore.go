@@ -204,9 +204,6 @@ func (s *Service) restorePreflight(ctx context.Context, req restoreRequest) (Rep
 		if s.app.Docker == nil {
 			return r, m, nil, "", errors.New("foreign ownership restoration requires the confined Docker restore worker")
 		}
-		if _, e = s.app.Docker.ImageInspect(ctx, s.app.Config.BackupWorkerImage); e != nil {
-			return r, m, nil, "", fmt.Errorf("restore worker image unavailable; install the pinned worker image before restoring foreign UID/GID: %w", e)
-		}
 	}
 	req.TargetState, e = restoreTargetState(target, nodes)
 	if e != nil {
@@ -301,6 +298,24 @@ func (s *Service) restore(c *gin.Context) {
 		if rev != req.Revision {
 			return errors.New("restore inputs changed after confirmation")
 		}
+		verifyNodes := dataNodes(manifest, nodes)
+		if req.Overwrite {
+			verifyNodes = nodes
+		}
+		if needsRestoreWorker(verifyNodes) {
+			if e = s.prepareWorker(t); e != nil {
+				return e
+			}
+			// Download before creating the target or stopping writers, then
+			// revalidate the confirmation because inputs may have changed.
+			r, manifest, nodes, rev, e = s.restorePreflight(t.Context(), req)
+			if e != nil {
+				return e
+			}
+			if rev != req.Revision {
+				return errors.New("restore inputs changed while preparing the worker image; preview again")
+			}
+		}
 		target, e := s.path(req.Target)
 		if e != nil {
 			return e
@@ -348,7 +363,7 @@ func (s *Service) restore(c *gin.Context) {
 			}
 			restoreRef += ":" + src.SnapshotPath
 		}
-		verifyNodes := dataNodes(manifest, nodes)
+		verifyNodes = dataNodes(manifest, nodes)
 		if req.Overwrite {
 			verifyNodes = nodes
 		}

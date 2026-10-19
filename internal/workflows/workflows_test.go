@@ -406,6 +406,9 @@ func TestResticBackupOfflineDiscoveryAndVerifiedRestore(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
+	if handleLazyWorkerRestic() {
+		os.Exit(0)
+	}
 	if handleProcessHelper() {
 		os.Exit(0)
 	}

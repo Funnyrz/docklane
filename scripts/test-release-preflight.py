@@ -44,7 +44,7 @@ class ReleasePreflightTests(unittest.TestCase):
             for item in sorted(names)))
 
     def refresh(self):
-        self.manifest('RELEASE-SHA256SUMS', preflight.release_assets('v0.3.2-beta.1'))
+        self.manifest('RELEASE-SHA256SUMS', preflight.release_assets('v0.3.2-beta.2'))
 
     def run_command(self, args, root, timeout=30):
         if args[:2] == ['git', 'rev-parse']:
@@ -83,7 +83,7 @@ class ReleasePreflightTests(unittest.TestCase):
 
     def inspect(self, *options):
         args = ['release-preflight.py', '--root', str(self.root), '--artifacts', str(self.artifacts),
-                '--tag', 'v0.3.2-beta.1', '--actionlint', '/mock/actionlint', *options]
+                '--tag', 'v0.3.2-beta.2', '--actionlint', '/mock/actionlint', *options]
         stream = io.StringIO()
         with mock.patch.object(sys, 'argv', args), mock.patch.object(preflight, 'run', self.run_command), \
                 mock.patch.object(preflight.shutil, 'which', return_value='/mock/gh'), contextlib.redirect_stdout(stream):
@@ -97,6 +97,14 @@ class ReleasePreflightTests(unittest.TestCase):
         self.assertIsNone(report['registry'])
         self.assertFalse(report['published'])
         self.assertTrue(all(value == 'passed' for value in report['gate_status'].values()))
+
+    def test_public_inventory_has_independent_architecture_worker_archives(self):
+        expected = preflight.release_assets('v0.3.2-beta.2')
+        self.assertEqual(len(expected), 6)
+        self.assertIn('docklane-images-amd64.tar.gz', expected)
+        self.assertIn('docklane-images-arm64.tar.gz', expected)
+        self.assertNotIn('docklane-images.tar.gz', expected)
+        self.assertEqual(len(list(self.artifacts.iterdir())), 7)
 
     def test_optional_future_registry_does_not_require_registry_login(self):
         code, report = self.inspect('--online', '--registry', 'ghcr.io/example/docklane')
@@ -128,7 +136,7 @@ class ReleasePreflightTests(unittest.TestCase):
 
     def test_existing_release_is_never_overwritten(self):
         for draft in (True, False):
-            self.releases = [[{'tag_name': 'v0.3.2-beta.1', 'draft': draft}]]
+            self.releases = [[{'tag_name': 'v0.3.2-beta.2', 'draft': draft}]]
             code, _ = self.inspect('--online')
             self.assertEqual(code, 2)
 

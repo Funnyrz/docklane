@@ -1,5 +1,9 @@
 # 发布验收复现与证据范围
 
+v0.3.2-beta.2 将安装改为默认仅安装二进制，需要工作容器的任务才下载同版本、当前程序架构的镜像。发布布局为七附件，两个 worker 归档按架构独立分发；程序架构须与本机 Linux Docker Engine 一致。v0.3.2-beta.1 的 Release、Tag 和六附件原样保留。以下既有平台证据保留原始含义，不作为新版已完成全矩阵验证的证明；实际结果以 [验证记录](verification.md) 为准。
+
+新增验收需证明：无镜像也能安装/升级和启动原生二进制；需要 worker 的首次任务只下载应用同版本、当前程序架构（与本机 Docker Engine 一致）的已校验归档并记录进度，之后复用本地镜像；无需 worker 的目录备份及恢复预检/预览不联网；自定义引用缺失时要求手动准备；下载、摘要或架构失败发生在业务停机或恢复写入之前。离线场景单独校验并导入当前架构归档及匹配标签。双架构候选物需验证统一清单覆盖其余六附件、内部镜像清单覆盖两个镜像包、两包均含同版本可执行文件与 MIT，并保留准确 Tag/CI 与草稿下载复核门禁。
+
 验收使用固定版本 Go 1.27.2、Compose 2.40.3、Restic 0.19.1，以及实际运行的 Engine 28.5.1 / 29.5.2。应用运行不依赖 Node 或 Python；Python 3.11 以上仅供验收脚本使用。镜像构建需要 Docker Buildx，脚本会显式检查，避免误用不能解释 `BUILDPLATFORM` 的旧构建器。
 
 ## 平台证据
@@ -23,7 +27,7 @@
 
 ## 安装、重启、升级与镜像持久化
 
-当前源码构建的可执行文件为 `bin/docklane`，发布二进制为 `docklane-linux-amd64` / `docklane-linux-arm64`，精简包内仅含 `docklane`。安装与升级脚本安装 `/usr/local/bin/docklane`。当前版本的服务及账号为 `docklane`，配置目录为 `/etc/docklane`，数据目录为 `/var/lib/docklane`，镜像为 `docklane:v0.3.2-beta.1`；`DM_*` 接口及内部数据格式保持不变。旧 `docker-manager` 部署残留会被拒绝，不执行自动更名迁移。上方平台报告为历史验收，保留当时的产物名称与摘要；本次发布的实际验证范围见 [当前验证记录](verification.md)。
+当前源码构建的可执行文件为 `bin/docklane`，发布二进制为 `docklane-linux-amd64` / `docklane-linux-arm64`，精简包内含 `docklane` 与 `LICENSE`。安装与升级脚本安装 `/usr/local/bin/docklane`。当前版本的服务及账号为 `docklane`，配置目录为 `/etc/docklane`，数据目录为 `/var/lib/docklane`，镜像为 `docklane:v0.3.2-beta.2`；`DM_*` 接口及内部数据格式保持不变。旧 `docker-manager` 部署残留会被拒绝，不执行自动更名迁移。上方平台报告为历史验收，保留当时的产物名称与摘要；本次发布的实际验证范围见 [当前验证记录](verification.md)。
 
 `scripts/platform-acceptance.py` 必须在明确隔离的 Linux guest 内以 root 运行；首次安装阶段拒绝已有应用安装及数据。源码目录包含 `scripts/` 与 `deployments/`，先准备实际 Docker、固定版本工具、已校验二进制和本机架构正式镜像。
 
@@ -33,7 +37,7 @@ export DM_PLATFORM_ENVIRONMENT=vm
 python3 scripts/platform-acceptance.py --phase prepare \
   --state /var/lib/dm-platform-run1 --source "$PWD" \
   --binary "$PWD/bin/release-internal/docklane-linux-arm64" \
-  --image docklane:v0.3.2-beta.1 --fixture-image docklane:v0.3.2-beta.1 \
+  --image docklane:v0.3.2-beta.2 --fixture-image docklane:v0.3.2-beta.2 \
   --report /var/lib/dm-platform-run1-report.json
 # 在外部真正关闭并启动这个测试 VM，然后依次执行同样参数：
 # --phase resume、--phase migration、--phase docker、--phase cleanup
@@ -52,7 +56,7 @@ python3 scripts/platform-acceptance.py --phase prepare \
 ```sh
 DM_TEST_DOCKER_ENDPOINT=unix:///var/run/docker.sock \
 DM_TEST_RESTIC=/usr/local/bin/restic \
-DM_TEST_WORKER_IMAGE=docklane:v0.3.2-beta.1 \
+DM_TEST_WORKER_IMAGE=docklane:v0.3.2-beta.2 \
 DM_TEST_REPORT=/var/tmp/dm-integration-report.json \
 DM_TEST_TMPDIR=/var/tmp \
 python3 scripts/integration.py --binary /opt/release/docklane-linux-amd64

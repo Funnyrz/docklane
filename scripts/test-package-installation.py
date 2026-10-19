@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Isolated six-asset packaging and draft-publication tests; no Docker or GitHub writes."""
+"""Isolated seven-asset packaging and draft-publication tests; no Docker or GitHub writes."""
 import hashlib
+import gzip
 import importlib.util
 import io
 import json
@@ -17,7 +18,7 @@ SOURCE = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location('release_preflight', SOURCE / 'scripts/release-preflight.py')
 HELPER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(HELPER)
-VERSION = '0.3.2-beta.1'
+VERSION = '0.3.2-beta.2'
 SHA = 'a' * 40
 
 
@@ -32,6 +33,46 @@ def tar_bytes(path, entries):
             item.size = len(content)
             item.mode = 0o755 if name == 'docklane' else 0o644
             archive.addfile(item, io.BytesIO(content))
+
+
+def worker_fixture(path, version, arch, license, *, actual_arch=None, runtime_version=None, extra_tag=False,
+                   bad_license=False, unsafe=False, wrong_elf=False, bad_layer_hash=False, oci_identity=False, compressed_layer=False):
+    stream = io.BytesIO()
+    content = bytearray(64)
+    content[:6] = b'\x7fELF\x02\x01'
+    content[18:20] = (183 if arch == 'arm64' else 62).to_bytes(2, 'little')
+    if wrong_elf:
+        content[18:20] = (0).to_bytes(2, 'little')
+    with tarfile.open(fileobj=stream, mode='w') as layer:
+        for name, data in {'usr/share/licenses/docklane/LICENSE': b'wrong' if bad_license else license,
+                           'usr/local/bin/docklane': bytes(content), **({'../escape': b'unsafe'} if unsafe else {})}.items():
+            item = tarfile.TarInfo(name)
+            item.size = len(data)
+            layer.addfile(item, io.BytesIO(data))
+    layer = stream.getvalue()
+    config = json.dumps({'os': 'linux', 'architecture': actual_arch or arch,
+        'config': {'Entrypoint': ['/usr/local/bin/docklane'],
+                   'Env': ['DM_BACKUP_WORKER_IMAGE=docklane:v' + (runtime_version or version)]},
+        'rootfs': {'type': 'layers', 'diff_ids': ['sha256:' + ('0' * 64 if bad_layer_hash else hashlib.sha256(layer).hexdigest())]}}).encode()
+    digest = hashlib.sha256(config).hexdigest()
+    tag = f'docklane:v{version}-{arch}'
+    if compressed_layer:
+        layer = gzip.compress(layer, mtime=0)
+    layer_name = 'blobs/sha256/' + hashlib.sha256(layer).hexdigest() if compressed_layer else 'layer.tar'
+    entries = {'manifest.json': json.dumps([{'Config': digest + '.json',
+        'RepoTags': [tag, 'extra:tag'] if extra_tag else [tag], 'Layers': [layer_name]}]).encode(),
+        digest + '.json': config, layer_name: layer}
+    identity = 'sha256:' + digest
+    if oci_identity:
+        image = json.dumps({'schemaVersion': 2, 'config': {'digest': identity}}).encode()
+        image_digest = hashlib.sha256(image).hexdigest()
+        index = json.dumps({'schemaVersion': 2, 'manifests': [{'digest': 'sha256:' + image_digest,
+                            'platform': {'os': 'linux', 'architecture': arch}}]}).encode()
+        index_digest = hashlib.sha256(index).hexdigest()
+        entries.update({'blobs/sha256/' + image_digest: image, 'blobs/sha256/' + index_digest: index})
+        identity = 'sha256:' + index_digest
+    tar_bytes(path, entries)
+    return identity
 
 
 def fixture(root, version=VERSION):
@@ -50,6 +91,7 @@ def fixture(root, version=VERSION):
     (root / 'web/package.json').write_text(json.dumps({'version': version}))
     for name in ('package-installation.sh', 'release-preflight.py', 'release.sh', 'build-images.sh'):
         shutil.copyfile(SOURCE / 'scripts' / name, root / 'scripts' / name)
+    (root / 'LICENSE').write_bytes((SOURCE / 'LICENSE').read_bytes())
     license = (root / 'LICENSE').read_bytes()
     (build / 'LICENSE').write_bytes(license)
     for arch, machine in [('amd64', 62), ('arm64', 183)]:
@@ -61,9 +103,12 @@ def fixture(root, version=VERSION):
         tar_bytes(build / name, {'docklane': bytes(content), 'LICENSE': license})
         manifest(build, name + '.sha256', [name])
     manifest(build, 'SHA256SUMS', ['docklane-linux-amd64', 'docklane-linux-arm64', 'LICENSE'])
-    (build / 'docklane-images.tar.gz').write_bytes(b'image fixture')
-    manifest(build, 'IMAGE-SHA256SUMS', ['docklane-images.tar.gz'])
-    (build / 'IMAGES.txt').write_text(''.join(f'[docklane:v{version}-{arch}] sha256:{"1" * 64} linux/{arch}\n' for arch in ('amd64', 'arm64')))
+    image_lines = []
+    for arch in ('amd64', 'arm64'):
+        identity = worker_fixture(build / f'docklane-images-{arch}.tar.gz', version, arch, license)
+        image_lines.append(f'[docklane:v{version}-{arch}] {identity} linux/{arch}\n')
+    manifest(build, 'IMAGE-SHA256SUMS', ['docklane-images-amd64.tar.gz', 'docklane-images-arm64.tar.gz'])
+    (build / 'IMAGES.txt').write_text(''.join(image_lines))
     (build / 'release-ci-evidence.json').write_text(json.dumps({'version': version, 'tag': 'v' + version,
         'head_sha': SHA, 'ci_run_id': 123, 'ci_run_url': 'https://github.com/example/project/actions/runs/123', 'publication': 'candidate'}))
     return build, output
@@ -97,7 +142,7 @@ class PackageTests(unittest.TestCase):
         tar_bytes(path, entries)
         manifest(self.output, 'RELEASE-SHA256SUMS', HELPER.release_assets('v' + VERSION))
 
-    def test_exact_six_assets_and_internal_metadata(self):
+    def test_exact_seven_assets_and_internal_metadata(self):
         self.pack()
         self.assertEqual({p.name for p in self.output.iterdir()}, HELPER.release_assets('v' + VERSION) | {'RELEASE-SHA256SUMS'})
         result = HELPER.validate_candidate(self.output, 'v' + VERSION, SHA)
@@ -107,8 +152,93 @@ class PackageTests(unittest.TestCase):
                          'release-ci-evidence.json', 'SECURITY-NOTES.md', 'LICENSE'):
                 self.assertTrue(archive.getmember(name).isfile())
             self.assertEqual(archive.extractfile('VERSION').read(), (VERSION + '\n').encode())
-        self.assertEqual(len((self.output / 'RELEASE-SHA256SUMS').read_text().splitlines()), 5)
-        self.pack()  # Replacing only the same known six assets is supported.
+        self.assertEqual(len((self.output / 'RELEASE-SHA256SUMS').read_text().splitlines()), 6)
+        self.pack()  # Replacing only the same known seven assets is supported.
+
+    def test_each_worker_archive_contains_only_its_own_architecture(self):
+        self.pack()
+        for arch in ('amd64', 'arm64'):
+            with tarfile.open(self.output / f'docklane-images-{arch}.tar.gz') as archive:
+                images = json.load(archive.extractfile('manifest.json'))
+            self.assertEqual(len(images), 1)
+            self.assertEqual(images[0]['RepoTags'], [f'docklane:v{VERSION}-{arch}'])
+
+    def test_worker_validation_rejects_wrong_identity_architecture_version_and_payload(self):
+        license = (self.root / 'LICENSE').read_bytes()
+        cases = [({'actual_arch': 'arm64'}, 'architecture'),
+                 ({'runtime_version': '0.0.0'}, 'version'),
+                 ({'extra_tag': True}, 'tag'),
+                 ({'bad_license': True}, 'MIT'),
+                 ({'unsafe': True}, 'Unsafe'),
+                 ({'wrong_elf': True}, 'ELF'),
+                 ({'bad_layer_hash': True}, 'layer checksum')]
+        path = self.root / 'worker.tar.gz'
+        for options, error in cases:
+            with self.subTest(options=options):
+                identity = worker_fixture(path, VERSION, 'amd64', license, **options)
+                with self.assertRaisesRegex(ValueError, error):
+                    HELPER.validate_worker_archive(path, f'docklane:v{VERSION}-amd64', 'amd64', identity, license)
+        identity = worker_fixture(path, VERSION, 'amd64', license)
+        with self.assertRaisesRegex(ValueError, 'identity'):
+            HELPER.validate_worker_archive(path, f'docklane:v{VERSION}-amd64', 'amd64', 'sha256:' + '0' * 64, license)
+
+    def test_containerd_oci_index_identity_is_verified_to_config(self):
+        path = self.root / 'worker.tar.gz'
+        license = (self.root / 'LICENSE').read_bytes()
+        identity = worker_fixture(path, VERSION, 'amd64', license, oci_identity=True)
+        HELPER.validate_worker_archive(path, f'docklane:v{VERSION}-amd64', 'amd64', identity, license)
+        with tarfile.open(path) as archive:
+            entries = {member.name: archive.extractfile(member).read() for member in archive.getmembers()}
+        entries['blobs/sha256/' + identity.split(':')[1]] = b'corrupt OCI index'
+        tar_bytes(path, entries)
+        with self.assertRaisesRegex(ValueError, 'descriptor checksum'):
+            HELPER.validate_worker_archive(path, f'docklane:v{VERSION}-amd64', 'amd64', identity, license)
+
+    def test_containerd_gzip_layers_verify_blob_and_decompressed_diff_id(self):
+        path = self.root / 'worker.tar.gz'
+        license = (self.root / 'LICENSE').read_bytes()
+        identity = worker_fixture(path, VERSION, 'amd64', license, oci_identity=True, compressed_layer=True)
+        HELPER.validate_worker_archive(path, f'docklane:v{VERSION}-amd64', 'amd64', identity, license)
+        with tarfile.open(path) as archive:
+            entries = {member.name: archive.extractfile(member).read() for member in archive.getmembers()}
+        metadata = json.loads(entries['manifest.json'])[0]
+        entries[metadata['Layers'][0]] += b'tampered'
+        tar_bytes(path, entries)
+        with self.assertRaisesRegex(ValueError, 'blob checksum'):
+            HELPER.validate_worker_archive(path, f'docklane:v{VERSION}-amd64', 'amd64', identity, license)
+        identity = worker_fixture(path, VERSION, 'amd64', license, compressed_layer=True, bad_layer_hash=True)
+        with self.assertRaisesRegex(ValueError, 'layer checksum'):
+            HELPER.validate_worker_archive(path, f'docklane:v{VERSION}-amd64', 'amd64', identity, license)
+
+    def test_missing_architecture_worker_archive_is_rejected(self):
+        (self.build / 'docklane-images-arm64.tar.gz').unlink()
+        self.pack(False)
+        self.assertEqual(list(self.output.iterdir()), [])
+
+    def test_image_build_saves_separate_architecture_tags(self):
+        tools = self.root / 'image-tools'
+        tools.mkdir()
+        fake = tools / 'docker'
+        fake.write_text('#!/usr/bin/env python3\nimport os,pathlib,sys,json\n'
+            'args=sys.argv[1:]\n'
+            'with open(os.environ["IMAGE_TRACE"],"a") as f:f.write(json.dumps(args)+"\\n")\n'
+            'if args[0]=="save":pathlib.Path(args[args.index("--output")+1]).write_bytes(b"saved")\n'
+            'if args[:2]==["image","inspect"]:print("sha256:"+"1"*64+" linux/"+args[-1].rsplit("-",1)[1])\n')
+        fake.chmod(0o755)
+        trace = self.root / 'image-trace'
+        result = subprocess.run(['sh', str(self.root / 'scripts/build-images.sh')], cwd=self.root,
+            env={**os.environ, 'RELEASE_BUILD_DIR': str(self.build), 'IMAGE_TRACE': str(trace),
+                 'PATH': str(tools) + os.pathsep + os.environ['PATH']}, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = [json.loads(line) for line in trace.read_text().splitlines()]
+        saves = [args for args in calls if args[0] == 'save']
+        self.assertEqual(len(saves), 2)
+        for args, arch in zip(saves, ('amd64', 'arm64')):
+            self.assertEqual(args[-1], f'docklane:v{VERSION}-{arch}')
+            self.assertEqual(len(args), 4)
+            self.assertTrue((self.build / f'docklane-images-{arch}.tar.gz').is_file())
+        self.assertEqual(set(HELPER.parsed_manifest((self.build / 'IMAGE-SHA256SUMS').read_bytes())),
+                         {'docklane-images-amd64.tar.gz', 'docklane-images-arm64.tar.gz'})
 
     def test_public_contamination_is_preserved_and_rejected(self):
         (self.output / 'unknown').write_bytes(b'preserve')
@@ -192,7 +322,7 @@ class PackageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Checksum'):
             HELPER.validate_candidate(self.output, 'v' + VERSION)
         (self.output / 'extra').write_bytes(b'extra')
-        with self.assertRaisesRegex(ValueError, 'six'):
+        with self.assertRaisesRegex(ValueError, 'seven'):
             HELPER.validate_candidate(self.output, 'v' + VERSION)
 
     def publish(self, version=VERSION, **overrides):

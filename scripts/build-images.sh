@@ -12,12 +12,15 @@ for arch in amd64 arm64; do
   docker buildx build --load --platform "linux/$arch" --build-arg "DOCKLANE_VERSION=$version" --tag "docklane:v$version-$arch" .
 done
 temporary=$(mktemp -d)
-archive="$temporary/docklane-images.tar"
-compressed="$temporary/docklane-images.tar.gz"
 trap 'rm -rf "$temporary"' EXIT HUP INT TERM
-docker save --output "$archive" "docklane:v$version-amd64" "docklane:v$version-arm64"
-gzip -n -c "$archive" > "$compressed"
-mv "$compressed" "$release_dir/docklane-images.tar.gz"
+for arch in amd64 arm64; do
+  archive="$temporary/docklane-images-$arch.tar"
+  compressed="$temporary/docklane-images-$arch.tar.gz"
+  docker save --output "$archive" "docklane:v$version-$arch"
+  gzip -n -c "$archive" > "$compressed"
+  mv "$compressed" "$release_dir/docklane-images-$arch.tar.gz"
+  rm "$archive"
+done
 {
   for arch in amd64 arm64; do
     printf '[docklane:v%s-%s] ' "$version" "$arch"
@@ -26,7 +29,7 @@ mv "$compressed" "$release_dir/docklane-images.tar.gz"
 } > "$release_dir/IMAGES.txt"
 cd "$release_dir"
 if command -v sha256sum >/dev/null 2>&1; then
-  sha256sum docklane-images.tar.gz > IMAGE-SHA256SUMS
+  sha256sum docklane-images-amd64.tar.gz docklane-images-arm64.tar.gz > IMAGE-SHA256SUMS
 else
-  shasum -a 256 docklane-images.tar.gz > IMAGE-SHA256SUMS
+  shasum -a 256 docklane-images-amd64.tar.gz docklane-images-arm64.tar.gz > IMAGE-SHA256SUMS
 fi

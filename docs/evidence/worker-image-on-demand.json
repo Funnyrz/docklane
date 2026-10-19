@@ -1,0 +1,159 @@
+{
+  "verified_at": "2026-10-19T15:29:44.932840+00:00",
+  "status": "passed",
+  "scope": "Unpublished source changes; no GitHub release or tag modified",
+  "baseline_commit": "bcd97a13e0196d773954bafdb8788f6fc6a2193b",
+  "source_sha256": {
+    "internal/workerimage/archive.go": "c6f57759a3f47b08ed2e679059bed7b04dd5c5834b38618a2a5b0fc54745e52e",
+    "internal/workerimage/docker_integration_test.go": "e5f83adac3cb6a9e9b8137b493937454a812171887e647d2de356682e4db9f4d",
+    "internal/workerimage/download.go": "e78781b6df907008a84588768345ffefa38ec3fa1083acf0930d1305d2f8504a",
+    "internal/workerimage/ensure.go": "a4a2c5e5290c2c00c671f75a4f755f81fff30ae84fb3e82e30808ca6a7336171",
+    "internal/workerimage/ensure_test.go": "9208b8634210dff920c3282730a17ef57c82784f5e4c60e8e820d01c548bcd49",
+    "internal/workflows/backup.go": "c2d299426f8a19533af3a9d14ed1dde4cfec8ab9711c6c84258e5f5b2a37cfc7",
+    "internal/workflows/restore.go": "466ca5034e3213f087c1b650655edae3e12924f60b89d8bd65962a7773b338cc",
+    "internal/workflows/worker_image.go": "84cd3e315c48f67953cc8f76d0321cebd92fc275d5669d5e1d22f6efb28eaedf",
+    "scripts/build-images.sh": "6801e3b02c83203f7f3af7a0a49b1ae425d3b25ec7f1918b8dfe7d32e49ef5eb",
+    "scripts/install-online.sh": "1c2cc3714a378e07bd002bd7b0e251ad93b38253aec61438c597d17eabdfd774",
+    "scripts/install-support.py": "3883b23513857015be62912eb51b10aa0122e0cb4d83a1835c7e690451cf72d1",
+    "scripts/package-installation.sh": "d39384ead354fb62c1bcd784cca037c48fac15e7abbc9087fb0b5abe6dfc509d",
+    "scripts/release-preflight.py": "988a5aa5bb332c361b3ab8e1ddaf5707a26859dc985110d787439d10a6df1c1e",
+    "web/src/i18n/views.ts": "37d67b3841f66a26265eb1c4df8317064ac1855e02adb7c37876001d3f876bf4",
+    "web/src/views/TasksView.vue": "df985fff69ed6edc4142fdb11fd4e75fc8e2eba95fd616fdf2d45c01945ffdff"
+  },
+  "checks": {
+    "make_check": "passed",
+    "frontend_tests": 98,
+    "online_installer_tests": 77,
+    "installation_lifecycle_tests": 60,
+    "lifecycle_platform_skips": 1,
+    "packaging_tests": 33,
+    "release_preflight_tests": 14,
+    "go_race_vet": "passed",
+    "shell_python_syntax": "passed",
+    "actionlint": "passed",
+    "local_readme_links": "passed"
+  },
+  "on_demand": {
+    "initial_downloads": [
+      "RELEASE-SHA256SUMS",
+      "docklane-installation.tar.gz",
+      "docklane-images-arm64.tar.gz"
+    ],
+    "worker_compressed_bytes": 107020782,
+    "worker_archive_sha256": "df42e391e15e4c2e12edfd37a355a4b93a3d61f401648a7aaa83062c10c9de92",
+    "image_fixture_version": "0.0.0-beta.90001",
+    "real_docker_load_and_tag": "passed",
+    "classic_config_to_containerd_id_content_proof": "passed",
+    "second_use_network_requests": 0,
+    "local_native_tag_only_reuse": "passed (Go regression)",
+    "invalid_checksum_platform_version_archive": "rejected (Go regressions)",
+    "canceled_transfer_cleanup_retry": "passed (Go regression)",
+    "https_downgrade": "rejected (Go regression)",
+    "failed_preparation_preserves_writers_and_restore_target": "passed (workflow regressions)"
+  },
+  "real_integration": {
+    "result": "passed",
+    "host": {
+      "system": "Linux",
+      "architecture": "aarch64",
+      "uid": 501
+    },
+    "engine": "29.5.2",
+    "compose": "2.40.3",
+    "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64",
+    "binary_sha256": "b9233344dfeda736aeb37ec6e1b2b704afe679fe86de0800dd7a09adc6a1fd8f",
+    "tests": [
+      {
+        "name": "installation preserves pre-existing container ID and running state",
+        "status": "passed",
+        "detail": ""
+      },
+      {
+        "name": "authentication, single setup, CSRF, API404 and daemon capability enforcement",
+        "status": "passed",
+        "detail": ""
+      },
+      {
+        "name": "dashboard counts match independent Engine inventory and repeated refresh preserves resources",
+        "status": "passed",
+        "detail": "independent CLI/Engine HTTP; running/stopped/paused fixtures; three refreshes; IDs/config/mounts/network/state unchanged"
+      },
+      {
+        "name": "CLI discovery and Engine-verified lifecycle with task idempotency",
+        "status": "passed",
+        "detail": ""
+      },
+      {
+        "name": "healthy container rebuild creates new ID and failing replacement restores original ID/data",
+        "status": "passed",
+        "detail": ""
+      },
+      {
+        "name": "real streamed Docker image export and asynchronous tar import",
+        "status": "passed",
+        "detail": "5242880-byte tar exceeds ordinary API body cap"
+      },
+      {
+        "name": "real Compose multiconfig/env/profile import preserves IDs, ports and mounts",
+        "status": "passed",
+        "detail": ""
+      },
+      {
+        "name": "stop-writer directory backup, full Restic data read and content/mode/ownership restore",
+        "status": "passed",
+        "detail": ""
+      },
+      {
+        "name": "SIGKILL during real stopped-writer Restic backup terminates child and recovers writer on restart",
+        "status": "passed",
+        "detail": "256MiB random source; direct child executable+PPID+starttime verified through /proc; task Failed/INTERRUPTED"
+      },
+      {
+        "name": "container snapshot recreates a running service against verified recovered bind data",
+        "status": "passed",
+        "detail": "original ID remains running; new ID/name/bind path and in-container content independently verified"
+      },
+      {
+        "name": "named Volume worker backup and verified restore",
+        "status": "passed",
+        "detail": "locally pinned worker image ID"
+      },
+      {
+        "name": "worker ambient capability reads foreign UID mode0600 and preserves repository ownership",
+        "status": "passed",
+        "detail": "app UID 501, source UID 1001"
+      },
+      {
+        "name": "non-root manager restores foreign UID/GID mode0600 through scoped worker",
+        "status": "passed",
+        "detail": "independent read-only Docker stat and content check"
+      },
+      {
+        "name": "real Cron Volume file backup commits snapshot and restart preserves unique UTC task instance",
+        "status": "passed",
+        "detail": "file consistency only; no database consistency claim; no clock or database manipulation"
+      },
+      {
+        "name": "restart persists users, sessions, policies and completed tasks",
+        "status": "passed",
+        "detail": ""
+      },
+      {
+        "name": "fresh database imports encrypted repository and restores without original SQLite or source directory",
+        "status": "passed",
+        "detail": ""
+      }
+    ],
+    "cleanup_errors": [],
+    "limitations": [
+      "systemd/distro and dual-architecture runtime matrix are separate release checks",
+      "daemon configuration mutation/restart is a separate isolated release check"
+    ]
+  },
+  "limitations": [
+    "No new Release publication or public URL acceptance; existing beta assets unchanged.",
+    "Real Docker download test serves verified local fixture assets over httptest HTTP; production clients enforce HTTPS.",
+    "Actual workflow integration ran Linux arm64 Docker 29.5.2 inside existing isolated Colima VM, not fresh systemd installation.",
+    "New image archives were not rebuilt and published for both architectures; packaging fixtures and existing real Docker archives validated."
+  ]
+}

@@ -158,14 +158,16 @@ if not valid:
         detail+='\nNo stable release could be verified. A stable release may be unpublished, or GitHub metadata access may be unavailable. Retry access or use --channel beta explicitly; no channel switch was performed.'
     raise SystemExit(detail)
 r=max(valid,key=lambda release:key(release['tag_name']));tag=r['tag_name']
-slim={'RELEASE-SHA256SUMS','install-online.sh','docklane-images.tar.gz','docklane-installation.tar.gz',
+base={'RELEASE-SHA256SUMS','install-online.sh','docklane-installation.tar.gz',
       f'docklane-{tag}-linux-amd64.tar.gz',f'docklane-{tag}-linux-arm64.tar.gz'}
 assets=r.get('assets',[]);names=[asset.get('name') for asset in assets]
-if set(names)==slim and len(names)==6:
-    required=['RELEASE-SHA256SUMS','docklane-installation.tar.gz','docklane-images.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz']
-    validate=slim
-    layout='slim'
-else:raise SystemExit('Release must provide exactly the six supported assets')
+legacy=base|{'docklane-images.tar.gz'}
+split=base|{'docklane-images-amd64.tar.gz','docklane-images-arm64.tar.gz'}
+if len(names)!=len(set(names)) or set(names) not in (legacy,split):
+    raise SystemExit('Release must provide exactly the six legacy or seven architecture-specific supported assets')
+required=['RELEASE-SHA256SUMS','docklane-installation.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz']
+validate=set(names)
+layout='split' if set(names)==split else 'slim'
 for name in validate:
     found=[asset for asset in assets if asset.get('name')==name]
     expected=f'https://github.com/Funnyrz/docklane/releases/download/{tag}/{name}'
@@ -242,10 +244,12 @@ for line in (root/'RELEASE-SHA256SUMS').read_text().splitlines():
     match=re.fullmatch(r'[a-fA-F0-9]{64} [ *]([A-Za-z0-9][A-Za-z0-9._-]*)',line)
     if not match or match[1] in names:raise SystemExit('Unsafe checksum manifest')
     names.add(match[1])
-slim={'install-online.sh','docklane-installation.tar.gz','docklane-images.tar.gz',f'docklane-{tag}-linux-amd64.tar.gz',f'docklane-{tag}-linux-arm64.tar.gz'}
-required=['RELEASE-SHA256SUMS','docklane-installation.tar.gz','docklane-images.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz']
-layout='slim'
-if names!=slim:raise SystemExit('Unsupported release asset layout')
+base={'install-online.sh','docklane-installation.tar.gz',f'docklane-{tag}-linux-amd64.tar.gz',f'docklane-{tag}-linux-arm64.tar.gz'}
+legacy=base|{'docklane-images.tar.gz'}
+split=base|{'docklane-images-amd64.tar.gz','docklane-images-arm64.tar.gz'}
+required=['RELEASE-SHA256SUMS','docklane-installation.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz']
+if names not in (legacy,split):raise SystemExit('Unsupported release asset layout')
+layout='split' if names==split else 'slim'
 (root/'layout').write_text(layout)
 print(tag);print('\n'.join(required))
 PY
@@ -253,7 +257,7 @@ PY
 }
 verify_release() {
   python3 - "$work" "$version" "$arch" <<'PY'
-import hashlib,json,pathlib,re,struct,sys,tarfile
+import ast,hashlib,json,pathlib,re,struct,sys,tarfile
 root=pathlib.Path(sys.argv[1]);version,arch=sys.argv[2:]
 def digest(p):
     h=hashlib.sha256()
@@ -269,8 +273,10 @@ def manifest(path):
     if not result:raise SystemExit('Empty checksum manifest')
     return result
 sums=manifest(root/'RELEASE-SHA256SUMS')
-expected={'install-online.sh','docklane-installation.tar.gz','docklane-images.tar.gz',f'docklane-{version}-linux-amd64.tar.gz',f'docklane-{version}-linux-arm64.tar.gz'}
-if set(sums)!=expected:raise SystemExit('Six-asset checksum manifest must cover exactly the other five assets')
+base={'install-online.sh','docklane-installation.tar.gz',f'docklane-{version}-linux-amd64.tar.gz',f'docklane-{version}-linux-arm64.tar.gz'}
+image_names={'docklane-images-amd64.tar.gz','docklane-images-arm64.tar.gz'} if (root/'layout').read_text()=='split' else {'docklane-images.tar.gz'}
+expected=base|image_names
+if set(sums)!=expected:raise SystemExit('Release checksum manifest must cover exactly every other supported asset')
 for name in (root/'release-selection').read_text().splitlines()[2:]:
     if name not in sums or digest(root/name)!=sums[name]:raise SystemExit('Checksum mismatch: '+name)
 def unpack(name,destination):
@@ -286,6 +292,9 @@ def unpack(name,destination):
 materials=root/'materials';unpack('docklane-installation.tar.gz',materials)
 for name in ['scripts/install-support.py','scripts/install.sh','scripts/upgrade.sh','scripts/uninstall.sh','deployments/docklane.service','deployments/config.example.json','LICENSE']:
     if not(materials/name).is_file():raise SystemExit('Missing installation material: '+name)
+helper=ast.parse((materials/'scripts/install-support.py').read_text())
+if not any(isinstance(node,ast.Assign) and any(isinstance(target,ast.Name) and target.id=='LAZY_WORKER_DOWNLOAD' for target in node.targets) and isinstance(node.value,ast.Constant) and node.value.value is True for node in helper.body):
+    raise SystemExit('Selected release installation materials predate on-demand worker downloads. Select a newer release with lazy-worker support; the system was not changed beyond base dependency preparation.')
 for name in ('VERSION','SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt','TOOL-VERSIONS.txt','release-ci-evidence.json','SECURITY-NOTES.md'):
     if not(materials/name).is_file():raise SystemExit('Missing installation metadata: '+name)
 if (materials/'VERSION').read_text().strip()!=version.removeprefix('v'):raise SystemExit('Material VERSION mismatch')
@@ -302,7 +311,7 @@ if sorted(image_arches)!=['amd64','arm64']:raise SystemExit('Worker image metada
 if not(materials/'TOOL-VERSIONS.txt').read_text().strip() or not(materials/'SECURITY-NOTES.md').read_text().strip():raise SystemExit('Empty required release metadata')
 for name in ('SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt','LICENSE'):(root/name).write_bytes((materials/name).read_bytes())
 image_sums=manifest(root/'IMAGE-SHA256SUMS')
-if image_sums.get('docklane-images.tar.gz')!=sums['docklane-images.tar.gz']:raise SystemExit('Inconsistent manifest: IMAGE-SHA256SUMS')
+if set(image_sums)!=image_names or any(image_sums[name]!=sums[name] for name in image_names):raise SystemExit('Inconsistent manifest: IMAGE-SHA256SUMS')
 binary_name=f'docklane-{version}-linux-{arch}.tar.gz'
 binary=root/'binary';members=unpack(binary_name,binary)
 if members!={'docklane','LICENSE'}:raise SystemExit('Unexpected binary archive layout')
@@ -402,55 +411,6 @@ install_tools() {
   DOCKER_CONFIG="$work/docker-config" local_docker compose version --short | grep -Eq '^v?2\.' || die 'Compose v2 verification failed.'
   /usr/local/lib/docklane/bin/restic version | grep -q '^restic 0\.19\.1 ' || die 'Restic version verification failed.'
 }
-install_worker() {
-  local native="docklane:$version-$arch"
-  local_docker load --input "$work/docklane-images.tar.gz"
-  local_docker image inspect "$native" > "$work/worker.json"
-  local_docker image save --output "$work/worker-loaded.tar" "$native"
-  python3 - "$work/IMAGES.txt" "$work/worker.json" "$native" "$version" "$arch" "$work/docklane-images.tar.gz" "$work/worker-loaded.tar" <<'PY'
-import hashlib,json,re,sys,tarfile
-lines=open(sys.argv[1]).read().splitlines(); entries=[]
-for line in lines:
-    m=re.fullmatch(r'\[([^]]+)\] (sha256:[a-f0-9]{64}) linux/(amd64|arm64)',line)
-    if m and m[1]==sys.argv[3]: entries.append((m[2],m[3]))
-images=json.load(open(sys.argv[2]))
-if len(entries)!=1 or len(images)!=1:raise SystemExit('Missing worker image identity')
-i=images[0]
-with tarfile.open(sys.argv[6], 'r:gz') as archive:
-    manifests=json.load(archive.extractfile('manifest.json'))
-    native=[m for m in manifests if sys.argv[3] in (m.get('RepoTags') or [])]
-    if len(native)!=1:raise SystemExit('Missing native image archive manifest')
-    config=archive.extractfile(native[0]['Config']).read()
-    config_id='sha256:'+hashlib.sha256(config).hexdigest()
-    # Classic Docker stores expose the config digest as .Id; containerd stores
-    # expose the OCI index digest recorded by build-images.sh. Both must come
-    # from this verified archive, never an unrelated locally tagged image.
-    expected=entries[0][0]
-    if expected!=config_id:
-        def contains_config(identity, depth=0):
-            if depth>8 or not re.fullmatch(r'sha256:[a-f0-9]{64}',identity):
-                raise SystemExit('Invalid worker descriptor')
-            blob=archive.extractfile('blobs/sha256/'+identity[7:]).read()
-            if 'sha256:'+hashlib.sha256(blob).hexdigest()!=identity:
-                raise SystemExit('Worker archive identity mismatch')
-            descriptor=json.loads(blob)
-            if descriptor.get('config',{}).get('digest')==config_id:return True
-            return any(contains_config(child['digest'],depth+1) for child in descriptor.get('manifests',[]))
-        if not contains_config(expected):raise SystemExit('Worker index does not reference the native config')
-with tarfile.open(sys.argv[7], 'r:') as loaded:
-    manifests=json.load(loaded.extractfile('manifest.json'))
-    native=[m for m in manifests if sys.argv[3] in (m.get('RepoTags') or [])]
-    if len(native)!=1:raise SystemExit('Missing loaded native image manifest')
-    loaded_config=loaded.extractfile(native[0]['Config']).read()
-    if 'sha256:'+hashlib.sha256(loaded_config).hexdigest()!=config_id:
-        raise SystemExit('Loaded worker content differs from verified release')
-if entries[0][1]!=sys.argv[5] or not re.fullmatch(r'sha256:[a-f0-9]{64}',i.get('Id','')) or i.get('Architecture')!=sys.argv[5] or i.get('Os')!='linux':
-    raise SystemExit('Worker image identity/architecture mismatch')
-if 'DM_BACKUP_WORKER_IMAGE=docklane:'+sys.argv[4] not in i.get('Config',{}).get('Env',[]):
-    raise SystemExit('Worker application version mismatch')
-PY
-  local_docker tag "$native" "docklane:$version"
-}
 main() {
   version=; listen=; migrate=; config=; dry_run=false; download_source=mirror; channel=beta; explicit_version=false
   while (($#)); do
@@ -477,7 +437,7 @@ main() {
   if $dry_run; then
     log "Plan: $ID $VERSION_ID $arch; release ${version:-latest $channel}; listen ${listen:-preserve existing or :9999}; migration ${migrate:-none}."
     log "GitHub download source: $download_source; Docker apt repository: official (unchanged)."
-    log 'Verify release assets; prepare missing dependencies; load matching worker; install/upgrade systemd service; enable and check /healthz. No changes made.'
+    log 'Verify release assets; prepare missing dependencies; install/upgrade binary systemd service; enable and check /healthz. Worker image download is deferred until a task needs it. No changes made.'
     return
   fi
   check_legacy_installation
@@ -497,8 +457,8 @@ main() {
   install_docker
   progress '[5/8] 准备 Compose 和 Restic / Preparing Compose and Restic'
   install_tools
-  progress '[6/8] 加载并校验备份镜像 / Loading and verifying backup worker image'
-  install_worker
+  progress '[6/8] 备份工作镜像按需下载 / Backup worker image will download when first needed'
+  log 'Installing the binary service only; no worker image archive is downloaded or loaded during installation.'
   export DOCKER_HOST=unix:///var/run/docker.sock
   export DOCKER_CONFIG="$work/docker-config"
   unset DOCKER_CONTEXT DOCKER_TLS_VERIFY DOCKER_CERT_PATH
