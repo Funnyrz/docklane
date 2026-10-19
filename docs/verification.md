@@ -4,6 +4,8 @@
 
 目前唯一可下载版本为 [v0.3.1-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)。原 v0.3.0 Release 已撤回，当前没有正式 Release，也没有可用的正式版 latest 入口；正式通道需等待未来正式发布。当前安装请使用 [README 的一键安装命令](../README.md#一键在线安装推荐)。当前源码为 `0.3.1-beta.1`；无参数安装默认选择最新 Beta，并在修改系统前显示测试版警告。显式 `--channel stable` 仍请求正式版，当前会因暂无正式版而停止。
 
+[默认 Beta 验证记录](evidence/default-beta-install.json)覆盖 152 项脚本相关测试（本机 1 项 Linux 专用测试跳过），并在原生 arm64 Ubuntu 24.04 隔离 VM 中通过真实公开镜像 curl 验证无参数 Beta 重复安装、测试版警告，以及显式 stable 在暂无正式版时的安全拒绝。管理员、设置、密钥、配置、二进制及应用/Docker 进程均保留；服务 active / enabled，健康检查成功。[对应代码提交的 CI](https://github.com/Funnyrz/docklane/actions/runs/39231392895) 五个 job 全部成功，包含 Docker 28/29 × amd64/arm64 集成。此项仅为既有 Beta 安装上的复验，未新增全新安装或全平台矩阵。
+
 默认通道调整前的[撤回验证记录](evidence/beta-only-withdrawal.json)覆盖 150 项安装/生命周期/打包/预检测试（本机 1 项 Linux 专用测试跳过）、脚本与工作流检查。原生 arm64 Ubuntu 24.04 隔离 VM 通过公开镜像执行真实 curl：无参数请求在暂无正式版时清楚拒绝，显式 Beta 重复安装成功，原管理员、设置、密钥、配置、程序及 Docker 进程保留。[精确代码提交的 CI](https://github.com/Funnyrz/docklane/actions/runs/39229598649) 五个 job 全部成功，包含前后端检查和 Docker 28/29 × amd64/arm64 集成。此为既有 Beta 上的重复安装复验，不代表新增全平台或全新安装验收。
 
 > 以下原有发布、CI、公开下载、latest 状态及清理描述均为相应测试/发布时刻的历史记录，保留用于追溯；它们不代表已撤回的 Release 现在仍可下载。原始 JSON、Tag 与历史验收记录未因本次撤回说明而改写。

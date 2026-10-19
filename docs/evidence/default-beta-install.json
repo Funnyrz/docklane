@@ -1,0 +1,68 @@
+{
+  "verified_at": "2026-10-19T09:38:17.472925+00:00",
+  "result": "passed",
+  "source_commit": "8109cb3e7d89fd847b653e878c5607ecc2f2dfa6",
+  "bootstrap_sha256": "de85c9301ff2611b4441cb247b4205c64e1b1231a1153feebb54c8a86a043a75",
+  "commands": [
+    "set -o pipefail; curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --",
+    "set -o pipefail; curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel stable"
+  ],
+  "checks": [
+    "Public mirror installer matches the committed main bootstrap",
+    "Explicit stable stops clearly when no stable release is available",
+    "No-argument command selects beta and repeat installation succeeds from public assets",
+    "Both invocations preserve binary inode/hash, master key, config, application/Docker PID and receipt",
+    "Service remains active and enabled; health endpoint returns 200",
+    "Existing administrator login and saved settings are retained",
+    "Bilingual testing-only disclaimer appears before the verified application installation stage"
+  ],
+  "mocked_operations": [],
+  "environment": "Isolated native arm64 Ubuntu 24.04 systemd VM",
+  "limitations": [
+    "Repeat installation on existing beta; no fresh install or new cross-platform matrix",
+    "No independent mainland ISP measurement"
+  ],
+  "local_checks": {
+    "python_tests": 152,
+    "python_tests_skipped": 1,
+    "skip_reason": "One lifecycle test requires Linux; local runner is macOS",
+    "shell_syntax": "passed",
+    "python_compilation": "passed",
+    "actionlint": "passed",
+    "buildinfo": "passed",
+    "documentation_links": "passed"
+  },
+  "release_metadata": {
+    "beta_notes_updated": true,
+    "asset_count": 6,
+    "versioned_assets_unchanged": true,
+    "prerelease": true
+  },
+  "ci": {
+    "url": "https://github.com/Funnyrz/docklane/actions/runs/39231392895",
+    "head_sha": "8109cb3e7d89fd847b653e878c5607ecc2f2dfa6",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "checks",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 28.5.1 / amd64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 28.5.1 / arm64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / arm64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / amd64",
+        "conclusion": "success"
+      }
+    ]
+  }
+}
