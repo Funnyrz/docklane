@@ -1,0 +1,215 @@
+{
+  "verified_at": "2026-10-19T09:08:51.869040+00:00",
+  "result": "passed",
+  "source_commit": "7a28708b5fe5cf17a1e01b0f47db1a8b6e2bf1e1",
+  "release": "https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1",
+  "ci": {
+    "main": "https://github.com/Funnyrz/docklane/actions/runs/39225538379",
+    "tag": "https://github.com/Funnyrz/docklane/actions/runs/39226372174",
+    "publication": "https://github.com/Funnyrz/docklane/actions/runs/39226373513",
+    "all_conclusions": "success"
+  },
+  "local_checks": {
+    "make_check": "passed",
+    "online_tests": 61,
+    "lifecycle_tests": 47,
+    "packaging_publication_tests": 20,
+    "preflight_tests": 13,
+    "local_linux_only_skip": 1,
+    "frontend_tests": 98,
+    "go_race_vet": "passed",
+    "shell_python_actionlint": "passed"
+  },
+  "publication_flags": {
+    "result": "passed",
+    "beta_tag_commit": "7a28708b5fe5cf17a1e01b0f47db1a8b6e2bf1e1",
+    "legacy_tag_commit": "3a53e0986eb4e84f355332974eb6662006673932",
+    "beta_prerelease": true,
+    "beta_draft": false,
+    "beta_asset_count": 6,
+    "stable_latest": "v0.3.0",
+    "legacy_asset_count_preserved": 17
+  },
+  "published_assets": {
+    "result": "passed",
+    "tag": "v0.3.1-beta.1",
+    "source_commit": "7a28708b5fe5cf17a1e01b0f47db1a8b6e2bf1e1",
+    "validated": {
+      "names": [
+        "RELEASE-SHA256SUMS",
+        "docker-manager-images.tar.gz",
+        "docker-manager-installation.tar.gz",
+        "docklane-v0.3.1-beta.1-linux-amd64.tar.gz",
+        "docklane-v0.3.1-beta.1-linux-arm64.tar.gz",
+        "install-online.sh"
+      ],
+      "version": "0.3.1-beta.1",
+      "prerelease": true,
+      "evidence": {
+        "version": "0.3.1-beta.1",
+        "tag": "v0.3.1-beta.1",
+        "head_sha": "7a28708b5fe5cf17a1e01b0f47db1a8b6e2bf1e1",
+        "ci_run_url": "https://github.com/Funnyrz/docklane/actions/runs/39225538379",
+        "ci_run_id": 39225538379,
+        "publication": "candidate"
+      }
+    },
+    "assets": {
+      "RELEASE-SHA256SUMS": {
+        "size": 496,
+        "sha256": "c3eff6db01f7c4c86f63cdb6aee421fe08a092137627cc2342a297a4bd62954b"
+      },
+      "docker-manager-images.tar.gz": {
+        "size": 178580848,
+        "sha256": "9b4196b38bac1c8e9dc3f31617ac5fa11cdb913b820a00c24a590c62d5a34408"
+      },
+      "docker-manager-installation.tar.gz": {
+        "size": 4815558,
+        "sha256": "3cb61a076d95b7e368e33f89a4b7cf90eea89d74b61e89fcedf163b5bef11a19"
+      },
+      "docklane-v0.3.1-beta.1-linux-amd64.tar.gz": {
+        "size": 10658759,
+        "sha256": "a08247dc76dd887d1e097ea5176490f3ccad275e9a50ebf27c7fcda150dbd3c7"
+      },
+      "docklane-v0.3.1-beta.1-linux-arm64.tar.gz": {
+        "size": 9626926,
+        "sha256": "780f2bfc01f3f844dc9cfbe226e57adb31c4dfa28ff79675bcdfb9e29283ee2c"
+      },
+      "install-online.sh": {
+        "size": 26805,
+        "sha256": "17d1da5d324cf3a12ad6a7bdac6cea2a9d97fe14b0db59dea7cd33f88e94ae67"
+      }
+    }
+  },
+  "candidate_upgrade_and_paired_restore": {
+    "result": "passed",
+    "checks": [
+      "Six-asset local candidate upgrades legacy stable to beta with administrator, key, settings and Docker preserved",
+      "Paired pre-upgrade backup restores stable binary, full data, configuration, service and receipt"
+    ],
+    "source_commit": "7a28708b5fe5cf17a1e01b0f47db1a8b6e2bf1e1",
+    "candidate_transport": "Only release API selection and asset fetch are local fixtures; validation, Docker, deployment, systemd and rollback are real",
+    "environment": "Native arm64 Ubuntu 24.04 systemd VM",
+    "limitations": [
+      "Candidate artifacts precede public release; public beta acceptance is separate"
+    ],
+    "backup_group": "20261019T085527.652995Z"
+  },
+  "public_default_stable": {
+    "result": "passed",
+    "command": "set -o pipefail; curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --",
+    "bootstrap_sha256": "17d1da5d324cf3a12ad6a7bdac6cea2a9d97fe14b0db59dea7cd33f88e94ae67",
+    "checks": [
+      "Exact committed public bootstrap",
+      "Default stable still installs legacy v0.3.0",
+      "Same-version repeat preserves binary/key/application PID/Docker PID/receipt",
+      "Existing administrator logs in"
+    ],
+    "mocked_operations": [],
+    "environment": "Native arm64 Ubuntu 24.04 systemd VM"
+  },
+  "public_beta_lifecycle": {
+    "phases": [
+      {
+        "phase": "stable",
+        "started_at": "2026-10-19T08:41:27.020133+00:00",
+        "checks": [],
+        "result": "failed",
+        "error": "POST /auth/setup: expected HTTP (200,), got 403: {\"error\":{\"code\":\"CSRF_INVALID\",\"message\":\"CSRF_INVALID\",\"trace_id\":\"9408524c3c8e0586099c0ea949a07b6a\"}}",
+        "completed_at": "2026-10-19T08:43:21.192379+00:00"
+      },
+      {
+        "phase": "stable",
+        "started_at": "2026-10-19T08:44:04.309687+00:00",
+        "checks": [
+          {
+            "name": "Default stable channel installs legacy v0.3.0 and permits administrator setup",
+            "status": "passed"
+          }
+        ],
+        "result": "passed",
+        "completed_at": "2026-10-19T08:44:04.496586+00:00"
+      },
+      {
+        "phase": "beta",
+        "started_at": "2026-10-19T09:03:00.420104+00:00",
+        "checks": [
+          {
+            "name": "Public beta curl upgrades stable, retains administrator, key, settings and Docker, and creates backup",
+            "status": "passed"
+          },
+          {
+            "name": "Repeated public beta installation preserves binary inode and running process",
+            "status": "passed"
+          },
+          {
+            "name": "Default stable command refuses an implicit downgrade without stopping beta",
+            "status": "passed"
+          }
+        ],
+        "result": "passed",
+        "completed_at": "2026-10-19T09:05:38.252263+00:00"
+      },
+      {
+        "phase": "resume",
+        "started_at": "2026-10-19T09:06:29.085037+00:00",
+        "checks": [
+          {
+            "name": "Real guest reboot retains enabled service, beta version, administrator, key and settings",
+            "status": "passed"
+          }
+        ],
+        "result": "passed",
+        "completed_at": "2026-10-19T09:06:29.293626+00:00"
+      }
+    ],
+    "environment": {
+      "system": "Linux",
+      "machine": "aarch64",
+      "pid1": "systemd"
+    },
+    "limitations": [
+      "One isolated native arm64 Ubuntu 24.04 VM; no independent mainland ISP measurement",
+      "Stable phase uses local reviewed bootstrap and public downloads; beta phase has no transport or selector mocks"
+    ]
+  },
+  "published_image_licenses": {
+    "result": "passed",
+    "license_sha256": "13d574fba57470036711181178466217fac88a9567e34425104e2e4a3000746d",
+    "images": [
+      {
+        "reference": "docker-manager:v0.3.1-beta.1-amd64",
+        "architecture": "amd64",
+        "MIT_license": "exact source bytes",
+        "ELF_machine": 62,
+        "execution": "Container created for filesystem inspection only; no foreign binary executed"
+      },
+      {
+        "reference": "docker-manager:v0.3.1-beta.1-arm64",
+        "architecture": "arm64",
+        "MIT_license": "exact source bytes",
+        "ELF_machine": 183,
+        "execution": "Container created for filesystem inspection only; no foreign binary executed"
+      }
+    ],
+    "containers_removed": [
+      "docklane-beta-license-amd64-910cd001",
+      "docklane-beta-license-arm64-30483f02"
+    ]
+  },
+  "harness_correction": "The first stable setup request omitted the CSRF status request. The application correctly rejected it. The acceptance harness was corrected before source commit 7a28708; the retained initial failure is not an installer failure. Subsequent administrator setup and all public beta phases passed.",
+  "limitations": [
+    "One native arm64 Ubuntu 24.04 systemd VM; new beta was not re-certified across the earlier six-system VM matrix",
+    "No independent mainland ISP reachability measurement",
+    "Beta is for learning/testing only and must not be used in production",
+    "Legacy v0.3.0 helper may reject beta worker configuration during an explicit version downgrade; use a coherent pre-upgrade backup group for rollback"
+  ],
+  "cleanup": {
+    "vm": "dm-beta-ubuntu24-arm64",
+    "status": "Stopped",
+    "data_backups_and_private_logs": "Retained in isolated VM",
+    "license_inspection_containers": "Removed by exact owned container identity",
+    "original_dirty_workspace": "Not modified or included in this release"
+  },
+  "completed_at": "2026-10-19T09:09:50.939384+00:00"
+}

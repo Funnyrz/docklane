@@ -1,5 +1,15 @@
 # v0.3 验证记录
 
+## 2026-10-19 Beta 声明与六附件发布
+
+[v0.3.1-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1) 已作为预发布版发布，来源为 [7a28708](https://github.com/Funnyrz/docklane/commit/7a28708b5fe5cf17a1e01b0f47db1a8b6e2bf1e1)。[主分支 CI](https://github.com/Funnyrz/docklane/actions/runs/39225538379)、[Tag CI](https://github.com/Funnyrz/docklane/actions/runs/39226372174) 和 [发布工作流](https://github.com/Funnyrz/docklane/actions/runs/39226373513) 全部成功。新 Release 恰好六个上传附件，GitHub 自动源码包不计入；旧 v0.3.0 的 Tag、17 个资产身份/大小/摘要及正式版 latest 保持不变，新旧发布说明均有免责声明。
+
+[本轮验证记录](evidence/beta-release-0.3.1.json) 包含六附件公开下载及内外校验链、双架构 ELF、安装材料版本/CI 来源、两个已发布 worker 镜像的 MIT 原文和 ELF 架构检查。本地完整 `make check` 通过，最终安装/生命周期/打包/预检共 141 项（macOS 跳过一项 Linux 专属场景，远端 Linux CI 覆盖），前端 98 项通过；Shell/Python、actionlint 与 Go race/vet 检查通过。
+
+在新建原生 arm64 Ubuntu 24.04 systemd VM 中，默认 stable 从公开资产安装旧版并创建管理员；本地六附件候选完成真实升级，再由升级前同一组备份恢复旧程序、数据、配置、服务及 receipt。发布后无选择器或下载 mock，实际公开 `curl` 验证默认正式版重复安装、stable → beta、beta 重复安装、隐式降级拒绝及实际关机/启动后的自启健康。管理员、master.key、已保存设置及二进制保留检查通过；运行中的 Docker 未因安装或升级被重启。
+
+第一次管理员初始化验收脚本未先取得 CSRF Cookie，应用按设计拒绝；修正验收脚本后完成初始化，保留初始失败记录，不把它算作程序安装失败。此次只覆盖上述 Ubuntu ARM systemd 路径，不能替代完整发行版矩阵或生产环境验证，也未独立验证国内运营商网络。程序仍为 Beta，请勿用于生产环境。本轮新建测试 VM 已停止，保留私有数据和配套备份；原工作区的其他未提交改动未纳入本次发布。
+
 ## 2026-10-19 公共镜像下载入口
 
 [镜像传输验证记录](evidence/online-install/public-mirrors.json) 对应 [03760ee](https://github.com/Funnyrz/docklane/commit/03760ee64c7f30baa5c2037453cb13c56b3651a2)。主、备用镜像均返回与该提交字节一致的安装入口；全部所需 v0.3.0 arm64 资产（含 worker 镜像）、Compose 2.40.3 和 Restic 0.19.1 经主镜像下载并通过 SHA-256 校验。公开 latest 网页查询实测主镜像 HTTP 403 后，由备用镜像跳转到正确的正式版本地址。

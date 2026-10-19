@@ -147,6 +147,8 @@ Docker 模式永远不允许自动写宿主机 daemon 配置。二进制模式�
 
 ## 升级和回退
 
+`--version` 选择目标版本，不保证旧版数据库或旧安装器能接受较新配置。已发布的 v0.3.0 安装辅助程序不识别 Beta worker 标签，显式指定旧版本也可能在停机前被拒绝；从 Beta 回退应恢复升级前同一组备份的程序、配置、数据库与密钥，不能只替换版本号或二进制。
+
 在线升级见上方流程；离线升级先校验发布 `RELEASE-SHA256SUMS`。二进制使用 `scripts/upgrade.sh /path/to/docklane`，同时保留该版本的 `deployments/docker-manager.service`。脚本停服务后按实际生效的数据目录备份完整数据、配置、原服务单元及存在的 `docklane` / `docker-manager` 二进制，再安装 `/usr/local/bin/docklane` 和匹配的服务单元，执行 daemon-reload 后启动，并在有界等待内检查服务与 `/healthz`。旧 `/usr/local/bin/docker-manager` 保留作为回退材料；已有服务会迁移到新入口，无需迁移数据目录。
 
 已有 systemd 受管安装升级失败时，保持停止状态；从同一次备份恢复配置、完整数据目录（含数据库、存在的 WAL/SHM 及 `master.key`）、原服务单元和对应旧二进制到原路径，再执行 `systemctl daemon-reload` 和 `systemctl start docker-manager`。旧服务单元可能仍指向 `/usr/local/bin/docker-manager`，必须与备份二进制匹配，避免直接用旧程序打开新版本数据库。
