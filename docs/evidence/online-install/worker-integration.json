@@ -1,0 +1,125 @@
+{
+  "namespace": "dm-e2e-fd346dfe6875a738",
+  "engine": "29.9.1",
+  "compose": "2.40.3",
+  "restic": "restic 0.19.1 compiled with go1.26.4 on linux/arm64",
+  "binary_sha256": "d1684995cc7bf0611744f9e05fa3f90f40c40732b853b318e2b7b241176fa494",
+  "worker_image_id": "sha256:18485f0daacf5ef93f0fe0f31eda231309d8ec690c5684554fb8208eb7ff1922",
+  "host": {
+    "system": "Linux",
+    "architecture": "aarch64",
+    "uid": 0
+  },
+  "engine_os": "Ubuntu 24.04.5 LTS",
+  "started_at": "2026-10-19T07:22:44.523823+00:00",
+  "tests": [
+    {
+      "name": "installation preserves pre-existing container ID and running state",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "authentication, single setup, CSRF, API404 and daemon capability enforcement",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "dashboard counts match independent Engine inventory and repeated refresh preserves resources",
+      "status": "passed",
+      "detail": "independent CLI/Engine HTTP; running/stopped/paused fixtures; three refreshes; IDs/config/mounts/network/state unchanged"
+    },
+    {
+      "name": "CLI discovery and Engine-verified lifecycle with task idempotency",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "healthy container rebuild creates new ID and failing replacement restores original ID/data",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "real streamed Docker image export and asynchronous tar import",
+      "status": "passed",
+      "detail": "5242880-byte tar exceeds ordinary API body cap"
+    },
+    {
+      "name": "real Compose multiconfig/env/profile import preserves IDs, ports and mounts",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "stop-writer directory backup, full Restic data read and content/mode/ownership restore",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "SIGKILL during real stopped-writer Restic backup terminates child and recovers writer on restart",
+      "status": "passed",
+      "detail": "256MiB random source; direct child executable+PPID+starttime verified through /proc; task Failed/INTERRUPTED"
+    },
+    {
+      "name": "container snapshot recreates a running service against verified recovered bind data",
+      "status": "passed",
+      "detail": "original ID remains running; new ID/name/bind path and in-container content independently verified"
+    },
+    {
+      "name": "named Volume worker backup and verified restore",
+      "status": "passed",
+      "detail": "locally pinned worker image ID"
+    },
+    {
+      "name": "worker ambient capability reads foreign UID mode0600 and preserves repository ownership",
+      "status": "passed",
+      "detail": "app UID 0, source UID 1001"
+    },
+    {
+      "name": "non-root manager restores foreign UID/GID mode0600 through scoped worker",
+      "status": "passed",
+      "detail": "independent read-only Docker stat and content check"
+    },
+    {
+      "name": "real Cron Volume file backup commits snapshot and restart preserves unique UTC task instance",
+      "status": "passed",
+      "detail": "file consistency only; no database consistency claim; no clock or database manipulation"
+    },
+    {
+      "name": "restart persists users, sessions, policies and completed tasks",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "fresh database imports encrypted repository and restores without original SQLite or source directory",
+      "status": "passed",
+      "detail": ""
+    }
+  ],
+  "limitations": [
+    "systemd/distro and dual-architecture runtime matrix are separate release checks",
+    "daemon configuration mutation/restart is a separate isolated release check"
+  ],
+  "dashboard_counts": {
+    "total": 3,
+    "running": 1,
+    "stopped": 1,
+    "abnormal": 1,
+    "images": 3,
+    "volumes": 1
+  },
+  "sigkill_recovery": {
+    "observed_restic_pid": 6158,
+    "restic_inactive_after_panel_kill": true,
+    "task_id": "64875dcbdab9f6b95ead2befccd511b8",
+    "error_code": "INTERRUPTED",
+    "original_writer_recovered": true
+  },
+  "scheduled_instance": {
+    "error": "",
+    "policy_id": "2b36701ba85042c6470460b8ac1dc461",
+    "scheduled_at_utc": "2026-10-19T07:26:00Z",
+    "task_id": "1966b63a7ff36985c521c692802c6dbd"
+  },
+  "result": "passed",
+  "cleanup_errors": [],
+  "finished_at": "2026-10-19T07:27:00.650460+00:00"
+}

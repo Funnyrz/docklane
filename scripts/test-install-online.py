@@ -32,8 +32,8 @@ def checksum(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def archive(path, members):
-    with tarfile.open(path, 'w:gz') as output:
+def archive(path, members, *, compressed=True):
+    with tarfile.open(path, 'w:gz' if compressed else 'w:') as output:
         for name, content in members.items():
             info = tarfile.TarInfo(name)
             if isinstance(content, tuple):
@@ -434,26 +434,44 @@ local_docker() {{ [[ -x {quote(plugin)} ]] && {quote(plugin)}; }}
         config = json.dumps({'architecture': 'amd64', 'os': 'linux',
                              'config': {'Env': [f'DM_BACKUP_WORKER_IMAGE=docker-manager:{TAG}']}}).encode()
         config_id = 'sha256:' + hashlib.sha256(config).hexdigest()
-        members = {'blobs/sha256/' + config_id[7:]: config}
+        legacy = store in ('classic-only', 'legacy-to-containerd')
+        config_name = config_id[7:] + '.json' if legacy else 'blobs/sha256/' + config_id[7:]
+        members = {config_name: config}
         native = f'docker-manager:{TAG}-amd64'
-        members['manifest.json'] = json.dumps([{'Config': 'blobs/sha256/' + config_id[7:],
+        members['manifest.json'] = json.dumps([{'Config': config_name,
                                               'RepoTags': [native], 'Layers': []}]).encode()
         referenced = 'sha256:' + 'f' * 64 if graph == 'wrong-config' else config_id
         descriptor = json.dumps({'config': {'digest': referenced}}).encode()
         descriptor_id = 'sha256:' + hashlib.sha256(descriptor).hexdigest()
         index = json.dumps({'manifests': [{'digest': descriptor_id}]}).encode()
         index_id = 'sha256:' + hashlib.sha256(index).hexdigest()
-        members['blobs/sha256/' + descriptor_id[7:]] = descriptor
-        members['blobs/sha256/' + index_id[7:]] = b'{}' if graph == 'corrupt-index' else index
-        expected = config_id if store == 'classic-only' else index_id
+        if not legacy:
+            members['blobs/sha256/' + descriptor_id[7:]] = descriptor
+            members['blobs/sha256/' + index_id[7:]] = b'{}' if graph == 'corrupt-index' else index
+        expected = config_id if legacy else index_id
         (self.work / 'IMAGES.txt').write_text(f'[{native}] {expected} linux/amd64\n')
         archive(self.work / 'docker-manager-images.tar.gz', members)
-        worker = [{'Id': index_id if store == 'containerd' else config_id,
-                   'Architecture': 'amd64', 'Os': 'linux',
+        # docker image save always produces a plain tar, and stores may rewrite
+        # metadata filenames and inspect IDs while preserving exact config bytes.
+        self.loaded_archive = self.root / 'loaded-worker.tar'
+        self.loaded_config = config
+        self.loaded_native = native
+        self.write_loaded_worker(config)
+        identity = index_id if store == 'containerd' else config_id
+        if store == 'legacy-to-containerd':
+            identity = 'sha256:' + '2' * 64
+        worker = [{'Id': identity, 'Architecture': 'amd64', 'Os': 'linux',
                    'Config': {'Env': [f'DM_BACKUP_WORKER_IMAGE=docker-manager:{TAG}']}}]
         fixture = self.root / 'worker.json'
         fixture.write_text(json.dumps(worker))
         return fixture, worker
+
+    def write_loaded_worker(self, config):
+        config_name = 'exported-config.json'
+        members = {config_name: config, 'manifest.json': json.dumps([
+            {'Config': config_name, 'RepoTags': [self.loaded_native], 'Layers': []}
+        ]).encode()}
+        archive(self.loaded_archive, members, compressed=False)
 
     def worker_prelude(self, fixture):
         return f'''
@@ -461,11 +479,12 @@ version={TAG}
 local_docker() {{
   printf 'docker %s\\n' "$*" >> "$trace"
   if [[ "$1 $2" == 'image inspect' ]]; then cat {quote(fixture)}; fi
+  if [[ "$1 $2" == 'image save' ]]; then cp {quote(self.loaded_archive)} "$4"; fi
 }}
 '''
 
     def test_worker_classic_and_containerd_stores(self):
-        for store in ('classic-only', 'classic', 'containerd'):
+        for store in ('classic-only', 'classic', 'containerd', 'legacy-to-containerd'):
             with self.subTest(store=store):
                 fixture, _ = self.worker_fixture(store)
                 self.bash('install_worker', prelude=self.worker_prelude(fixture))
@@ -480,10 +499,19 @@ local_docker() {{
                 self.assertNotIn('docker tag', self.trace.read_text())
                 self.trace.unlink()
 
+    def test_worker_rejects_loaded_content_with_different_config(self):
+        fixture, _ = self.worker_fixture('legacy-to-containerd')
+        altered = json.loads(self.loaded_config)
+        altered['config']['Labels'] = {'unexpected': 'different-content'}
+        self.write_loaded_worker(json.dumps(altered).encode())
+        result = self.bash('install_worker', prelude=self.worker_prelude(fixture), ok=False)
+        self.assertIn('Loaded worker content differs from verified release', result.stderr)
+        self.assertNotIn('docker tag', self.trace.read_text())
+
     def test_worker_identity_architecture_and_version(self):
         fixture, worker = self.worker_fixture()
         prelude = self.worker_prelude(fixture)
-        for field, value in [('Id', 'sha256:' + '2' * 64), ('Architecture', 'arm64'), ('Os', 'windows'),
+        for field, value in [('Id', 'not-a-valid-sha256'), ('Architecture', 'arm64'), ('Os', 'windows'),
                              ('Config', {'Env': ['DM_BACKUP_WORKER_IMAGE=docker-manager:v0.2.0']})]:
             with self.subTest(field=field):
                 bad = json.loads(json.dumps(worker))

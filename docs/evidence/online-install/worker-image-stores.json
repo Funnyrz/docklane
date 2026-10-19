@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "checked_at": "2026-10-19T07:31:00.981694+00:00",
+  "source": "Debian 12 arm64 Docker 28.5.1 classic image store; docker image save of both release native tags",
+  "target": "Clean Ubuntu 24.04 arm64 Docker 29.9.1 containerd image store",
+  "checks": [
+    "Classic export native config digest matches versioned IMAGES.txt",
+    "Native image loads with a newly synthesized containerd index ID",
+    "Production install_worker re-exports loaded native image and verifies byte-identical config digest",
+    "Architecture and release worker version are checked before assigning canonical tag"
+  ],
+  "source_native_config_id": "sha256:3e48377455f3d3771d4c995040c73e409103684575252de93b125dcad2d6e388",
+  "target_native_inspect_id": "sha256:63856581706a462a6b7def2a60124833c0777b9298ef603ab575b8e3d5e109b6",
+  "archive_sha256": "ddc8ab58a01f3bb37748a83977351b573a7c24112400486a8978bc3ac6d91011",
+  "entrypoint_sha256": "51b7d3698107227d29f7e4c4e090df3ed0292119cd3fd42363a1df184e603b98"
+}

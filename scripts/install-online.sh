@@ -208,7 +208,8 @@ install_worker() {
   local native="docker-manager:$version-$arch"
   local_docker load --input "$work/docker-manager-images.tar.gz"
   local_docker image inspect "$native" > "$work/worker.json"
-  python3 - "$work/IMAGES.txt" "$work/worker.json" "$native" "$version" "$arch" "$work/docker-manager-images.tar.gz" <<'PY'
+  local_docker image save --output "$work/worker-loaded.tar" "$native"
+  python3 - "$work/IMAGES.txt" "$work/worker.json" "$native" "$version" "$arch" "$work/docker-manager-images.tar.gz" "$work/worker-loaded.tar" <<'PY'
 import hashlib,json,re,sys,tarfile
 lines=open(sys.argv[1]).read().splitlines(); entries=[]
 for line in lines:
@@ -238,7 +239,14 @@ with tarfile.open(sys.argv[6], 'r:gz') as archive:
             if descriptor.get('config',{}).get('digest')==config_id:return True
             return any(contains_config(child['digest'],depth+1) for child in descriptor.get('manifests',[]))
         if not contains_config(expected):raise SystemExit('Worker index does not reference the native config')
-if entries[0][1]!=sys.argv[5] or i.get('Id') not in (expected,config_id) or i.get('Architecture')!=sys.argv[5] or i.get('Os')!='linux':
+with tarfile.open(sys.argv[7], 'r:') as loaded:
+    manifests=json.load(loaded.extractfile('manifest.json'))
+    native=[m for m in manifests if sys.argv[3] in (m.get('RepoTags') or [])]
+    if len(native)!=1:raise SystemExit('Missing loaded native image manifest')
+    loaded_config=loaded.extractfile(native[0]['Config']).read()
+    if 'sha256:'+hashlib.sha256(loaded_config).hexdigest()!=config_id:
+        raise SystemExit('Loaded worker content differs from verified release')
+if entries[0][1]!=sys.argv[5] or not re.fullmatch(r'sha256:[a-f0-9]{64}',i.get('Id','')) or i.get('Architecture')!=sys.argv[5] or i.get('Os')!='linux':
     raise SystemExit('Worker image identity/architecture mismatch')
 if 'DM_BACKUP_WORKER_IMAGE=docker-manager:'+sys.argv[4] not in i.get('Config',{}).get('Env',[]):
     raise SystemExit('Worker application version mismatch')
