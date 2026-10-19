@@ -2,7 +2,7 @@
 
 ## 一键在线安装
 
-支持 Ubuntu 24.04、Debian 12/13，架构为 `amd64` / `arm64`，要求 root 和正在运行的 systemd。在线入口位于公开仓库，默认安装最新正式 GitHub Release；解析版本后固定该版本的下载地址，所有安装材料与 worker 镜像必须来自同一 Release。
+支持 Ubuntu 24.04、Debian 12/13，架构为 `amd64` / `arm64`，要求 root 和正在运行的 systemd。在线入口位于公开仓库，默认安装最新正式 GitHub Release；解析版本后固定该版本的下载地址，所有安装材料与 worker 镜像必须来自同一 Release。匿名 GitHub API 限流时，可通过公开的最新正式 Release 链接完成 latest 或同版本安装；明确指定旧版本仍需 API 元数据，限流时安全停止并提示稍后重试。
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --

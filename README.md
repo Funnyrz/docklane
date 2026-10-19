@@ -96,6 +96,8 @@ curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/insta
 
 脚本解析一次最新正式 [GitHub Release](https://github.com/Funnyrz/docklane/releases/latest)，固定版本并校验下载资产的 SHA-256、架构和归档路径，安装 `/usr/local/bin/docklane`，创建专用账号及 `docker-manager.service`，自动后台启动并设置开机自启。结束时检查服务状态、自启和 `/healthz`，输出访问地址；首次打开页面创建管理员。默认监听 `:8080`，不自动修改防火墙。
 
+匿名 GitHub API 限流时，脚本可通过公开的最新正式 Release 链接完成 latest 或同版本安装；明确指定旧版本仍需 API 元数据，限流时会安全停止并提示稍后重试。
+
 缺少 Docker 时从官方软件源安装稳定 29.x 并启用自启；已有可用 Docker 28/29 不会被升级或重启，冲突安装会报错。复用已有 Compose v2，缺失时安装 v2.40.3；提供 Restic 0.19.1，使用专属工具目录而不覆盖其他应用使用的版本。同一 Release 的备份 worker 镜像会下载并加载。基础依赖（包括 Python 3）由脚本补齐，下载与包管理需要联网。
 
 指定版本、监听地址，或先查看执行计划：

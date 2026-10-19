@@ -52,7 +52,11 @@ bootstrap_tools() {
 resolve_release() {
   local endpoint=latest
   [[ -z $version ]] || endpoint="tags/$version"
-  fetch "https://api.github.com/repos/Funnyrz/docklane/releases/$endpoint" "$work/release.json"
+  if ! fetch "https://api.github.com/repos/Funnyrz/docklane/releases/$endpoint" "$work/release.json"; then
+    log 'GitHub API unavailable; checking the public latest formal release.'
+    resolve_release_web
+    return
+  fi
   python3 - "$work/release.json" "$version" "$arch" > "$work/release-selection" <<'PY'
 import json, re, sys
 r=json.load(open(sys.argv[1])); tag=r.get('tag_name','')
@@ -73,9 +77,41 @@ print(tag)
 print('\n'.join(required))
 PY
   version=$(head -n 1 "$work/release-selection")
+  download_release_assets
+}
+download_release_assets() {
+  local name
   while IFS= read -r name; do
     fetch "https://github.com/Funnyrz/docklane/releases/download/$version/$name" "$work/$name"
   done < <(tail -n +2 "$work/release-selection")
+}
+fetch_release_page() {
+  curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+    --connect-timeout 20 --max-time 120 --retry 3 --output "$work/release-page.html" \
+    --write-out '%{url_effective}' 'https://github.com/Funnyrz/docklane/releases/latest' > "$work/release-page-url"
+}
+resolve_release_web() {
+  # GitHub documents /releases/latest independently of REST API quotas:
+  # https://docs.github.com/en/repositories/releasing-projects-on-github/linking-to-releases
+  # Only the formal latest redirect is trusted. An older explicitly requested
+  # version still requires API metadata; do not infer prerelease status from HTML.
+  fetch_release_page
+  python3 - "$work/release-page-url" "$version" "$arch" > "$work/release-selection" <<'PY'
+import pathlib,re,sys
+url=pathlib.Path(sys.argv[1]).read_text().strip()
+match=re.fullmatch(r'https://github\.com/Funnyrz/docklane/releases/tag/(v\d+\.\d+\.\d+)',url)
+if not match:raise SystemExit('Public latest did not resolve to a stable Docklane release')
+tag=match[1]
+if sys.argv[2] and sys.argv[2]!=tag:
+    raise SystemExit('GitHub API unavailable: only the current formal latest can be verified. Retry the requested older version after API access recovers.')
+print(tag)
+print('\n'.join(['RELEASE-SHA256SUMS','LICENSE','SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt',
+                 'docker-manager-images.tar.gz','docker-manager-installation.tar.gz',
+                 f'docklane-{tag}-linux-{sys.argv[3]}.tar.gz',
+                 f'docklane-{tag}-linux-{sys.argv[3]}.tar.gz.sha256']))
+PY
+  version=$(head -n 1 "$work/release-selection")
+  download_release_assets
 }
 verify_release() {
   python3 - "$work" "$version" "$arch" <<'PY'

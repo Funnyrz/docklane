@@ -96,6 +96,8 @@ curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/insta
 
 The script resolves the latest stable [GitHub Release](https://github.com/Funnyrz/docklane/releases/latest) once, pins that version, and verifies asset SHA-256 checksums, architecture and archive paths. It installs `/usr/local/bin/docklane`, creates a dedicated account and `docker-manager.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. The default listener is `:8080`; the script does not change firewall rules.
 
+If the anonymous GitHub API is rate-limited, the public latest formal Release link can still resolve an installation of latest or that same version; an explicitly requested older version needs API metadata, so the script stops safely and asks you to retry later.
+
 If Docker is absent, the script installs stable 29.x from the official repository and enables startup at boot. An existing usable Docker 28/29 is neither upgraded nor restarted; conflicting installations fail explicitly. Existing Compose v2 is reused; otherwise v2.40.3 is installed. Restic 0.19.1 is provided through a dedicated tools directory without overwriting versions used by other applications. The matching release's backup worker image is downloaded and loaded. The script installs base dependencies, including Python 3; downloads and package management require network access.
 
 Choose a version and listener, or preview the actions first:

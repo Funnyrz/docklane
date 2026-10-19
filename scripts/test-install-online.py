@@ -210,6 +210,102 @@ fetch() {{
         self.bash('version=v0.3.0; resolve_release; verify_release')
         self.assertIn('/releases/tags/v0.3.0', self.trace.read_text().splitlines()[0])
 
+    def api_unavailable_prelude(self, redirect=None, *, failed_asset='', web_failure=False):
+        redirect = redirect or f'https://github.com/Funnyrz/docklane/releases/tag/{TAG}'
+        return f'''
+failed_asset={quote(failed_asset)}
+fetch() {{
+  printf 'fetch %s\\n' "$1" >> "$trace"
+  if [[ $1 == https://api.github.com/* ]]; then
+    printf 'rate limited' > "$2"
+    return 22
+  fi
+  [[ ${{1##*/}} != "$failed_asset" ]] || {{ printf partial > "$2"; return 22; }}
+  [[ $1 == https://github.com/Funnyrz/docklane/releases/download/* ]] || return 90
+  cp "$assets/${{1##*/}}" "$2"
+}}
+curl() {{
+  printf 'web-curl %s\\n' "$*" >> "$trace"
+  [[ ${{!#}} == https://github.com/Funnyrz/docklane/releases/latest ]] || return 91
+  {'return 22' if web_failure else ':'}
+  printf '<html>untrusted v9.9.9 prerelease draft</html>' > "$work/release-page.html"
+  printf '%s' {quote(redirect)}
+}}
+'''
+
+    def test_rate_limited_api_uses_one_web_redirect_and_pins_all_assets(self):
+        self.bash('resolve_release; [[ $version == v0.3.0 ]]; verify_release',
+                  prelude=self.api_unavailable_prelude())
+        calls = self.trace.read_text().splitlines()
+        self.assertEqual(sum('api.github.com' in line for line in calls), 1)
+        self.assertEqual(sum(line.startswith('web-curl ') for line in calls), 1)
+        self.assertIn('--write-out %{url_effective}', calls[1])
+        self.assertIn("--proto =https --proto-redir =https", calls[1])
+        self.assertTrue(all('/download/v0.3.0/' in line for line in calls[2:]))
+        self.assertEqual((self.work / 'binary/docklane').read_bytes(), self.binary)
+        self.assertNotIn('v9.9.9', (self.work / 'release-selection').read_text())
+
+    def test_rate_limited_explicit_latest_is_allowed(self):
+        self.bash('version=v0.3.0; resolve_release; verify_release',
+                  prelude=self.api_unavailable_prelude())
+        calls = self.trace.read_text().splitlines()
+        self.assertIn('/releases/tags/v0.3.0', calls[0])
+        self.assertEqual(sum(line.startswith('web-curl ') for line in calls), 1)
+
+    def test_rate_limited_explicit_older_version_is_safely_rejected(self):
+        result = self.bash('version=v0.2.0; resolve_release',
+                           prelude=self.api_unavailable_prelude(), ok=False)
+        self.assertIn('Retry the requested older version after API access recovers', result.stderr)
+        self.assertEqual(len(self.trace.read_text().splitlines()), 2)
+        self.assertFalse((self.work / 'binary').exists())
+
+    def test_web_redirect_rejects_untrusted_or_nonstable_release_urls(self):
+        invalid = [
+            'https://github.com/Other/docklane/releases/tag/v0.3.0',
+            'https://github.com/Funnyrz/other/releases/tag/v0.3.0',
+            'https://evil.invalid/Funnyrz/docklane/releases/tag/v0.3.0',
+            'http://github.com/Funnyrz/docklane/releases/tag/v0.3.0',
+            'https://github.com/Funnyrz/docklane/releases/tag/v0.3.0-rc1',
+            'https://github.com/Funnyrz/docklane/releases/tag/draft',
+            'https://github.com/Funnyrz/docklane/releases/new?draft=true',
+            'https://github.com/Funnyrz/docklane/releases/latest',
+            'https://github.com/Funnyrz/docklane/releases/tag/v0.3.0?prerelease=false',
+            'https://github.com/Funnyrz/docklane/releases/tag/v0.3.0/extra',
+        ]
+        for url in invalid:
+            with self.subTest(url=url):
+                self.trace.unlink(missing_ok=True)
+                result = self.bash('resolve_release', prelude=self.api_unavailable_prelude(url), ok=False)
+                self.assertIn('did not resolve to a stable Docklane release', result.stderr)
+                self.assertEqual(len(self.trace.read_text().splitlines()), 2)
+
+    def test_web_fallback_failure_does_not_download_assets(self):
+        self.bash('resolve_release', prelude=self.api_unavailable_prelude(web_failure=True), ok=False)
+        self.assertEqual(len(self.trace.read_text().splitlines()), 2)
+        self.assertFalse((self.work / 'binary').exists())
+
+    def test_web_fallback_asset_download_failure_stops(self):
+        self.bash('resolve_release; echo unexpected-verification',
+                  prelude=self.api_unavailable_prelude(failed_asset='LICENSE'), ok=False)
+        self.assertFalse((self.work / 'binary').exists())
+        self.assertFalse((self.work / 'SHA256SUMS').exists())
+
+    def test_web_fallback_keeps_checksum_verification(self):
+        (self.assets / 'LICENSE').write_bytes(b'corrupted after release checksums')
+        result = self.bash('resolve_release; verify_release',
+                           prelude=self.api_unavailable_prelude(), ok=False)
+        self.assertIn('Checksum mismatch: LICENSE', result.stderr)
+        self.assertFalse((self.work / 'binary').exists())
+
+    def test_valid_api_metadata_rejection_does_not_use_web_fallback(self):
+        self.change_release(lambda release: release.update(draft=True))
+        result = self.bash('resolve_release', prelude='''
+fetch_release_page() { echo 'unexpected web fallback' >&2; exit 90; }
+''', ok=False)
+        self.assertIn('A published stable release is required', result.stderr)
+        self.assertNotIn('unexpected web fallback', result.stderr)
+        self.assertEqual(len(self.trace.read_text().splitlines()), 1)
+
     def test_arm64_binary(self):
         self.make_release('arm64')
         self.bash('arch=arm64; resolve_release; verify_release')
