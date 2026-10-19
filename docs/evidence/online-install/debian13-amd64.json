@@ -1,0 +1,179 @@
+{
+  "phases": [
+    {
+      "phase": "install",
+      "started_at": "2026-10-19T07:16:55.233609+00:00",
+      "checks": [
+        {
+          "name": "local candidate online install starts and enables hardened systemd service",
+          "status": "passed",
+          "evidence": {
+            "unit": {
+              "MainPID": "1808",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ProtectHome": "yes",
+              "LoadState": "loaded",
+              "ActiveState": "active",
+              "UnitFileState": "enabled"
+            },
+            "docker_preserved": {
+              "version": "29.5.2",
+              "pid": "660",
+              "start_ticks": "2629",
+              "executable": "/usr/local/bin/dockerd"
+            },
+            "private_log": "installer-f7ee55f9.log"
+          }
+        },
+        {
+          "name": "first administrator setup and fresh login succeed",
+          "status": "passed",
+          "evidence": {
+            "admin_id": "ae0d2b393cee6dae0dc7f795c00e1658"
+          }
+        },
+        {
+          "name": "same-version repeat preserves binary inode, master key, administrator and daemon",
+          "status": "passed",
+          "evidence": {
+            "binary_inode": 25062,
+            "binary_sha256": "51310899cf5ebf6062b88c6e6fa83a497719f9891ce33a482030d4fa34bbfaa0",
+            "unit": {
+              "MainPID": "1808",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ProtectHome": "yes",
+              "LoadState": "loaded",
+              "ActiveState": "active",
+              "UnitFileState": "enabled"
+            },
+            "private_log": "installer-1cb5f12e.log"
+          }
+        }
+      ],
+      "status": "passed",
+      "completed_at": "2026-10-19T07:18:37.820182+00:00"
+    }
+  ],
+  "limitations": [
+    "Candidate Release selection/downloads are redirected to local files; public HTTP is a separate smoke test.",
+    "This harness requires existing Docker and checks that it is preserved.",
+    "Worker loading uses production code; real volume backup/restore is verified separately.",
+    "Installation intentionally remains in the disposable guest for reboot/resume verification."
+  ],
+  "environment": {
+    "vm_name": "dm-release-debian13-amd64-kernel",
+    "virtualization": "QEMU x86_64 guest on arm64 host (software emulation)",
+    "independent_kernel": true,
+    "native_amd64_cpu": false,
+    "os_release": "PRETTY_NAME=\"Debian GNU/Linux 13 (trixie)\"\nNAME=\"Debian GNU/Linux\"\nVERSION_ID=\"13\"\nVERSION=\"13 (trixie)\"\nVERSION_CODENAME=trixie\nDEBIAN_VERSION_FULL=13.7\nID=debian\nHOME_URL=\"https://www.debian.org/\"\nSUPPORT_URL=\"https://www.debian.org/support\"\nBUG_REPORT_URL=\"https://bugs.debian.org/\"",
+    "kernel": "Linux 6.12.111+deb13-cloud-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.111-1 (2026-09-28) x86_64",
+    "pid1": "systemd",
+    "mounts": [],
+    "initial_conditions": "Existing Docker 29.5.2; dependency tools prepared during retained earlier failed candidate attempts."
+  },
+  "candidate_sha256": {
+    "install-online.sh": "6594d699f8116bc1d2dde16462ce8d33a4f19abf440a72109fe7d69d2c88acad",
+    "docker-manager-installation.tar.gz": "ec7a99eb3f1b2d09184d2ce907b817e6f3f5998eb179cef68ae0d9ab2fd9f5d3",
+    "RELEASE-SHA256SUMS": "922e32410e489c48dd229e40e2018284a2c7a2d34b98c3d2cc25aa1958cfe4d0"
+  },
+  "prior_attempts": [
+    {
+      "phases": [
+        {
+          "phase": "install",
+          "started_at": "2026-10-19T07:08:15.297971+00:00",
+          "checks": [],
+          "status": "failed",
+          "error": "online installer failed; inspect private log: /var/lib/docklane-online-test/report-state/installer-7df1a2e9.log\n<stdin>:33: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.\nWorker image identity/architecture mismatch\n",
+          "completed_at": "2026-10-19T07:11:02.477835+00:00"
+        }
+      ],
+      "limitations": [
+        "Candidate Release selection/downloads are redirected to local files; public HTTP is a separate smoke test.",
+        "This harness requires existing Docker and checks that it is preserved.",
+        "Worker loading uses production code; real volume backup/restore is verified separately.",
+        "Installation intentionally remains in the disposable guest for reboot/resume verification."
+      ],
+      "environment": {
+        "vm_name": "dm-release-debian13-amd64-kernel",
+        "virtualization": "QEMU x86_64 guest on arm64 host (software emulation)",
+        "independent_kernel": true,
+        "native_amd64_cpu": false,
+        "os_release": "PRETTY_NAME=\"Debian GNU/Linux 13 (trixie)\"\nNAME=\"Debian GNU/Linux\"\nVERSION_ID=\"13\"\nVERSION=\"13 (trixie)\"\nVERSION_CODENAME=trixie\nDEBIAN_VERSION_FULL=13.7\nID=debian\nHOME_URL=\"https://www.debian.org/\"\nSUPPORT_URL=\"https://www.debian.org/support\"\nBUG_REPORT_URL=\"https://bugs.debian.org/\"",
+        "kernel": "Linux 6.12.111+deb13-cloud-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.111-1 (2026-09-28) x86_64",
+        "pid1": "systemd",
+        "mounts": []
+      },
+      "candidate_sha256": {
+        "online-candidate-source/scripts/install-online.sh": "6245a8ed60f46e0e2c7ad0170283e52c2979bc5cf44222223ed3574b1ad49496",
+        "online-candidate-source/scripts/install-support.py": "54a0e947db72817da022058663943983c49dde672672d1495c84fa1d937dfe6b",
+        "online-assets/RELEASE-SHA256SUMS": "1971eeca45eaa0c91118f84be1bb61ef64086a369227ca2ea21df86bd5f0bf1d"
+      },
+      "failure_diagnostics": {
+        "expected_image_references": [
+          "[docker-manager:v0.3.0-amd64] sha256:3334f0cdb7f38ddc268eb26cf9e2fbcd2e2d06658bfd8f1fcfd89e51a997ddd4 linux/amd64",
+          "[docker-manager:v0.3.0-arm64] sha256:18485f0daacf5ef93f0fe0f31eda231309d8ec690c5684554fb8208eb7ff1922 linux/arm64"
+        ],
+        "actual_native_worker": "sha256:c74399c3c8954c9e47fccf25d5ec1d8a94bbf53113df082fe89c8bd50adda1cb amd64 linux",
+        "service_state": [
+          "MainPID=0",
+          "LoadState=not-found",
+          "ActiveState=inactive"
+        ],
+        "interpretation": "IMAGES.txt contains an OCI index digest; classic Docker image store reports the native config digest as .Id. Installation correctly stops before service deployment, but validation needs an identity that supports both stores."
+      }
+    },
+    {
+      "phases": [
+        {
+          "phase": "install",
+          "started_at": "2026-10-19T07:15:44.079698+00:00",
+          "checks": [],
+          "status": "failed",
+          "error": "online installer failed; inspect private log: /var/lib/docklane-online-test/retry1-state/installer-822c3af8.log\n<stdin>:33: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.\nInstallation refused: The dedicated account with the docker supplementary group cannot access /var/run/docker.sock. Repair socket permissions explicitly; the installer will not modify them.\n",
+          "completed_at": "2026-10-19T07:16:10.667363+00:00"
+        }
+      ],
+      "limitations": [
+        "Candidate Release selection/downloads are redirected to local files; public HTTP is a separate smoke test.",
+        "This harness requires existing Docker and checks that it is preserved.",
+        "Worker loading uses production code; real volume backup/restore is verified separately.",
+        "Installation intentionally remains in the disposable guest for reboot/resume verification."
+      ],
+      "environment": {
+        "vm_name": "dm-release-debian13-amd64-kernel",
+        "virtualization": "QEMU x86_64 guest on arm64 host (software emulation)",
+        "independent_kernel": true,
+        "native_amd64_cpu": false,
+        "os_release": "PRETTY_NAME=\"Debian GNU/Linux 13 (trixie)\"\nNAME=\"Debian GNU/Linux\"\nVERSION_ID=\"13\"\nVERSION=\"13 (trixie)\"\nVERSION_CODENAME=trixie\nDEBIAN_VERSION_FULL=13.7\nID=debian\nHOME_URL=\"https://www.debian.org/\"\nSUPPORT_URL=\"https://www.debian.org/support\"\nBUG_REPORT_URL=\"https://bugs.debian.org/\"",
+        "kernel": "Linux 6.12.111+deb13-cloud-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.111-1 (2026-09-28) x86_64",
+        "pid1": "systemd",
+        "mounts": [],
+        "initial_conditions": "Existing Docker 29.5.2; dependency tools prepared during retained earlier failed candidate attempts."
+      },
+      "candidate_sha256": {
+        "install-online.sh": "6594d699f8116bc1d2dde16462ce8d33a4f19abf440a72109fe7d69d2c88acad",
+        "RELEASE-SHA256SUMS": "b7bb4c7c5ff17083b40261a2e993208e6c8a1eb70ed7cdd6c352c6c4ddfffd53"
+      },
+      "failure_diagnostics": {
+        "interpretation": "The worker identity fix passed. Account socket preflight then rejected a supported deployment because the runuser supplementary group syntax was incorrect. The installer did not change socket permissions or start a service."
+      }
+    }
+  ],
+  "additional_limitations": [
+    "This guest completed install only; no reboot/resume was requested for this guest.",
+    "Emulated amd64 CPU; this establishes independent-kernel functionality, not native amd64 performance.",
+    "This report covers candidate v3. Later bootstrap-only fixes were tested separately and are not implied to have rerun this guest matrix."
+  ],
+  "current_service_state": [
+    "MainPID=1808",
+    "User=docker-manager",
+    "Group=docker-manager",
+    "ProtectHome=yes",
+    "LoadState=loaded",
+    "ActiveState=active",
+    "UnitFileState=enabled"
+  ]
+}

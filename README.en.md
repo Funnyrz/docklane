@@ -78,7 +78,7 @@ Captured directly from the deployed Docklane test environment on 2026-10-19, the
 | Compose / Restic | Compose v2 (pinned validation version v2.40.3), Restic 0.19.1 |
 | Build tools | Go 1.27.2, Node.js 22.22.0, pnpm 10.28.2 |
 
-The Docker image includes Docker CLI, Compose and Restic. Binary installations need these tools installed separately. Cross-compiling an architecture does not establish acceptance on native hardware; see the [verification record](docs/verification.md).
+The Docker image includes Docker CLI, Compose and Restic. The online installer prepares the tools needed for binary deployments; direct execution and offline installation require preparing them separately. Cross-compiling an architecture does not establish acceptance on native hardware; see the [verification record](docs/verification.md).
 
 ## Deployment
 
@@ -86,17 +86,54 @@ The Docker image includes Docker CLI, Compose and Restic. Binary installations n
 
 **The product is Docklane, and its executable is `docklane`.** For upgrade compatibility, the systemd service and account, image tags, configuration and data directories, Go module, `DM_*` environment variables and browser storage keys retain their existing technical identifiers. Installation/upgrade scripts install the new binary as `docklane` while retaining the `docker-manager` service and existing data.
 
+### One-command online installation (recommended)
+
+Run on an `amd64` / `arm64` host with Ubuntu 24.04 or Debian 12/13. Root privileges and a running systemd are required:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+```
+
+The script resolves the latest stable [GitHub Release](https://github.com/Funnyrz/docklane/releases/latest) once, pins that version, and verifies asset SHA-256 checksums, architecture and archive paths. It installs `/usr/local/bin/docklane`, creates a dedicated account and `docker-manager.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. The default listener is `:8080`; the script does not change firewall rules.
+
+If Docker is absent, the script installs stable 29.x from the official repository and enables startup at boot. An existing usable Docker 28/29 is neither upgraded nor restarted; conflicting installations fail explicitly. Existing Compose v2 is reused; otherwise v2.40.3 is installed. Restic 0.19.1 is provided through a dedicated tools directory without overwriting versions used by other applications. The matching release's backup worker image is downloaded and loaded. The script installs base dependencies, including Python 3; downloads and package management require network access.
+
+Choose a version and listener, or preview the actions first:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
+  | sudo bash -s -- --version v0.3.0 --listen :8080 --dry-run
+```
+
+Remove `--dry-run` to install; use `--help` for parameters. Repeated execution preserves configuration and data, and skips replacing an identical binary with the same version and checksum. A version change stops the service and creates a backup before upgrading. Explicitly migrate an existing manually started instance rather than treating it as a fresh installation:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
+  | sudo bash -s -- --migrate-from /home/ubuntu/docklane/data
+```
+
+Add `--config /absolute/path/config.json` if the old startup configuration cannot be established reliably. Migration needs downtime and retains both the complete source data and a matching database/key backup. External business paths still need access for the dedicated account. The service retains `ProtectHome=true`; move Compose projects, repositories or backup sources under home directories to suitable authorized locations first. See [migration and recovery](docs/operations.md#手动实例迁移).
+
+```sh
+sudo systemctl status docker-manager       # Inspect service state
+sudo journalctl -u docker-manager -f        # Follow logs
+sudo systemctl restart docker-manager      # Restart
+sudo systemctl stop docker-manager         # Stop
+sudo systemctl disable docker-manager      # Disable startup at boot
+```
+
 ### Choose a download
 
-As of 2026-10-17, no version has been published on [GitHub Releases](https://github.com/Funnyrz/docklane/releases). The package-based instructions below require a matching release bundle from the maintainer. If you do not have one, use the source build instructions below. The listed filenames are not live download links.
+Download assets for your architecture from the [v0.3.0 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.0). Online installation fetches matching materials automatically; manual installation requires verifying the corresponding checksum manifest first.
 
 | Download | Use case |
 | --- | --- |
-| `docklane-v0.3.0-<timestamp>.tar.gz` | Complete bundle: offline Docker images, both binary architectures, installation scripts, deployment examples and bilingual documentation/screenshots; extracts to `docklane-v0.3.0/` |
 | `docklane-v0.3.0-linux-amd64.tar.gz` | Slim binary package for x86-64 Linux |
 | `docklane-v0.3.0-linux-arm64.tar.gz` | Slim binary package for ARM64 Linux |
+| `docker-manager-installation.tar.gz` | systemd installation, upgrade, uninstall and online-install helpers, configuration examples, documentation and MIT license |
+| `docker-manager-images.tar.gz` | Both architectures of offline Docker / backup worker images |
 
-Each slim package has a matching `.tar.gz.sha256` sidecar. Newly built packages contain the `docklane` executable and the MIT `LICENSE` file. The frontend is embedded, so no separate frontend installation is needed. Choose the complete bundle for offline images, systemd installation materials or bundled documentation.
+Each slim package has a matching `.tar.gz.sha256` sidecar and contains the `docklane` executable and `LICENSE`. The frontend is embedded, so no separate frontend installation is needed. The Release also provides raw binaries for both architectures, `LICENSE` and `RELEASE-SHA256SUMS`. A maintainer-generated `docklane-v0.3.0-<timestamp>.tar.gz` complete bundle places these materials under `docklane-v0.3.0/`.
 
 ### Slim binary package: run directly
 
@@ -114,10 +151,10 @@ Slim packages do not bundle Docker CLI, Compose or Restic. Install Docker Engine
 
 ### Docker: offline installation
 
-Extract the complete release package, enter `docklane-v0.3.0/`, then run the following. This example targets amd64; on arm64, replace `amd64` with `arm64` in the image tag.
+Download and verify the Release installation materials, image archive and manifest in an empty directory (or extract a complete bundle and enter `docklane-v0.3.0/`), then run the following. This example targets amd64; on arm64, replace `amd64` with `arm64` in the image tag.
 
 ```sh
-sha256sum -c RELEASE-SHA256SUMS
+sha256sum --check --ignore-missing RELEASE-SHA256SUMS
 tar -xzf docker-manager-installation.tar.gz
 docker load -i docker-manager-images.tar.gz
 docker tag docker-manager:v0.3.0-amd64 docker-manager:v0.3.0
@@ -147,13 +184,16 @@ The example Compose file binds only to `127.0.0.1:8080`. Access it locally, thro
 
 ### Linux binary and systemd
 
-The complete bundle provides `docklane-linux-amd64` and `docklane-linux-arm64`. Installation places the executable at `/usr/local/bin/docklane`; the service remains `docker-manager`. Existing installations should use the new package’s `scripts/upgrade.sh`, which handles switching the old executable path to `docklane` while retaining configuration and data locations.
+The Release provides `docklane-linux-amd64` and `docklane-linux-arm64`. Installation places the executable at `/usr/local/bin/docklane`; the service remains `docker-manager`. Existing installations should use the new package’s `scripts/upgrade.sh`, which handles switching the old executable path to `docklane` while retaining configuration and data locations.
 
-Install Docker, Compose v2 and Restic 0.19.1, then run inside the extracted complete package’s `docklane-v0.3.0/` directory. Skip extracting the installation materials if already done. On arm64, change the binary filename suffix:
+Prepare a usable local Docker Engine 28/29, Compose v2 (validated version v2.40.3), Restic 0.19.1 on the service PATH, Python 3 and `runuser` (util-linux). The `docker` group must exist and grant the service account access to the Docker Socket through that supplementary group. Download the matching raw binary, `docker-manager-installation.tar.gz`, `docker-manager-images.tar.gz`, `IMAGE-SHA256SUMS`, `IMAGES.txt` and `RELEASE-SHA256SUMS` from the same Release into an empty directory (or enter an extracted complete bundle). These steps also prepare the required local worker. On arm64, replace `amd64` with `arm64` in both the binary filename and image tag:
 
 ```sh
-sha256sum -c RELEASE-SHA256SUMS
+sha256sum --check --ignore-missing RELEASE-SHA256SUMS
+sha256sum --check IMAGE-SHA256SUMS
 tar -xzf docker-manager-installation.tar.gz
+sudo docker load -i docker-manager-images.tar.gz
+sudo docker tag docker-manager:v0.3.0-amd64 docker-manager:v0.3.0
 sudo ./scripts/install.sh ./docklane-linux-amd64
 sudo journalctl -u docker-manager -f
 ```
@@ -219,4 +259,4 @@ These records define the scope of testing and static checks. They do not establi
 
 Docklane is licensed under the [MIT License](LICENSE), with `Copyright (c) 2026 Funnyrz`. Retain the copyright and permission notices when distributing copies.
 
-Newly built slim binary packages, installation materials and release candidate directories include `LICENSE`. Docker images include it at `/usr/share/licenses/docklane/LICENSE`. Third-party dependencies and tools distributed with the image remain subject to their respective licenses.
+Slim binary packages, installation materials and release candidate directories include `LICENSE`. Docker images include it at `/usr/share/licenses/docklane/LICENSE`. Third-party dependencies and tools distributed with the image remain subject to their respective licenses.

@@ -48,7 +48,11 @@ jobs:
           sh -n scripts/integration.sh
           python3 -m py_compile scripts/*.py
           python3 scripts/check-acceptance.py
-          for script in scripts/*.sh; do sh -n "$script"; done
+          for script in scripts/*.sh; do case "$script" in *install-online.sh) bash -n "$script" ;; *) sh -n "$script" ;; esac; done
+          python3 scripts/test-install-online.py
+          python3 scripts/test-install-support.py
+          python3 scripts/test-package-installation.py
+          python3 scripts/test-release-preflight.py
           test -z "$(gofmt -l cmd internal)"
           go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
           "$(go env GOPATH)/bin/actionlint" -shellcheck= -pyflakes=

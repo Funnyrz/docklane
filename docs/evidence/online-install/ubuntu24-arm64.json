@@ -1,0 +1,71 @@
+{
+  "phases": [
+    {
+      "phase": "install",
+      "started_at": "2026-10-19T07:21:17.679228+00:00",
+      "checks": [
+        {
+          "name": "local candidate online install starts and enables hardened systemd service",
+          "status": "passed",
+          "evidence": {
+            "unit": {
+              "MainPID": "3372",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ProtectHome": "yes",
+              "LoadState": "loaded",
+              "ActiveState": "active",
+              "UnitFileState": "enabled"
+            },
+            "docker_before": null,
+            "docker_after": {
+              "version": "29.9.1",
+              "pid": "2697",
+              "start_ticks": "29407",
+              "executable": "/usr/bin/dockerd"
+            },
+            "docker_installed": true,
+            "private_log": "installer-6706c35d.log"
+          }
+        },
+        {
+          "name": "first administrator setup and fresh login succeed",
+          "status": "passed",
+          "evidence": {
+            "admin_id": "012b10763819b063b88f0a58a2617909"
+          }
+        },
+        {
+          "name": "same-version repeat preserves binary inode, master key, administrator and daemon",
+          "status": "passed",
+          "evidence": {
+            "binary_inode": 87725,
+            "binary_sha256": "d1684995cc7bf0611744f9e05fa3f90f40c40732b853b318e2b7b241176fa494",
+            "unit": {
+              "MainPID": "3372",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ProtectHome": "yes",
+              "LoadState": "loaded",
+              "ActiveState": "active",
+              "UnitFileState": "enabled"
+            },
+            "private_log": "installer-381f229a.log"
+          }
+        }
+      ],
+      "status": "passed",
+      "completed_at": "2026-10-19T07:22:14.333531+00:00"
+    }
+  ],
+  "limitations": [
+    "Candidate Release selection/downloads are redirected to local files; public HTTP is a separate smoke test.",
+    "Existing Docker is preserved; explicit --allow-missing-docker additionally verifies stable 29.x installation and Docker boot startup.",
+    "Worker loading uses production code; real volume backup/restore is verified separately.",
+    "Installation intentionally remains in the disposable guest for reboot/resume verification."
+  ],
+  "candidate_version": "v5; verified before the diagnostic-only errtrace change",
+  "environment_kind": "native arm64 VZ virtual machine, clean Ubuntu 24.04 cloud image",
+  "source_commit_before_feature": "f1dbfdee59b9894430913b7feb531511f8bc0cf6",
+  "entrypoint_sha256": "0ff1456f0fa3db6de9288b878a44f3d2135d0a83af21fb518bd572f7c5875789"
+}

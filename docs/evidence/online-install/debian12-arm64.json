@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "platform": "Debian 12 arm64",
+  "environment": "Lima VZ isolated real-kernel systemd VM",
+  "guest": "dm-release-debian12-arm64",
+  "recorded_at": "2026-10-19T07:18:50.812022+00:00",
+  "status": "passed",
+  "candidate": "online-assets-v3",
+  "source_sha256": {
+    "scripts/install-online.sh": "6594d699f8116bc1d2dde16462ce8d33a4f19abf440a72109fe7d69d2c88acad",
+    "scripts/install-support.py": "414979b072b349a6fb5f52dfa6880ba78682769a4eb6067dc241e64a63e05ec6",
+    "scripts/test-online-systemd.py": "6be1a70074306850223eab660389a71722cc3a8f27e7083b67c7d391f95ecbff"
+  },
+  "candidate_manifest_sha256": "922e32410e489c48dd229e40e2018284a2c7a2d34b98c3d2cc25aa1958cfe4d0",
+  "prior_attempts": [
+    {
+      "candidate": "online-assets",
+      "report": {
+        "phases": [
+          {
+            "phase": "install",
+            "started_at": "2026-10-19T07:07:31.130188+00:00",
+            "checks": [],
+            "status": "failed",
+            "error": "online installer failed; inspect private log: /var/lib/docklane-online-test/report-state/installer-15e92df5.log\nWorker image identity/architecture mismatch\n",
+            "completed_at": "2026-10-19T07:07:54.559233+00:00"
+          }
+        ],
+        "limitations": [
+          "Candidate Release selection/downloads are redirected to local files; public HTTP is a separate smoke test.",
+          "This harness requires existing Docker and checks that it is preserved.",
+          "Worker loading uses production code; real volume backup/restore is verified separately.",
+          "Installation intentionally remains in the disposable guest for reboot/resume verification."
+        ]
+      }
+    },
+    {
+      "candidate": "online-assets-v2",
+      "report": {
+        "phases": [
+          {
+            "phase": "install",
+            "started_at": "2026-10-19T07:15:03.770122+00:00",
+            "checks": [],
+            "status": "failed",
+            "error": "online installer failed; inspect private log: /var/lib/docklane-online-test/retry1-state/installer-2f9d0063.log\nInstallation refused: The dedicated account with the docker supplementary group cannot access /var/run/docker.sock. Repair socket permissions explicitly; the installer will not modify them.\n",
+            "completed_at": "2026-10-19T07:15:07.321061+00:00"
+          }
+        ],
+        "limitations": [
+          "Candidate Release selection/downloads are redirected to local files; public HTTP is a separate smoke test.",
+          "This harness requires existing Docker and checks that it is preserved.",
+          "Worker loading uses production code; real volume backup/restore is verified separately.",
+          "Installation intentionally remains in the disposable guest for reboot/resume verification."
+        ]
+      }
+    }
+  ],
+  "final": {
+    "phases": [
+      {
+        "phase": "install",
+        "started_at": "2026-10-19T07:16:59.514899+00:00",
+        "checks": [
+          {
+            "name": "local candidate online install starts and enables hardened systemd service",
+            "status": "passed",
+            "evidence": {
+              "unit": {
+                "MainPID": "2287",
+                "User": "docker-manager",
+                "Group": "docker-manager",
+                "ProtectHome": "yes",
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "UnitFileState": "enabled"
+              },
+              "docker_preserved": {
+                "version": "28.5.1",
+                "pid": "401",
+                "start_ticks": "331",
+                "executable": "/usr/local/bin/dockerd"
+              },
+              "private_log": "installer-be9cc475.log"
+            }
+          },
+          {
+            "name": "first administrator setup and fresh login succeed",
+            "status": "passed",
+            "evidence": {
+              "admin_id": "f4b02e5cd07ea8604f1f2992f26475a0"
+            }
+          },
+          {
+            "name": "same-version repeat preserves binary inode, master key, administrator and daemon",
+            "status": "passed",
+            "evidence": {
+              "binary_inode": 154,
+              "binary_sha256": "d1684995cc7bf0611744f9e05fa3f90f40c40732b853b318e2b7b241176fa494",
+              "unit": {
+                "MainPID": "2287",
+                "User": "docker-manager",
+                "Group": "docker-manager",
+                "ProtectHome": "yes",
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "UnitFileState": "enabled"
+              },
+              "private_log": "installer-b39f27f6.log"
+            }
+          }
+        ],
+        "status": "passed",
+        "completed_at": "2026-10-19T07:17:08.678510+00:00"
+      },
+      {
+        "phase": "resume",
+        "started_at": "2026-10-19T07:18:29.010609+00:00",
+        "checks": [
+          {
+            "name": "guest reboot retains automatic startup, health, key, administrator and session",
+            "status": "passed",
+            "evidence": {
+              "before": {
+                "boot_id": "cd69a1f1-cd68-48ba-9b50-a9c1e1ae1b3e",
+                "pid1_start_ticks": "0",
+                "pid1_comm": "systemd"
+              },
+              "after": {
+                "boot_id": "debafbb7-0549-4230-b3f3-f1cc8885d0ba",
+                "pid1_start_ticks": "0",
+                "pid1_comm": "systemd"
+              },
+              "unit": {
+                "MainPID": "719",
+                "User": "docker-manager",
+                "Group": "docker-manager",
+                "ProtectHome": "yes",
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "UnitFileState": "enabled"
+              },
+              "docker": {
+                "version": "28.5.1",
+                "pid": "400",
+                "start_ticks": "381",
+                "executable": "/usr/local/bin/dockerd"
+              },
+              "binary_inode": 154
+            }
+          }
+        ],
+        "status": "passed",
+        "completed_at": "2026-10-19T07:18:29.272970+00:00"
+      }
+    ],
+    "limitations": [
+      "Candidate Release selection/downloads are redirected to local files; public HTTP is a separate smoke test.",
+      "This harness requires existing Docker and checks that it is preserved.",
+      "Worker loading uses production code; real volume backup/restore is verified separately.",
+      "Installation intentionally remains in the disposable guest for reboot/resume verification."
+    ]
+  }
+}

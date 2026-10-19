@@ -1,0 +1,99 @@
+{
+  "phases": [
+    {
+      "phase": "migration",
+      "started_at": "2026-10-19T07:11:56.813344+00:00",
+      "checks": [
+        {
+          "name": "manual instance uses Go defaults, no configuration file and no business-path grants",
+          "status": "passed",
+          "evidence": {
+            "source_data": "/home/docklane-online-migration-6n7swdiw/data",
+            "cwd": "/home/docklane-online-migration-6n7swdiw",
+            "pid": 4584,
+            "listen": "127.0.0.1:53827",
+            "administrator_id": "542eeeb173f81d47a936a2fae2266536"
+          }
+        }
+      ],
+      "status": "failed",
+      "error": "online migration failed; inspect private log: /var/lib/dm-online-debian13-arm64-migration-state/migration-installer.log\n<stdin>:33: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.\nWorker image identity/architecture mismatch\n",
+      "completed_at": "2026-10-19T07:12:20.364050+00:00"
+    },
+    {
+      "phase": "migration",
+      "started_at": "2026-10-19T07:17:36.815564+00:00",
+      "checks": [],
+      "status": "failed",
+      "error": "online migration failed; inspect private log: /var/lib/dm-online-debian13-arm64-migration-state/migration-installer-57374944.log\n<stdin>:33: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.\nInstallation failed. No new service was started. Source data and consistent backup retained at /var/backups/docker-manager/20261019T071740.313243Z. Restore the binary, unit, config, database and master.key from this SAME backup group using docs/operations.md. No automatic rollback was attempted.\nInstallation refused: Listen address 127.0.0.1:53827 is already occupied or unavailable; no new service was started.\n",
+      "completed_at": "2026-10-19T07:17:40.338753+00:00"
+    },
+    {
+      "phase": "migration",
+      "started_at": "2026-10-19T07:21:11.073603+00:00",
+      "checks": [
+        {
+          "name": "retained no-config manual fixture migrates successfully after candidate correction",
+          "status": "passed",
+          "evidence": {
+            "old_pid": 5100,
+            "old_pidfd_confirmed_exited": true,
+            "old_exit_status": 0,
+            "unit": {
+              "MainPID": "5379",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ProtectHome": "yes",
+              "LoadState": "loaded",
+              "ActiveState": "active",
+              "UnitFileState": "enabled"
+            },
+            "source_data": "/home/docklane-online-migration-6n7swdiw/data",
+            "installed_data": "/var/lib/docker-manager",
+            "master_key_sha256": "a7c40c49250fd634aa0b00e466e16dde6903df40939a93d910380a643b4e36b8",
+            "backup": "/var/backups/docker-manager/20261019T072115.837100Z",
+            "backup_files": 3,
+            "private_installer_log": "migration-installer-0058e3c6.log",
+            "docker_preserved": {
+              "version": "29.5.2",
+              "pid": "588",
+              "start_ticks": "346",
+              "executable": "/usr/local/bin/dockerd"
+            }
+          }
+        }
+      ],
+      "status": "passed",
+      "completed_at": "2026-10-19T07:21:17.560396+00:00"
+    }
+  ],
+  "limitations": [
+    "Runs only inside an explicitly isolated Linux systemd guest.",
+    "Release selection and transport use local candidate assets; production verification, dependency preparation, worker loading and deployment remain unchanged.",
+    "Tests live no-config binary migration, with no external business-path grants; offline explicit-config cases use lifecycle unit tests.",
+    "The source fixture, backup group and managed installation remain for inspection or recovery; this harness performs no cleanup."
+  ],
+  "environment": {
+    "os": {
+      "PRETTY_NAME": "Debian GNU/Linux 13 (trixie)",
+      "NAME": "Debian GNU/Linux",
+      "VERSION_ID": "13",
+      "VERSION": "13 (trixie)",
+      "VERSION_CODENAME": "trixie",
+      "DEBIAN_VERSION_FULL": "13.7",
+      "ID": "debian",
+      "HOME_URL": "https://www.debian.org/",
+      "SUPPORT_URL": "https://www.debian.org/support",
+      "BUG_REPORT_URL": "https://bugs.debian.org/"
+    },
+    "kernel": "6.12.111+deb13-cloud-arm64",
+    "architecture": "aarch64",
+    "isolation": "disposable systemd Linux VM"
+  },
+  "verified_artifacts": {
+    "release_manifest_sha256": "7342492499a561c9cbd11a71ec20de944d051e2a92e3f27e6a40584fb9b4e6b3",
+    "helper_sha256": "2cab08ff74f2e41d146f43e9821b7e37bc03f14d65e11a11126708600839cb81",
+    "harness_sha256": "84f51408e6f0aaa92c0f46bdabf6fb5b871364a929de79b935cfbd856d23e3c0"
+  },
+  "result": "passed"
+}

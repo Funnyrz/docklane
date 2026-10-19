@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "checked_at": "2026-10-19T07:21:41.118703+00:00",
+  "checks": [
+    "invalid executable upgrade returns nonzero",
+    "failed new service has MainPID=0",
+    "stopped backup includes effective data, config, binary, unit and master.key",
+    "whole backup group restored and verified before startup",
+    "restored service active/enabled/healthy",
+    "administrator password hashes and master key retained"
+  ],
+  "backup_group": "/var/backups/docker-manager/20261019T072038.745031Z",
+  "private_failure_materials": "/var/lib/docklane-recovery-9353w8af",
+  "environment": {
+    "PRETTY_NAME": "\"Debian GNU/Linux 12 (bookworm)\"",
+    "NAME": "\"Debian GNU/Linux\"",
+    "VERSION_ID": "\"12\"",
+    "VERSION": "\"12 (bookworm)\"",
+    "VERSION_CODENAME": "bookworm",
+    "ID": "debian",
+    "HOME_URL": "\"https://www.debian.org/\"",
+    "SUPPORT_URL": "\"https://www.debian.org/support\"",
+    "BUG_REPORT_URL": "\"https://bugs.debian.org/\""
+  },
+  "limitations": [
+    "Deliberately invalid executable injection; database migration failure is covered separately by existing acceptance."
+  ],
+  "guest": "dm-release-debian12-arm64",
+  "environment_type": "Lima VZ isolated real-kernel systemd VM",
+  "source_sha256": {
+    "scripts/install-support.py": "2cab08ff74f2e41d146f43e9821b7e37bc03f14d65e11a11126708600839cb81",
+    "scripts/upgrade.sh": "7e89383d9136d9e47ee5e4d7110724b92bce1449b0d99169aac88f4303f4451e",
+    "scripts/test-online-recovery.py": "8e40662d94b973c8f925a0144950cf48a69f215aaeaa0ea2ef465018b89d1f6c"
+  }
+}

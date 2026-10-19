@@ -1,0 +1,219 @@
+{
+  "phases": [
+    {
+      "phase": "install",
+      "started_at": "2026-10-19T07:16:54.235767+00:00",
+      "checks": [
+        {
+          "name": "local candidate online install starts and enables hardened systemd service",
+          "status": "passed",
+          "evidence": {
+            "unit": {
+              "MainPID": "6829",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ProtectHome": "yes",
+              "LoadState": "loaded",
+              "ActiveState": "active",
+              "UnitFileState": "enabled"
+            },
+            "docker_preserved": {
+              "version": "29.5.2",
+              "pid": "456",
+              "start_ticks": "3007",
+              "executable": "/usr/local/bin/dockerd"
+            },
+            "private_log": "installer-ae8177c7.log"
+          }
+        },
+        {
+          "name": "first administrator setup and fresh login succeed",
+          "status": "passed",
+          "evidence": {
+            "admin_id": "98b01a1756a01e394d5233c7531e4204"
+          }
+        },
+        {
+          "name": "same-version repeat preserves binary inode, master key, administrator and daemon",
+          "status": "passed",
+          "evidence": {
+            "binary_inode": 1843,
+            "binary_sha256": "51310899cf5ebf6062b88c6e6fa83a497719f9891ce33a482030d4fa34bbfaa0",
+            "unit": {
+              "MainPID": "6829",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ProtectHome": "yes",
+              "LoadState": "loaded",
+              "ActiveState": "active",
+              "UnitFileState": "enabled"
+            },
+            "private_log": "installer-13dfa5bb.log"
+          }
+        }
+      ],
+      "status": "passed",
+      "completed_at": "2026-10-19T07:18:49.348821+00:00"
+    },
+    {
+      "phase": "resume",
+      "started_at": "2026-10-19T07:21:17.596786+00:00",
+      "checks": [
+        {
+          "name": "guest reboot retains automatic startup, health, key, administrator and session",
+          "status": "passed",
+          "evidence": {
+            "before": {
+              "boot_id": "ac7c276e-b3a4-4041-a280-712b4623342b",
+              "pid1_start_ticks": "37",
+              "pid1_comm": "systemd"
+            },
+            "after": {
+              "boot_id": "b9dae315-6293-44c7-9b71-078d5a089911",
+              "pid1_start_ticks": "91",
+              "pid1_comm": "systemd"
+            },
+            "unit": {
+              "MainPID": "649",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ProtectHome": "yes",
+              "LoadState": "loaded",
+              "ActiveState": "active",
+              "UnitFileState": "enabled"
+            },
+            "docker": {
+              "version": "29.5.2",
+              "pid": "662",
+              "start_ticks": "7000",
+              "executable": "/usr/local/bin/dockerd"
+            },
+            "binary_inode": 1843
+          }
+        }
+      ],
+      "status": "passed",
+      "completed_at": "2026-10-19T07:21:22.673588+00:00"
+    }
+  ],
+  "limitations": [
+    "Candidate Release selection/downloads are redirected to local files; public HTTP is a separate smoke test.",
+    "Existing Docker is preserved; explicit --allow-missing-docker additionally verifies stable 29.x installation and Docker boot startup.",
+    "Worker loading uses production code; real volume backup/restore is verified separately.",
+    "Installation intentionally remains in the disposable guest for reboot/resume verification."
+  ],
+  "environment": {
+    "vm_name": "dm-release-ubuntu24-amd64-kernel",
+    "virtualization": "QEMU x86_64 guest on arm64 host (software emulation)",
+    "independent_kernel": true,
+    "native_amd64_cpu": false,
+    "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo",
+    "kernel": "Linux 6.8.0-146-generic #146-Ubuntu SMP PREEMPT_DYNAMIC Thu Sep  3 16:12:30 UTC 2026 x86_64",
+    "pid1": "systemd",
+    "mounts": [],
+    "initial_conditions": "Existing Docker 29.5.2; dependency tools prepared during retained earlier failed candidate attempts."
+  },
+  "candidate_sha256": {
+    "install-online.sh": "6594d699f8116bc1d2dde16462ce8d33a4f19abf440a72109fe7d69d2c88acad",
+    "docker-manager-installation.tar.gz": "ec7a99eb3f1b2d09184d2ce907b817e6f3f5998eb179cef68ae0d9ab2fd9f5d3",
+    "RELEASE-SHA256SUMS": "922e32410e489c48dd229e40e2018284a2c7a2d34b98c3d2cc25aa1958cfe4d0"
+  },
+  "prior_attempts": [
+    {
+      "phases": [
+        {
+          "phase": "install",
+          "started_at": "2026-10-19T07:08:21.935199+00:00",
+          "checks": [],
+          "status": "failed",
+          "error": "online installer failed; inspect private log: /var/lib/docklane-online-test/report-state/installer-cffe2236.log\ndebconf: delaying package configuration, since apt-utils is not installed\nWorker image identity/architecture mismatch\n",
+          "completed_at": "2026-10-19T07:10:07.902935+00:00"
+        }
+      ],
+      "limitations": [
+        "Candidate Release selection/downloads are redirected to local files; public HTTP is a separate smoke test.",
+        "This harness requires existing Docker and checks that it is preserved.",
+        "Worker loading uses production code; real volume backup/restore is verified separately.",
+        "Installation intentionally remains in the disposable guest for reboot/resume verification."
+      ],
+      "environment": {
+        "vm_name": "dm-release-ubuntu24-amd64-kernel",
+        "virtualization": "QEMU x86_64 guest on arm64 host (software emulation)",
+        "independent_kernel": true,
+        "native_amd64_cpu": false,
+        "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo",
+        "kernel": "Linux 6.8.0-146-generic #146-Ubuntu SMP PREEMPT_DYNAMIC Thu Sep  3 16:12:30 UTC 2026 x86_64",
+        "pid1": "systemd",
+        "mounts": []
+      },
+      "candidate_sha256": {
+        "online-candidate-source/scripts/install-online.sh": "6245a8ed60f46e0e2c7ad0170283e52c2979bc5cf44222223ed3574b1ad49496",
+        "online-candidate-source/scripts/install-support.py": "54a0e947db72817da022058663943983c49dde672672d1495c84fa1d937dfe6b",
+        "online-assets/RELEASE-SHA256SUMS": "1971eeca45eaa0c91118f84be1bb61ef64086a369227ca2ea21df86bd5f0bf1d"
+      },
+      "failure_diagnostics": {
+        "expected_image_references": [
+          "[docker-manager:v0.3.0-amd64] sha256:3334f0cdb7f38ddc268eb26cf9e2fbcd2e2d06658bfd8f1fcfd89e51a997ddd4 linux/amd64",
+          "[docker-manager:v0.3.0-arm64] sha256:18485f0daacf5ef93f0fe0f31eda231309d8ec690c5684554fb8208eb7ff1922 linux/arm64"
+        ],
+        "actual_native_worker": "sha256:c74399c3c8954c9e47fccf25d5ec1d8a94bbf53113df082fe89c8bd50adda1cb amd64 linux",
+        "service_state": [
+          "MainPID=0",
+          "LoadState=not-found",
+          "ActiveState=inactive"
+        ],
+        "interpretation": "IMAGES.txt contains an OCI index digest; classic Docker image store reports the native config digest as .Id. Installation correctly stops before service deployment, but validation needs an identity that supports both stores."
+      }
+    },
+    {
+      "phases": [
+        {
+          "phase": "install",
+          "started_at": "2026-10-19T07:15:43.299378+00:00",
+          "checks": [],
+          "status": "failed",
+          "error": "online installer failed; inspect private log: /var/lib/docklane-online-test/retry1-state/installer-55f14079.log\nInstallation refused: The dedicated account with the docker supplementary group cannot access /var/run/docker.sock. Repair socket permissions explicitly; the installer will not modify them.\n",
+          "completed_at": "2026-10-19T07:16:15.580125+00:00"
+        }
+      ],
+      "limitations": [
+        "Candidate Release selection/downloads are redirected to local files; public HTTP is a separate smoke test.",
+        "This harness requires existing Docker and checks that it is preserved.",
+        "Worker loading uses production code; real volume backup/restore is verified separately.",
+        "Installation intentionally remains in the disposable guest for reboot/resume verification."
+      ],
+      "environment": {
+        "vm_name": "dm-release-ubuntu24-amd64-kernel",
+        "virtualization": "QEMU x86_64 guest on arm64 host (software emulation)",
+        "independent_kernel": true,
+        "native_amd64_cpu": false,
+        "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo",
+        "kernel": "Linux 6.8.0-146-generic #146-Ubuntu SMP PREEMPT_DYNAMIC Thu Sep  3 16:12:30 UTC 2026 x86_64",
+        "pid1": "systemd",
+        "mounts": [],
+        "initial_conditions": "Existing Docker 29.5.2; dependency tools prepared during retained earlier failed candidate attempts."
+      },
+      "candidate_sha256": {
+        "install-online.sh": "6594d699f8116bc1d2dde16462ce8d33a4f19abf440a72109fe7d69d2c88acad",
+        "RELEASE-SHA256SUMS": "b7bb4c7c5ff17083b40261a2e993208e6c8a1eb70ed7cdd6c352c6c4ddfffd53"
+      },
+      "failure_diagnostics": {
+        "interpretation": "The worker identity fix passed. Account socket preflight then rejected a supported deployment because the runuser supplementary group syntax was incorrect. The installer did not change socket permissions or start a service."
+      }
+    }
+  ],
+  "additional_limitations": [
+    "Emulated amd64 CPU; this establishes independent-kernel functionality, not native amd64 performance.",
+    "Guest reboot cleared /tmp. The frozen acceptance harness and integration helper were recopied before resume; the installed service, data, configuration, and persistent acceptance state were untouched.",
+    "This report covers candidate v3. Later bootstrap-only fixes were tested separately and are not implied to have rerun this guest matrix."
+  ],
+  "current_service_state": [
+    "MainPID=649",
+    "User=docker-manager",
+    "Group=docker-manager",
+    "ProtectHome=yes",
+    "LoadState=loaded",
+    "ActiveState=active",
+    "UnitFileState=enabled"
+  ]
+}

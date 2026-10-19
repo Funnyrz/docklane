@@ -1,0 +1,512 @@
+#!/usr/bin/env python3
+"""Exercise the public installer using isolated assets and mocked host commands.
+
+Only fixture paths are substituted in a temporary copy before sourcing Bash.
+Release validation and archive/ELF validation run unmodified. No network or host
+package manager, Docker daemon, service manager, or privileged writes are used.
+"""
+import bz2
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+import shlex
+import shutil
+import struct
+import subprocess
+import tarfile
+import tempfile
+import unittest
+
+SOURCE = Path(__file__).resolve().with_name('install-online.sh')
+BASH = shutil.which('bash')
+TAG = 'v0.3.0'
+
+
+def quote(value):
+    return shlex.quote(str(value))
+
+
+def checksum(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def archive(path, members):
+    with tarfile.open(path, 'w:gz') as output:
+        for name, content in members.items():
+            info = tarfile.TarInfo(name)
+            if isinstance(content, tuple):
+                info.type = content[0]
+                info.linkname = content[1]
+                output.addfile(info)
+            else:
+                info.size = len(content)
+                output.addfile(info, io.BytesIO(content))
+
+
+class InstallerTest(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix='docklane-online-test-')
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.work = self.root / 'work'
+        self.work.mkdir()
+        self.assets = self.root / 'assets'
+        self.assets.mkdir()
+        self.trace = self.root / 'trace'
+        self.os_release = self.root / 'os-release'
+        self.os_release.write_text('ID=ubuntu\nVERSION_ID=24.04\nVERSION_CODENAME=noble\n')
+        self.systemd = self.root / 'systemd'
+        self.systemd.mkdir()
+        self.script = self.root / 'install-online.sh'
+        source = SOURCE.read_text()
+        replacements = {
+            '/etc/os-release': str(self.os_release),
+            '/run/systemd/system': str(self.systemd),
+            '/usr/local/lib/docker': str(self.root / 'docker-tools'),
+            '/usr/local/lib/docklane': str(self.root / 'docklane-tools'),
+            '/etc/apt': str(self.root / 'apt'),
+            '/etc/ssl/certs/ca-certificates.crt': str(self.root / 'ca-certificates.crt'),
+        }
+        for old, new in replacements.items():
+            source = source.replace(old, new)
+        self.script.write_text(source)
+        (self.root / 'apt/sources.list.d').mkdir(parents=True)
+        self.restic = self.root / 'docklane-tools/bin/restic'
+        self.make_release()
+
+    def bash(self, body, *, prelude='', ok=True):
+        common = f'''
+source {quote(self.script)}
+work={quote(self.work)}
+version=; arch=amd64; docker_arch=x86_64; ID=ubuntu; VERSION_ID=24.04; VERSION_CODENAME=noble
+trace={quote(self.trace)}
+assets={quote(self.assets)}
+uname() {{ case "$1" in -s) echo Linux ;; -m) echo x86_64 ;; esac; }}
+id() {{ echo 0; }}
+systemctl() {{ printf 'systemctl %s\\n' "$*" >> "$trace"; }}
+apt-get() {{ printf 'apt-get %s\\n' "$*" >> "$trace"; }}
+fetch() {{
+  printf 'fetch %s\\n' "$1" >> "$trace"
+  case "$1" in
+    https://api.github.com/repos/Funnyrz/docklane/releases/*) cp "$assets/release.json" "$2" ;;
+    https://github.com/Funnyrz/docklane/releases/download/*) cp "$assets/${{1##*/}}" "$2" ;;
+    *) echo 'Unexpected fetch' >&2; return 80 ;;
+  esac
+}}
+'''
+        result = subprocess.run([BASH, '-c', common + prelude + '\n' + body], text=True,
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                env={**os.environ, 'HOME': str(self.root), 'LC_ALL': 'C'})
+        if ok:
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        else:
+            self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        return result
+
+    def make_release(self, arch='amd64', *, binary_members=None, material_members=None):
+        self.binary_name = f'docklane-{TAG}-linux-{arch}.tar.gz'
+        self.license = b'MIT License\nCopyright (c) 2026 Funnyrz\n'
+        header = bytearray(64)
+        header[:6] = b'\x7fELF\x02\x01'
+        header[18:20] = struct.pack('<H', {'amd64': 62, 'arm64': 183}[arch])
+        self.binary = bytes(header)
+        archive(self.assets / self.binary_name,
+                binary_members or {'docklane': self.binary, 'LICENSE': self.license})
+        materials = {name: b'fixture' for name in (
+            'scripts/install-support.py', 'scripts/install.sh', 'scripts/upgrade.sh',
+            'scripts/uninstall.sh', 'deployments/docker-manager.service',
+            'deployments/config.example.json')}
+        materials['LICENSE'] = self.license
+        archive(self.assets / 'docker-manager-installation.tar.gz',
+                materials if material_members is None else material_members)
+        (self.assets / 'LICENSE').write_bytes(self.license)
+        (self.assets / 'docker-manager-images.tar.gz').write_bytes(b'image archive fixture')
+        image_id = 'sha256:' + '1' * 64
+        (self.assets / 'IMAGES.txt').write_text(f'[docker-manager:{TAG}-{arch}] {image_id} linux/{arch}\n')
+        (self.assets / 'SHA256SUMS').write_text(
+            f'{hashlib.sha256(self.binary).hexdigest()}  docklane-linux-{arch}\n'
+            f'{hashlib.sha256(self.license).hexdigest()}  LICENSE\n')
+        self.rehash()
+        names = [p.name for p in self.assets.iterdir() if p.name != 'release.json']
+        release = {'tag_name': TAG, 'draft': False, 'prerelease': False, 'assets': [
+            {'name': name, 'state': 'uploaded', 'browser_download_url':
+             f'https://github.com/Funnyrz/docklane/releases/download/{TAG}/{name}'}
+            for name in names]}
+        (self.assets / 'release.json').write_text(json.dumps(release))
+
+    def rehash(self):
+        name = self.binary_name
+        (self.assets / (name + '.sha256')).write_text(f'{checksum(self.assets / name)}  {name}\n')
+        image = 'docker-manager-images.tar.gz'
+        (self.assets / 'IMAGE-SHA256SUMS').write_text(f'{checksum(self.assets / image)}  {image}\n')
+        paths = sorted(p for p in self.assets.iterdir()
+                       if p.name not in ('release.json', 'RELEASE-SHA256SUMS'))
+        (self.assets / 'RELEASE-SHA256SUMS').write_text(''.join(
+            f'{checksum(p)}  {p.name}\n' for p in paths))
+
+    def change_release(self, change):
+        p = self.assets / 'release.json'
+        data = json.loads(p.read_text())
+        change(data)
+        p.write_text(json.dumps(data))
+
+    def test_supported_platform_matrix(self):
+        for distro, version in [('ubuntu', '24.04'), ('debian', '12'), ('debian', '13')]:
+            for machine, expected in [('x86_64', 'amd64'), ('aarch64', 'arm64'), ('arm64', 'arm64')]:
+                with self.subTest(distro=distro, machine=machine):
+                    self.os_release.write_text(f'ID={distro}\nVERSION_ID={version}\n')
+                    out = self.bash('platform; echo "$arch"', prelude=
+                        f'uname() {{ case "$1" in -s) echo Linux ;; -m) echo {machine} ;; esac; }}')
+                    self.assertEqual(out.stdout.strip(), expected)
+
+    def test_unsupported_platform_arch_root_and_systemd(self):
+        for prelude, message in [
+            ('uname() { echo Darwin; }', 'Only Linux'),
+            ('uname() { case "$1" in -s) echo Linux;; -m) echo riscv64;; esac; }', 'Only amd64'),
+            ('id() { echo 1000; }', 'root'),
+        ]:
+            with self.subTest(message=message):
+                self.assertIn(message, self.bash('platform', prelude=prelude, ok=False).stderr)
+        self.os_release.write_text('ID=ubuntu\nVERSION_ID=22.04\n')
+        self.assertIn('Unsupported system', self.bash('platform', ok=False).stderr)
+        self.os_release.write_text('ID=debian\nVERSION_ID=13\n')
+        self.systemd.rmdir()
+        self.assertIn('systemd', self.bash('platform', ok=False).stderr)
+
+    def test_help_and_invalid_arguments_do_not_touch_system(self):
+        self.assertIn('--migrate-from', self.bash('main --help').stdout)
+        for args in ['--unknown', '--version', '--version latest', '--version v0.3.0-rc1',
+                     '--migrate-from relative', '--config relative', '--listen --dry-run']:
+            with self.subTest(args=args):
+                self.bash('main ' + args, ok=False)
+        self.assertFalse(self.trace.exists())
+
+    def test_dry_run_has_no_install_or_download(self):
+        result = self.bash('main --dry-run --version v0.3.0 --listen :9090 '
+                           '--migrate-from /old/data --config /old/config.json')
+        self.assertIn(':9090', result.stdout)
+        self.assertIn('/old/data', result.stdout)
+        self.assertIn('No changes made', result.stdout)
+        self.assertFalse(self.trace.exists())
+        self.assertEqual(list(self.work.iterdir()), [])
+
+    def test_nested_install_failure_has_clear_error_message(self):
+        result = self.bash('main', prelude='platform() { :; }; bootstrap_tools() { false; }', ok=False)
+        self.assertIn('installation failed', result.stderr)
+        self.assertIn('source data and recovery backups are retained', result.stderr)
+
+    def test_latest_resolves_once_and_downloads_pinned_assets(self):
+        self.bash('resolve_release; [[ $version == v0.3.0 ]]; verify_release')
+        calls = self.trace.read_text().splitlines()
+        self.assertEqual(sum('api.github.com' in line for line in calls), 1)
+        self.assertIn('/releases/latest', calls[0])
+        self.assertTrue(all('/download/v0.3.0/' in line for line in calls[1:]))
+        self.assertEqual((self.work / 'binary/docklane').read_bytes(), self.binary)
+        self.assertEqual((self.work / 'binary.sha256').read_text(), hashlib.sha256(self.binary).hexdigest())
+
+    def test_explicit_release_is_fixed(self):
+        self.bash('version=v0.3.0; resolve_release; verify_release')
+        self.assertIn('/releases/tags/v0.3.0', self.trace.read_text().splitlines()[0])
+
+    def test_arm64_binary(self):
+        self.make_release('arm64')
+        self.bash('arch=arm64; resolve_release; verify_release')
+
+    def test_unstable_missing_duplicate_or_redirected_assets_rejected(self):
+        changes = [lambda r: r.update(draft=True), lambda r: r.update(prerelease=True),
+                   lambda r: r.update(tag_name='v0.3.0-rc1'),
+                   lambda r: r['assets'].pop(),
+                   lambda r: r['assets'].append(r['assets'][0].copy()),
+                   lambda r: r['assets'][0].update(browser_download_url='https://evil.invalid/payload'),
+                   lambda r: r['assets'][0].update(state='new')]
+        original = (self.assets / 'release.json').read_text()
+        for change in changes:
+            with self.subTest(change=changes.index(change)):
+                (self.assets / 'release.json').write_text(original)
+                self.change_release(change)
+                self.bash('resolve_release', ok=False)
+        (self.assets / 'release.json').write_text(original)
+        self.bash('version=v9.9.9; resolve_release', ok=False)
+
+    def test_download_interruption_aborts_before_verification(self):
+        self.bash('resolve_release; echo reached-verification', prelude='''
+original_fetch=$(declare -f fetch)
+eval "${original_fetch/fetch ()/fixture_fetch ()}"
+fetch() { if [[ $1 == *LICENSE ]]; then printf partial > "$2"; return 22; fi; fixture_fetch "$@"; }
+''', ok=False)
+        self.assertFalse((self.work / 'binary').exists())
+
+    def test_corrupt_asset_and_unsafe_manifest_rejected(self):
+        self.bash('resolve_release; printf corrupt >> "$work/LICENSE"; verify_release', ok=False)
+        self.assertFalse((self.work / 'binary').exists())
+        shutil.rmtree(self.work)
+        self.work.mkdir()
+        self.bash('resolve_release; printf "bad checksum\\n" > "$work/RELEASE-SHA256SUMS"; verify_release', ok=False)
+
+    def test_duplicate_manifest_and_inconsistent_sidecar(self):
+        self.bash('resolve_release; cat "$work/RELEASE-SHA256SUMS" >> "$work/duplicate"; '
+                  'cat "$work/duplicate" >> "$work/RELEASE-SHA256SUMS"; verify_release', ok=False)
+        shutil.rmtree(self.work)
+        self.work.mkdir()
+        (self.assets / (self.binary_name + '.sha256')).write_text('0' * 64 + '  ' + self.binary_name + '\n')
+        paths = sorted(p for p in self.assets.iterdir() if p.name not in ('release.json', 'RELEASE-SHA256SUMS'))
+        (self.assets / 'RELEASE-SHA256SUMS').write_text(''.join(f'{checksum(p)}  {p.name}\n' for p in paths))
+        result = self.bash('resolve_release; verify_release', ok=False)
+        self.assertIn('Inconsistent manifest', result.stderr)
+
+    def test_raw_binary_manifest_must_match_slim_archive_and_license(self):
+        for bad_sums in [
+            '0' * 64 + '  docklane-linux-amd64\n' + hashlib.sha256(self.license).hexdigest() + '  LICENSE\n',
+            hashlib.sha256(self.binary).hexdigest() + '  docklane-linux-amd64\n' + '0' * 64 + '  LICENSE\n',
+            hashlib.sha256(self.binary).hexdigest() + '  docklane-linux-arm64\n' + hashlib.sha256(self.license).hexdigest() + '  LICENSE\n',
+        ]:
+            with self.subTest(sums=bad_sums):
+                shutil.rmtree(self.work)
+                self.work.mkdir()
+                (self.assets / 'SHA256SUMS').write_text(bad_sums)
+                self.rehash()
+                result = self.bash('resolve_release; verify_release', ok=False)
+                self.assertIn('Binary checksum manifest disagrees with archive', result.stderr)
+                self.assertFalse((self.work / 'materials').exists())
+
+    def test_unsafe_binary_archives(self):
+        for extra in [{'../escaped': b'bad'}, {'/absolute': b'bad'},
+                      {'link': (tarfile.SYMTYPE, '/etc/passwd')},
+                      {'hardlink': (tarfile.LNKTYPE, 'docklane')},
+                      {'fifo': (tarfile.FIFOTYPE, '')}]:
+            with self.subTest(extra=extra):
+                shutil.rmtree(self.work)
+                self.work.mkdir()
+                self.make_release(binary_members={'docklane': self.binary, 'LICENSE': self.license, **extra})
+                self.bash('resolve_release; verify_release', ok=False)
+                self.assertFalse((self.root / 'escaped').exists())
+
+    def test_unexpected_layout_and_wrong_elf(self):
+        for members in [{'docklane': self.binary},
+                        {'docklane': b'#!/bin/sh\nexit 0\n', 'LICENSE': self.license},
+                        {'docklane': self.binary[:18] + struct.pack('<H', 183) + self.binary[20:], 'LICENSE': self.license},
+                        {'docklane': self.binary, 'LICENSE': self.license, 'extra': b'file'}]:
+            with self.subTest(members=list(members)):
+                shutil.rmtree(self.work)
+                self.work.mkdir()
+                self.make_release(binary_members=members)
+                self.bash('resolve_release; verify_release', ok=False)
+
+    def test_missing_material_and_license_mismatch(self):
+        self.make_release(material_members={'LICENSE': self.license})
+        self.assertIn('Missing installation material', self.bash('resolve_release; verify_release', ok=False).stderr)
+        shutil.rmtree(self.work)
+        self.work.mkdir()
+        self.make_release(binary_members={'docklane': self.binary, 'LICENSE': b'other license'})
+        self.assertIn('License mismatch', self.bash('resolve_release; verify_release', ok=False).stderr)
+
+    def test_existing_docker_preserved_without_packages_or_restart(self):
+        for version in ['28.5.1', '29.5.2']:
+            with self.subTest(version=version):
+                result = self.bash('install_docker', prelude=f'''
+docker() {{ :; }}
+local_docker() {{ [[ "$*" == "version --format {{{{.Server.Version}}}}" ]] || return 91; echo {version}; }}
+''')
+                self.assertIn('Preserving existing Docker', result.stdout)
+        self.assertFalse(self.trace.exists())
+
+    def test_unhealthy_or_unsupported_existing_docker_fails(self):
+        for implementation in ['return 1', 'echo 27.5.1']:
+            self.bash('install_docker', prelude='docker() { :; }; local_docker() { ' + implementation + '; }', ok=False)
+        self.assertFalse(self.trace.exists())
+
+    def test_conflicting_dependency_does_not_mutate_host(self):
+        result = self.bash('install_docker', prelude='''
+command() { if [[ $1 == -v && $2 == docker ]]; then return 1; fi; builtin command "$@"; }
+dpkg-query() { [[ ${!#} != docker.io ]] || echo 'install ok installed'; }
+''', ok=False)
+        self.assertIn('Conflicting installation docker.io', result.stderr)
+        self.assertFalse(self.trace.exists())
+        self.assertEqual(list((self.root / 'apt/sources.list.d').iterdir()), [])
+
+    def test_bootstrap_installs_only_missing_base_dependencies(self):
+        result = self.bash('bootstrap_tools', prelude='''
+command() {
+  if [[ $1 == -v && ( $2 == python3 || $2 == runuser ) ]]; then return 1; fi
+  builtin command "$@"
+}
+''')
+        self.assertEqual(result.stdout, '')
+        calls = self.trace.read_text()
+        self.assertIn('apt-get update', calls)
+        self.assertIn('python3', calls)
+        self.assertIn('util-linux', calls)
+        self.assertIn('ca-certificates', calls)
+
+    def test_new_docker_uses_official_source_and_pinned_29_candidate(self):
+        self.bash('install_docker', prelude='''
+command() { if [[ $1 == -v && $2 == docker ]]; then return 1; fi; builtin command "$@"; }
+dpkg-query() { return 1; }
+fetch() { [[ $1 == https://download.docker.com/linux/ubuntu/gpg ]] || return 90; echo 'fixture-key' > "$2"; }
+apt-cache() { printf 'docker-ce | 5:30.0.0-1 | stable\\ndocker-ce | 5:29.5.2-1 | stable\\n'; }
+local_docker() { [[ $1 == info ]]; }
+''')
+        calls = self.trace.read_text()
+        self.assertIn('docker-ce=5:29.5.2-1 docker-ce-cli=5:29.5.2-1 containerd.io', calls)
+        self.assertIn('systemctl enable --now docker', calls)
+        source = (self.root / 'apt/sources.list.d/docklane-docker.sources').read_text()
+        self.assertIn('URIs: https://download.docker.com/linux/ubuntu', source)
+        self.assertIn('Suites: noble', source)
+        self.assertIn('Architectures: amd64', source)
+
+    def test_large_package_listing_is_drained_without_sigpipe(self):
+        self.bash('install_docker', prelude='''
+command() { if [[ $1 == -v && $2 == docker ]]; then return 1; fi; builtin command "$@"; }
+dpkg-query() { return 1; }
+fetch() { echo 'fixture-key' > "$2"; }
+apt-cache() {
+  python3 -c 'import sys; sys.stdout.write("docker-ce | 5:29.5.2-1 | stable\\n" + "docker-ce | 5:28.5.1-1 | stable\\n" * 25000)'
+}
+local_docker() { [[ $1 == info ]]; }
+''')
+        self.assertIn('docker-ce=5:29.5.2-1 docker-ce-cli=5:29.5.2-1 containerd.io', self.trace.read_text())
+
+    def test_missing_supported_docker_version_never_installs_engine(self):
+        self.bash('install_docker', prelude='''
+command() { if [[ $1 == -v && $2 == docker ]]; then return 1; fi; builtin command "$@"; }
+dpkg-query() { return 1; }
+fetch() { echo 'fixture-key' > "$2"; }
+apt-cache() { echo 'docker-ce | 5:30.0.0-1 | stable'; }
+''', ok=False)
+        calls = self.trace.read_text()
+        self.assertNotIn('apt-get install', calls)
+        self.assertNotIn('systemctl', calls)
+
+    def test_missing_tools_download_and_verify_private_versions(self):
+        compose_name = 'docker-compose-linux-x86_64'
+        compose = self.assets / compose_name
+        compose.write_bytes(b'#!/bin/sh\necho v2.40.3\n')
+        (self.assets / 'checksums.txt').write_text(f'{checksum(compose)}  {compose_name}\n')
+        restic_name = 'restic_0.19.1_linux_amd64.bz2'
+        packed = self.assets / restic_name
+        packed.write_bytes(bz2.compress(b'#!/bin/sh\necho "restic 0.19.1 fixture"\n'))
+        (self.assets / 'RESTIC-SHA256SUMS').write_text(f'{checksum(packed)}  {restic_name}\n')
+        plugin = self.root / 'docker-tools/cli-plugins/docker-compose'
+        self.bash('install_tools', prelude=f'''
+fetch() {{
+  printf 'fetch %s\\n' "$1" >> "$trace"
+  case "$1" in
+    */v2.40.3/*) cp "$assets/${{1##*/}}" "$2" ;;
+    */v0.19.1/SHA256SUMS) cp "$assets/RESTIC-SHA256SUMS" "$2" ;;
+    */v0.19.1/*) cp "$assets/${{1##*/}}" "$2" ;;
+    *) return 90 ;;
+  esac
+}}
+local_docker() {{ [[ -x {quote(plugin)} ]] && {quote(plugin)}; }}
+''')
+        self.assertEqual(self.restic.read_bytes(), b'#!/bin/sh\necho "restic 0.19.1 fixture"\n')
+        self.assertEqual(plugin.read_bytes(), compose.read_bytes())
+        self.assertEqual(len(self.trace.read_text().splitlines()), 4)
+
+    def test_tool_checksum_rejects_corruption_and_duplicates(self):
+        tool = self.root / 'tool'
+        tool.write_bytes(b'fixture executable')
+        sums = self.root / 'sums'
+        sums.write_text(f'{checksum(tool)}  tool-name\n')
+        cmd = f'verify_tool {quote(sums)} tool-name {quote(tool)}'
+        self.bash(cmd)
+        sums.write_text(sums.read_text() * 2)
+        self.bash(cmd, ok=False)
+        sums.write_text('0' * 64 + '  tool-name\n')
+        self.bash(cmd, ok=False)
+
+    def test_existing_compose_and_private_restic_reused(self):
+        self.restic.parent.mkdir(parents=True)
+        self.restic.write_text('#!/bin/sh\necho "restic 0.19.1 fixture"\n')
+        self.restic.chmod(0o755)
+        self.bash('install_tools', prelude='local_docker() { echo v2.40.3; }')
+        self.assertFalse(self.trace.exists())
+
+    def test_incompatible_compose_is_not_overwritten(self):
+        result = self.bash('install_tools', prelude='local_docker() { echo v1.29.0; }', ok=False)
+        self.assertIn('incompatible', result.stderr)
+        self.assertFalse(self.trace.exists())
+        self.assertFalse(self.restic.exists())
+
+    def worker_fixture(self, store='classic', *, graph='valid'):
+        config = json.dumps({'architecture': 'amd64', 'os': 'linux',
+                             'config': {'Env': [f'DM_BACKUP_WORKER_IMAGE=docker-manager:{TAG}']}}).encode()
+        config_id = 'sha256:' + hashlib.sha256(config).hexdigest()
+        members = {'blobs/sha256/' + config_id[7:]: config}
+        native = f'docker-manager:{TAG}-amd64'
+        members['manifest.json'] = json.dumps([{'Config': 'blobs/sha256/' + config_id[7:],
+                                              'RepoTags': [native], 'Layers': []}]).encode()
+        referenced = 'sha256:' + 'f' * 64 if graph == 'wrong-config' else config_id
+        descriptor = json.dumps({'config': {'digest': referenced}}).encode()
+        descriptor_id = 'sha256:' + hashlib.sha256(descriptor).hexdigest()
+        index = json.dumps({'manifests': [{'digest': descriptor_id}]}).encode()
+        index_id = 'sha256:' + hashlib.sha256(index).hexdigest()
+        members['blobs/sha256/' + descriptor_id[7:]] = descriptor
+        members['blobs/sha256/' + index_id[7:]] = b'{}' if graph == 'corrupt-index' else index
+        expected = config_id if store == 'classic-only' else index_id
+        (self.work / 'IMAGES.txt').write_text(f'[{native}] {expected} linux/amd64\n')
+        archive(self.work / 'docker-manager-images.tar.gz', members)
+        worker = [{'Id': index_id if store == 'containerd' else config_id,
+                   'Architecture': 'amd64', 'Os': 'linux',
+                   'Config': {'Env': [f'DM_BACKUP_WORKER_IMAGE=docker-manager:{TAG}']}}]
+        fixture = self.root / 'worker.json'
+        fixture.write_text(json.dumps(worker))
+        return fixture, worker
+
+    def worker_prelude(self, fixture):
+        return f'''
+version={TAG}
+local_docker() {{
+  printf 'docker %s\\n' "$*" >> "$trace"
+  if [[ "$1 $2" == 'image inspect' ]]; then cat {quote(fixture)}; fi
+}}
+'''
+
+    def test_worker_classic_and_containerd_stores(self):
+        for store in ('classic-only', 'classic', 'containerd'):
+            with self.subTest(store=store):
+                fixture, _ = self.worker_fixture(store)
+                self.bash('install_worker', prelude=self.worker_prelude(fixture))
+                self.assertIn(f'docker tag docker-manager:{TAG}-amd64 docker-manager:{TAG}', self.trace.read_text())
+                self.trace.unlink()
+
+    def test_worker_rejects_index_with_wrong_graph_or_corrupt_digest(self):
+        for graph in ('wrong-config', 'corrupt-index'):
+            with self.subTest(graph=graph):
+                fixture, _ = self.worker_fixture('containerd', graph=graph)
+                self.bash('install_worker', prelude=self.worker_prelude(fixture), ok=False)
+                self.assertNotIn('docker tag', self.trace.read_text())
+                self.trace.unlink()
+
+    def test_worker_identity_architecture_and_version(self):
+        fixture, worker = self.worker_fixture()
+        prelude = self.worker_prelude(fixture)
+        for field, value in [('Id', 'sha256:' + '2' * 64), ('Architecture', 'arm64'), ('Os', 'windows'),
+                             ('Config', {'Env': ['DM_BACKUP_WORKER_IMAGE=docker-manager:v0.2.0']})]:
+            with self.subTest(field=field):
+                bad = json.loads(json.dumps(worker))
+                bad[0][field] = value
+                fixture.write_text(json.dumps(bad))
+                self.bash('install_worker', prelude=prelude, ok=False)
+                self.assertNotIn('docker tag', self.trace.read_text())
+                self.trace.unlink()
+
+    def test_local_docker_ignores_remote_context(self):
+        commands = self.root / 'commands'
+        commands.mkdir()
+        docker = commands / 'docker'
+        docker.write_text('#!/bin/sh\n'
+                          '[ -z "${DOCKER_HOST:-}${DOCKER_CONTEXT:-}${DOCKER_TLS_VERIFY:-}${DOCKER_CERT_PATH:-}" ] || exit 91\n'
+                          'printf "%s\\n" "$*"\n')
+        docker.chmod(0o755)
+        result = self.bash('local_docker info', prelude=f'''
+export DOCKER_HOST=tcp://remote:2375 DOCKER_CONTEXT=remote DOCKER_TLS_VERIFY=1 DOCKER_CERT_PATH=/secret
+export PATH={quote(commands)}:"$PATH"
+''')
+        self.assertEqual(result.stdout.strip(), '--host unix:///var/run/docker.sock info')
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

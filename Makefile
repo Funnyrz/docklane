@@ -17,8 +17,12 @@ lint: web
 	test -z "$$(gofmt -l cmd internal web/embed.go)"
 	$(GO) vet ./...
 	$(PNPM) --dir web typecheck
-	for script in scripts/*.sh; do sh -n "$$script"; done
+	for script in scripts/*.sh; do case "$$script" in *install-online.sh) bash -n "$$script" ;; *) sh -n "$$script" ;; esac; done
 	python3 -m py_compile scripts/*.py
+	python3 scripts/test-install-online.py
+	python3 scripts/test-install-support.py
+	python3 scripts/test-package-installation.py
+	python3 scripts/test-release-preflight.py
 	python3 scripts/check-acceptance.py
 check: lint test
 	$(GO) test -race ./...

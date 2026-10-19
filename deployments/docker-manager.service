@@ -9,11 +9,13 @@ User=docker-manager
 Group=docker-manager
 SupplementaryGroups=docker
 Environment=DM_CONFIG=/etc/docker-manager/config.json
+Environment=PATH=/usr/local/lib/docklane/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart=/usr/local/bin/docklane
 WorkingDirectory=/var/lib/docker-manager
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=180
+SendSIGKILL=no
 UMask=0077
 NoNewPrivileges=true
 PrivateTmp=true

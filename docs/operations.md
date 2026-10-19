@@ -1,5 +1,83 @@
 # 安装、权限、升级与灾难恢复
 
+## 一键在线安装
+
+支持 Ubuntu 24.04、Debian 12/13，架构为 `amd64` / `arm64`，要求 root 和正在运行的 systemd。在线入口位于公开仓库，默认安装最新正式 GitHub Release；解析版本后固定该版本的下载地址，所有安装材料与 worker 镜像必须来自同一 Release。
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+```
+
+脚本在修改前检查系统与架构，下载后检查 SHA-256、架构及归档路径；缺少资产、下载中断、校验不符或不安全归档时停止。检查和安装过程不依赖交互输入，可用于 `curl | sudo bash`。首次访问页面仍需自行创建管理员，不创建默认密码。
+
+| 参数 | 行为 |
+| --- | --- |
+| `--version v0.3.0` | 安装指定正式版本；省略时使用一次解析得到的最新正式版本 |
+| `--listen :8080` | 设置监听地址；新装默认 `:8080`，已有安装保留原值，显式指定时覆盖 |
+| `--migrate-from /绝对路径/data` | 显式迁移手动实例的完整应用数据；保留源目录 |
+| `--config /绝对路径/config.json` | 提供配置；迁移时用于无法可靠还原旧启动配置的情况 |
+| `--dry-run` | 预览检查结果与计划，不安装工具、写配置、停止实例或注册服务 |
+| `--help` | 查看参数和使用说明 |
+
+脚本补齐基础工具（包括 Python 3）。Docker 未安装时从 Docker 官方软件源安装稳定 29.x 并启用开机自启；已有可用 Docker 28/29 不升级、不重启，冲突安装明确报错。复用 Compose v2，缺失时安装 v2.40.3；使用 Restic 0.19.1，其他应用的不同版本不被覆盖。Docklane 专用工具与同 Release 的 worker 镜像由脚本准备，镜像加载后检查版本和架构。
+
+安装路径为 `/usr/local/bin/docklane`，账号和服务名为 `docker-manager`，默认配置为 `/etc/docker-manager/config.json`，默认数据目录为 `/var/lib/docker-manager`。服务以专用账号运行，保留 `ProtectHome=true` 等限制；不授予 daemon 配置写权限，不改防火墙，不递归修改外部业务目录的所有者。使用外部 Compose、备份源、仓库和恢复目录前仍需显式授权路径与文件权限。
+
+结束时脚本检查 `systemctl is-active`、`systemctl is-enabled` 和有界 `/healthz` 请求，成功后显示访问地址、配置位置及日志命令。`:8080` 监听所有网卡，请通过可信网络或 HTTPS 反向代理访问。服务器重新启动后由 systemd 自动启动，无需再次运行脚本。
+
+```sh
+sudo systemctl status docker-manager
+sudo journalctl -u docker-manager -f
+sudo systemctl restart docker-manager
+sudo systemctl stop docker-manager
+sudo systemctl disable docker-manager
+```
+
+### 手动实例迁移
+
+已有手动部署不要直接执行全新安装。先预览迁移，再使用相同参数去掉 `--dry-run` 执行：
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
+  | sudo bash -s -- --migrate-from /home/ubuntu/docklane/data --dry-run
+```
+
+若无法可靠取得旧实例配置，追加 `--config /绝对路径/config.json`。配置中的相对路径按旧工作目录转换为绝对路径，应用数据和临时目录按受管安装调整；有效配置、数据库内保存的设置及密钥继续保留。不要为了通过路径检查，把旧配置替换成空白示例。
+
+迁移前检查外部 Compose 项目、备份源与仓库是否能被专用账号访问。`ProtectHome=true` 会屏蔽 home 下的业务路径，即使 Unix 权限允许也无法访问；先安排迁移到 `/srv` 等适当的授权目录。脚本不会自动放宽隔离或对这些路径递归 `chown`。非空目标数据目录、未知进程或无法还原的配置会使迁移停止。
+
+对正在运行的来源，脚本核对数据锁、持锁进程和程序身份，只对确认的进程发送 SIGTERM；等待正常退出并取得真实文件锁后才备份和复制。PID 不匹配、身份不明或退出超时都停止，不强杀进程。迁移需要停机窗口；不要在迁移过程中重新启动旧实例。
+
+完整停机备份包含数据库、存在的 WAL/SHM、`master.key` 及其他管理数据。源目录保留，配套配置与备份位置在输出中给出。迁移后确认已有管理员可登录、设置保留，并进行一次备份与新目录恢复验证。原始数据副本包含秘密，应按应用数据同等保护。
+
+### 重复执行与在线升级
+
+使用原命令可安装最新正式版本，也可固定版本：
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
+  | sudo bash -s -- --version v0.3.0
+```
+
+标准受管安装会保留现有配置和实际生效的数据目录；同版本且二进制 SHA-256 一致时跳过替换。版本变化先停服务，再备份实际数据目录、配置、服务单元和旧二进制，之后安装同版本材料并检查健康。显式指定 `--listen` 才更改已有监听地址。需要降级时应按下方回退说明恢复配套备份，不能用旧程序直接打开升级后的数据库。
+
+安装或升级失败返回非零退出码，停止未通过健康检查的新服务，并保留源数据及备份。先阅读错误输出与日志，不反复重启或混合恢复数据库和密钥。管理员按下方[升级和回退](#升级和回退)区分受管升级与首次手动迁移恢复；首次迁移可能没有旧服务单元或旧二进制备份，不能直接套用 systemd 回退步骤。失败前已停机的来源不会被强行启动；恢复由管理员确认。
+
+## 离线安装
+
+离线安装保留单参数入口。提前准备可用的本地 Docker Engine 28/29、Compose v2（验证版本 v2.40.3）、服务 PATH 可用的 Restic 0.19.1、Python 3 与 `runuser`（util-linux）；`docker` 组须存在，服务账号须能通过该附加组访问 Docker Socket。下载同一 Release 的原始二进制、`docker-manager-installation.tar.gz`、`docker-manager-images.tar.gz`、`IMAGE-SHA256SUMS`、`IMAGES.txt` 与 `RELEASE-SHA256SUMS` 到空目录，先校验资产，再加载并为本机架构设置必需的 worker 通用标签：
+
+```sh
+sha256sum --check --ignore-missing RELEASE-SHA256SUMS
+sha256sum --check IMAGE-SHA256SUMS
+tar -xzf docker-manager-installation.tar.gz
+sudo docker load -i docker-manager-images.tar.gz
+sudo docker tag docker-manager:v0.3.0-amd64 docker-manager:v0.3.0
+sudo ./scripts/install.sh ./docklane-linux-amd64
+```
+
+arm64 将二进制文件名和镜像标签中的 `amd64` 改为 `arm64`。精简二进制包只包含 `docklane` 和 `LICENSE`；需要 `scripts/`、服务文件和辅助程序时必须同时下载安装材料，不应混用 `main` 上的服务文件与旧版本程序。
+
 ## 授权与路径
 
 `DM_CONFIG` 指定 JSON 配置文件。环境变量可覆盖 listen、data_dir、docker_endpoint、mode、compose_path、restic_path、backup_worker_image；`DM_ALLOWED_PATHS` 为逗号分隔的显式绝对路径；`DM_PATH_MAPPINGS` 为 host/local 对象数组的 JSON。根目录 `/` 不能作为授权路径。
@@ -43,9 +121,11 @@ Docker 模式永远不允许自动写宿主机 daemon 配置。二进制模式�
 
 ## 升级和回退
 
-校验发布 SHA256SUMS。二进制使用 `scripts/upgrade.sh /path/to/docklane`，同时保留该版本的 `deployments/docker-manager.service`。脚本停服务后备份完整数据目录、配置、原服务单元及存在的 `docklane` / `docker-manager` 二进制，再安装 `/usr/local/bin/docklane` 和匹配的服务单元，执行 daemon-reload 后启动。旧 `/usr/local/bin/docker-manager` 保留作为回退材料；已有服务会迁移到新入口，无需迁移数据目录。
+在线升级见上方流程；离线升级先校验发布 `RELEASE-SHA256SUMS`。二进制使用 `scripts/upgrade.sh /path/to/docklane`，同时保留该版本的 `deployments/docker-manager.service`。脚本停服务后按实际生效的数据目录备份完整数据、配置、原服务单元及存在的 `docklane` / `docker-manager` 二进制，再安装 `/usr/local/bin/docklane` 和匹配的服务单元，执行 daemon-reload 后启动，并在有界等待内检查服务与 `/healthz`。旧 `/usr/local/bin/docker-manager` 保留作为回退材料；已有服务会迁移到新入口，无需迁移数据目录。
 
-若启动或迁移失败，保持停止状态；从同一次备份恢复配置、完整数据目录（含数据库及 master.key）、原服务单元和对应二进制到原路径，再执行 `systemctl daemon-reload` 和 `systemctl start docker-manager`。旧服务单元可能仍指向 `/usr/local/bin/docker-manager`，必须与备份二进制匹配，避免直接用旧程序打开新版本数据库。
+已有 systemd 受管安装升级失败时，保持停止状态；从同一次备份恢复配置、完整数据目录（含数据库、存在的 WAL/SHM 及 `master.key`）、原服务单元和对应旧二进制到原路径，再执行 `systemctl daemon-reload` 和 `systemctl start docker-manager`。旧服务单元可能仍指向 `/usr/local/bin/docker-manager`，必须与备份二进制匹配，避免直接用旧程序打开新版本数据库。
+
+首次手动实例迁移失败时，先确认新建的 `docker-manager` 服务已停止；若已注册服务，取消其开机自启，避免恢复旧实例后再次启动新目标。保留失败目标目录用于检查，不把其中的数据库或密钥混拷回原目录。确认原手动二进制仍可用，按原运行账号和工作目录，使用保留的源数据目录以及同次备份的 `startup-config.json` 恢复原实例（通过 `DM_CONFIG` 指定，并避免遗留 `DM_*` 环境变量覆盖配置）。若原二进制路径被替换，使用同组备份中的对应旧程序。首次迁移备份可能没有旧服务单元或旧二进制；没有旧单元时无需恢复单元，也不应以 `systemctl start docker-manager` 代替原手动启动方式。若选择从备份恢复源数据，须让两个实例都保持停止，并完整恢复同一备份组的数据库、WAL/SHM、`master.key` 及其他管理数据；不要混用源、失败目标与不同备份组。
 
 使用 Volume 备份/恢复的二进制部署还需加载或更新本次发布的同版本 worker 镜像：新程序使用镜像内的 `docklane` 入口，旧镜像即使标签相同也不兼容，可从完整离线包导入对应镜像。
 

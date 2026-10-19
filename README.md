@@ -78,7 +78,7 @@ Go 服务嵌入 Vue 界面，支持 Linux 二进制和 Docker 部署。Docker En
 | Compose / Restic | Compose v2（锁定验证版本 v2.40.3）、Restic 0.19.1 |
 | 构建工具 | Go 1.27.2、Node.js 22.22.0、pnpm 10.28.2 |
 
-Docker 镜像包含 Docker CLI、Compose 和 Restic；二进制部署需自行安装运行工具。交叉构建出某架构产物不代表已完成该架构原生硬件验收，具体见[验证记录](docs/verification.md)。
+Docker 镜像包含 Docker CLI、Compose 和 Restic；在线安装脚本自动准备二进制部署需要的运行工具，直接运行或离线安装时需自行准备。交叉构建出某架构产物不代表已完成该架构原生硬件验收，具体见[验证记录](docs/verification.md)。
 
 ## 部署
 
@@ -86,17 +86,54 @@ Docker 镜像包含 Docker CLI、Compose 和 Restic；二进制部署需自行�
 
 **产品与可执行文件均命名为 Docklane（命令为 `docklane`）。** 为保持升级兼容，systemd 服务和账号、镜像标签、配置与数据目录、Go module、`DM_*` 环境变量及浏览器存储键仍保留现有技术标识。安装/升级脚本会将新二进制安装为 `docklane`，并继续使用 `docker-manager` 服务管理已有数据。
 
+### 一键在线安装（推荐）
+
+在 Ubuntu 24.04 或 Debian 12/13 的 `amd64` / `arm64` 主机运行，要求 root 权限和正在运行的 systemd：
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+```
+
+脚本解析一次最新正式 [GitHub Release](https://github.com/Funnyrz/docklane/releases/latest)，固定版本并校验下载资产的 SHA-256、架构和归档路径，安装 `/usr/local/bin/docklane`，创建专用账号及 `docker-manager.service`，自动后台启动并设置开机自启。结束时检查服务状态、自启和 `/healthz`，输出访问地址；首次打开页面创建管理员。默认监听 `:8080`，不自动修改防火墙。
+
+缺少 Docker 时从官方软件源安装稳定 29.x 并启用自启；已有可用 Docker 28/29 不会被升级或重启，冲突安装会报错。复用已有 Compose v2，缺失时安装 v2.40.3；提供 Restic 0.19.1，使用专属工具目录而不覆盖其他应用使用的版本。同一 Release 的备份 worker 镜像会下载并加载。基础依赖（包括 Python 3）由脚本补齐，下载与包管理需要联网。
+
+指定版本、监听地址，或先查看执行计划：
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
+  | sudo bash -s -- --version v0.3.0 --listen :8080 --dry-run
+```
+
+去掉 `--dry-run` 执行安装；`--help` 查看参数。再次执行会保留现有配置与数据，同版本且校验和相同则跳过二进制替换；版本变化先停机备份再升级。已有手动运行实例必须显式迁移，不能直接当作全新安装：
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
+  | sudo bash -s -- --migrate-from /home/ubuntu/docklane/data
+```
+
+脚本无法可靠取得旧启动配置时，增加 `--config /绝对路径/config.json`。迁移需要短暂停机，保留完整源数据和数据库/密钥配套备份；外部业务路径仍需专用账号可访问。服务保留 `ProtectHome=true`，位于 home 下的 Compose、仓库或备份源需先迁移到适当的授权目录。详见[迁移与恢复说明](docs/operations.md#手动实例迁移)。
+
+```sh
+sudo systemctl status docker-manager       # 查看服务状态
+sudo journalctl -u docker-manager -f        # 查看日志
+sudo systemctl restart docker-manager      # 重启
+sudo systemctl stop docker-manager         # 停止
+sudo systemctl disable docker-manager      # 取消开机自启
+```
+
 ### 选择下载包
 
-截至 2026-10-17，[GitHub Releases](https://github.com/Funnyrz/docklane/releases) 尚未发布版本。以下安装方式要求先取得维护者提供的对应发布包；没有发布包时，请使用下方的源码构建步骤。这里列出的文件名不是已上线的下载链接。
+从 [v0.3.0 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.0) 下载匹配架构的资产。在线安装会自动取得同一版本所需材料；手工安装先校验相应校验清单。
 
 | 下载文件 | 适用场景 |
 | --- | --- |
-| `docklane-v0.3.0-<时间戳>.tar.gz` | 完整包：离线 Docker 镜像、双架构二进制、安装脚本、部署示例与双语文档/截图；解压目录为 `docklane-v0.3.0/` |
 | `docklane-v0.3.0-linux-amd64.tar.gz` | x86-64 Linux 精简二进制包 |
 | `docklane-v0.3.0-linux-arm64.tar.gz` | ARM64 Linux 精简二进制包 |
+| `docker-manager-installation.tar.gz` | systemd 安装、升级、卸载与在线安装辅助材料，配置示例、文档和 MIT 协议 |
+| `docker-manager-images.tar.gz` | 双架构离线 Docker / 备份 worker 镜像 |
 
-每个精简包都配有同名 `.tar.gz.sha256` 校验文件，后续构建的包内包含可执行文件 `docklane` 和 MIT 协议文件 `LICENSE`。程序已嵌入前端，无需单独安装前端。需要离线镜像、systemd 安装材料或随包文档时选择完整包。
+每个精简包配有同名 `.tar.gz.sha256` 校验文件，包含可执行文件 `docklane` 和 `LICENSE`。程序已嵌入前端，无需单独安装前端。Release 同时提供原始双架构二进制、`LICENSE` 及 `RELEASE-SHA256SUMS`。维护者另行生成的 `docklane-v0.3.0-<时间戳>.tar.gz` 完整包将这些材料放在 `docklane-v0.3.0/` 目录内。
 
 ### 精简二进制包：直接运行
 
@@ -114,10 +151,10 @@ macOS 上校验可使用 `shasum -a 256 -c`；程序仍需在 Linux 运行。访
 
 ### Docker：离线安装
 
-解压完整发布包并进入 `docklane-v0.3.0/` 后执行。以下为 amd64 示例；arm64 主机将镜像标签中的 `amd64` 改为 `arm64`。
+在空目录下载并校验 Release 的安装材料、镜像归档和清单（或解压完整发布包并进入 `docklane-v0.3.0/`）后执行。以下为 amd64 示例；arm64 主机将镜像标签中的 `amd64` 改为 `arm64`。
 
 ```sh
-sha256sum -c RELEASE-SHA256SUMS
+sha256sum --check --ignore-missing RELEASE-SHA256SUMS
 tar -xzf docker-manager-installation.tar.gz
 docker load -i docker-manager-images.tar.gz
 docker tag docker-manager:v0.3.0-amd64 docker-manager:v0.3.0
@@ -147,13 +184,16 @@ docker compose -f deployments/docker-compose.yml up -d --no-build
 
 ### Linux 二进制与 systemd
 
-完整包提供 `docklane-linux-amd64` 与 `docklane-linux-arm64`；安装后可执行文件为 `/usr/local/bin/docklane`，服务名仍为 `docker-manager`。已有安装使用新包的 `scripts/upgrade.sh`，由脚本处理旧可执行文件路径到 `docklane` 的切换，配置与数据目录保持原位置。
+Release 提供 `docklane-linux-amd64` 与 `docklane-linux-arm64`；安装后可执行文件为 `/usr/local/bin/docklane`，服务名仍为 `docker-manager`。已有安装使用新包的 `scripts/upgrade.sh`，由脚本处理旧可执行文件路径到 `docklane` 的切换，配置与数据目录保持原位置。
 
-准备 Docker、Compose v2 与 Restic 0.19.1，在完整发布包解压后的 `docklane-v0.3.0/` 内执行。若已解压安装材料，无需重复解压。arm64 主机替换二进制文件名后缀：
+准备可用的本地 Docker Engine 28/29、Compose v2（验证版本 v2.40.3）、服务 PATH 可用的 Restic 0.19.1、Python 3 与 `runuser`（util-linux）。`docker` 组必须存在，Docker Socket 须允许服务账号通过该附加组访问。将同一 Release 的对应原始二进制、`docker-manager-installation.tar.gz`、`docker-manager-images.tar.gz`、`IMAGE-SHA256SUMS`、`IMAGES.txt` 和 `RELEASE-SHA256SUMS` 下载到同一空目录（或进入完整包解压目录）。下面同时准备安装所需的本地 worker；arm64 主机将二进制与镜像标签中的 `amd64` 改为 `arm64`：
 
 ```sh
-sha256sum -c RELEASE-SHA256SUMS
+sha256sum --check --ignore-missing RELEASE-SHA256SUMS
+sha256sum --check IMAGE-SHA256SUMS
 tar -xzf docker-manager-installation.tar.gz
+sudo docker load -i docker-manager-images.tar.gz
+sudo docker tag docker-manager:v0.3.0-amd64 docker-manager:v0.3.0
 sudo ./scripts/install.sh ./docklane-linux-amd64
 sudo journalctl -u docker-manager -f
 ```
@@ -217,4 +257,4 @@ make release-images # 双架构镜像及离线归档，需要 Docker Buildx
 
 Docklane 使用 [MIT 协议](LICENSE)，版权署名为 `Copyright (c) 2026 Funnyrz`。分发副本时请保留协议中的版权和许可声明。
 
-后续构建的精简二进制包、安装材料及候选发布目录携带 `LICENSE`；Docker 镜像内路径为 `/usr/share/licenses/docklane/LICENSE`。第三方依赖与随镜像分发的工具仍适用各自的许可。
+精简二进制包、安装材料及候选发布目录携带 `LICENSE`；Docker 镜像内路径为 `/usr/share/licenses/docklane/LICENSE`。第三方依赖与随镜像分发的工具仍适用各自的许可。
