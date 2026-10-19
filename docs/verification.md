@@ -4,6 +4,8 @@
 
 目前唯一可下载版本为 [v0.3.1-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)。原 v0.3.0 Release 已撤回，当前没有正式 Release，也没有可用的正式版 latest 入口；正式通道需等待未来正式发布。当前安装请使用 [README 的显式 Beta 命令](../README.md#一键在线安装推荐)。当前源码为 `0.3.1-beta.1`，安装示例显式使用 `--channel beta`，安装器默认仍为 `stable`，当前无参数安装会停止并提示显式选择 Beta。
 
+本次同步的[验证记录](evidence/beta-only-withdrawal.json)覆盖 150 项安装/生命周期/打包/预检测试（本机 1 项 Linux 专用测试跳过）、脚本与工作流检查。原生 arm64 Ubuntu 24.04 隔离 VM 通过公开镜像执行真实 curl：无参数请求在暂无正式版时清楚拒绝，显式 Beta 重复安装成功，原管理员、设置、密钥、配置、程序及 Docker 进程保留。[精确代码提交的 CI](https://github.com/Funnyrz/docklane/actions/runs/39229598649) 五个 job 全部成功，包含前后端检查和 Docker 28/29 × amd64/arm64 集成。此为既有 Beta 上的重复安装复验，不代表新增全平台或全新安装验收。
+
 > 以下原有发布、CI、公开下载、latest 状态及清理描述均为相应测试/发布时刻的历史记录，保留用于追溯；它们不代表已撤回的 Release 现在仍可下载。原始 JSON、Tag 与历史验收记录未因本次撤回说明而改写。
 
 ## 2026-10-19 Beta 声明与六附件发布

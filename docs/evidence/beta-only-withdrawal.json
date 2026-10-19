@@ -1,0 +1,80 @@
+{
+  "verified_at": "2026-10-19T09:28:29.994081+00:00",
+  "source_commit": "8cdfd9587c7065e25a167d196709ef1bc56d908d",
+  "publication_state": {
+    "published_versions": [
+      "v0.3.1-beta.1"
+    ],
+    "stable_latest_http_status": 404,
+    "beta_prerelease": true,
+    "beta_asset_count": 6,
+    "beta_assets_unchanged_from_before_notes_update": true,
+    "notes_updated": true
+  },
+  "local_checks": {
+    "python_tests": 150,
+    "python_tests_skipped": 1,
+    "skip_reason": "One lifecycle test requires Linux; local runner is macOS",
+    "shell_syntax": "passed",
+    "python_compilation": "passed",
+    "actionlint": "passed",
+    "buildinfo_tests": "passed",
+    "acceptance_document_links": "passed"
+  },
+  "public_installation": {
+    "verified_at": "2026-10-19T09:24:11.898717+00:00",
+    "result": "passed",
+    "source_commit": "8cdfd95",
+    "bootstrap_sha256": "623a0ed88375c08dee6b14f254ca422393df23c5ae998cde93869cab0ee65c50",
+    "commands": [
+      "set -o pipefail; curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --",
+      "set -o pipefail; curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta"
+    ],
+    "checks": [
+      "Public mirror installer matches the committed main bootstrap",
+      "Default stable stops clearly when no stable release is available",
+      "Explicit beta repeat installation succeeds from public assets",
+      "Both invocations preserve binary inode/hash, master key, config, application/Docker PID and receipt",
+      "Service remains active and enabled; health endpoint returns 200",
+      "Existing administrator login and saved settings are retained"
+    ],
+    "mocked_operations": [],
+    "environment": "Isolated native arm64 Ubuntu 24.04 systemd VM",
+    "limitations": [
+      "Repeat installation on existing beta; no fresh install or new cross-platform matrix",
+      "No independent mainland ISP measurement"
+    ]
+  },
+  "ci": {
+    "url": "https://github.com/Funnyrz/docklane/actions/runs/39229598649",
+    "head_sha": "8cdfd9587c7065e25a167d196709ef1bc56d908d",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "checks",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / amd64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 28.5.1 / amd64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 28.5.1 / arm64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / arm64",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "limits": [
+    "No new version, tag, release or asset was published",
+    "The beta publication path with no stable release was validated with automated workflow fixtures, not a new publication",
+    "Existing historical reports retain the publication state at their original verification time"
+  ]
+}
