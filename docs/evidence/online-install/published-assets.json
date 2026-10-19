@@ -1,0 +1,33 @@
+{
+  "status": "passed",
+  "checked_at": "2026-10-19T07:58:32.421367+00:00",
+  "release_url": "https://github.com/Funnyrz/docklane/releases/tag/v0.3.0",
+  "release_commit": "3a53e0986eb4e84f355332974eb6662006673932",
+  "ci": {
+    "head_sha": "3a53e0986eb4e84f355332974eb6662006673932",
+    "ci_run_url": "https://github.com/Funnyrz/docklane/actions/runs/39216500363",
+    "ci_run_id": 39216500363,
+    "publication": "candidate"
+  },
+  "public_asset_hashes": {
+    "TOOL-VERSIONS.txt": "b8e043da65e3e39c919183fcb7e44472fe7d9d864fca23a3d95fca97e8a91222",
+    "LICENSE": "13d574fba57470036711181178466217fac88a9567e34425104e2e4a3000746d",
+    "install-online.sh": "51b7d3698107227d29f7e4c4e090df3ed0292119cd3fd42363a1df184e603b98",
+    "IMAGE-SHA256SUMS": "1c2a4d64cc01766fd90c9b2f7fc84814adcf1506c0d047a9a588a9e1e3b7ef6b",
+    "docklane-v0.3.0-linux-amd64.tar.gz": "94a37298129f091e738639063fb923797f0583e18c4335c602198de561d78e3f",
+    "release-ci-evidence.json": "51e737147ef11de992744b715cba599308d377c7bbd023a4550e31b153294357",
+    "docker-manager-installation.tar.gz": "b288c09f7a48cedc096f39fe5e047e7aeec15e0fcfaa4eb164e4edba116e6246",
+    "IMAGES.txt": "6e6d5c93cb1eb3df4c32bb5dee2aae1c73fc8d1b42c0a6130e476d32707f92d8",
+    "docklane-v0.3.0-linux-arm64.tar.gz": "9613cacdd66f850bf6b9ac73762bfe2ba6910056a580c179b2bd3d3f801ba0de",
+    "SHA256SUMS": "35b30055ad1d782f95d38501dc820c256043fe2625d93b228fcd03ee93c50dd5"
+  },
+  "checks": [
+    "Public checksum manifest matches downloaded payloads",
+    "Both slim packages contain exact MIT license and correct ELF architecture",
+    "Slim executable hashes match release raw binary manifest",
+    "Versioned installation materials and standalone installer match immutable tagged source",
+    "Loaded published worker contains exact MIT license at /usr/share/licenses/docklane/LICENSE",
+    "Publicly installed arm64 executable and license match published hashes"
+  ],
+  "worker_archive": "Verified by actual public bootstrap SHA-256 and loaded/exported native config check; not redundantly downloaded to host"
+}

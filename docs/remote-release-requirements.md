@@ -1,6 +1,8 @@
 # 远端 CI 与正式发布的环境要求
 
-当前项目仓库为公开的 [Funnyrz/docklane](https://github.com/Funnyrz/docklane)，默认分支为 `main`。一键在线安装使用正式 Release 资产，入口为 `scripts/install-online.sh`，首个目标版本为 [v0.3.0](https://github.com/Funnyrz/docklane/releases/tag/v0.3.0)。Release URL、精确提交的成功 CI、资产校验和与公开下载复验共同构成发布证据；文档中的目标地址本身不证明发布或虚拟机验收已完成。
+截至 2026-10-19，公开仓库 [Funnyrz/docklane](https://github.com/Funnyrz/docklane) 的首个正式版本 [v0.3.0](https://github.com/Funnyrz/docklane/releases/tag/v0.3.0) 已发布并设为 latest，默认分支为 `main`。Tag 与应用产物来源为 [3a53e098](https://github.com/Funnyrz/docklane/commit/3a53e0986eb4e84f355332974eb6662006673932)，精确提交的 [CI 39216500363](https://github.com/Funnyrz/docklane/actions/runs/39216500363) 和 [发布工作流 39217575907](https://github.com/Funnyrz/docklane/actions/runs/39217575907) 均成功。[公开 curl 验收](evidence/online-install/public-curl.json) 无传输 mock，已验证正式资产安装、重复执行及真实 VM 重启后自启，保留匿名 API 限流的原始失败记录。
+
+一键入口 `scripts/install-online.sh` 的后续通用 `main` 修正 [99ebac6](https://github.com/Funnyrz/docklane/commit/99ebac6ceba60791a46a4f23d5f6b5422a02c0f0) 通过公开 latest 链接处理 API 限流，仍校验并安装原 v0.3.0 资产，不覆盖正式 Tag 或已发布产物。该修正的 [CI 39218732043](https://github.com/Funnyrz/docklane/actions/runs/39218732043) 也已成功；与首版 Tag 的成功 CI 分开记录。六组发行版/架构候选记录、QEMU amd64 边界、worker 转换与集成证据见 [当前验证记录](verification.md#2026-10-19-在线安装与正式发布)。
 
 历史准备阶段尚无 commit、remote 或目标仓库，仅以只读 API 核对本机账户；`docs/evidence/remote-release-readiness.json` 保留该阶段的准备证据，不代表当前仓库状态，也不代替本轮实际远端 CI 与发布结果。GHCR 权限和镜像 Digest 仍需单独核对，本轮在线安装通过 Release 镜像归档提供本地 worker，不依赖公开 GHCR 包。
 

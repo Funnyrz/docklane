@@ -1,0 +1,144 @@
+{
+  "phases": [
+    {
+      "phase": "install",
+      "started_at": "2026-10-19T07:52:23.129633+00:00",
+      "checks": [
+        {
+          "name": "public curl installation starts and enables hardened systemd service",
+          "status": "passed",
+          "evidence": {
+            "unit": {
+              "MainPID": "3175",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ProtectHome": "yes",
+              "LoadState": "loaded",
+              "ActiveState": "active",
+              "UnitFileState": "enabled"
+            },
+            "docker_before": null,
+            "docker_after": {
+              "version": "29.9.1",
+              "pid": "2488",
+              "start_ticks": "133579",
+              "executable": "/usr/bin/dockerd"
+            },
+            "docker_installed": true,
+            "private_log": "public-installer-c845682f.log"
+          }
+        },
+        {
+          "name": "first administrator setup and fresh login succeed",
+          "status": "passed",
+          "evidence": {
+            "admin_id": "1bfbceb7ac301db64cad50efe4cc6e1a"
+          }
+        },
+        {
+          "name": "same-version repeat preserves binary inode, master key, administrator and daemon",
+          "status": "passed",
+          "evidence": {
+            "binary_inode": 87752,
+            "binary_sha256": "e3db93fd17a4459138e2b46b2ff3c30874f40f9e4aaf3adaeac1215959140e6e",
+            "unit": {
+              "MainPID": "3175",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ProtectHome": "yes",
+              "LoadState": "loaded",
+              "ActiveState": "active",
+              "UnitFileState": "enabled"
+            },
+            "private_log": "public-installer-acff5de6.log"
+          }
+        }
+      ],
+      "status": "passed",
+      "completed_at": "2026-10-19T07:55:05.378727+00:00"
+    },
+    {
+      "phase": "resume",
+      "started_at": "2026-10-19T07:55:55.167468+00:00",
+      "checks": [
+        {
+          "name": "guest reboot retains automatic startup, health, key, administrator and session",
+          "status": "passed",
+          "evidence": {
+            "before": {
+              "boot_id": "8aa4431e-a7ac-4603-b507-d51a1267bb6a",
+              "pid1_start_ticks": "0",
+              "pid1_comm": "systemd"
+            },
+            "after": {
+              "boot_id": "e40734f7-d358-49d6-b924-20a68b0a6f4e",
+              "pid1_start_ticks": "0",
+              "pid1_comm": "systemd"
+            },
+            "unit": {
+              "MainPID": "1180",
+              "User": "docker-manager",
+              "Group": "docker-manager",
+              "ProtectHome": "yes",
+              "LoadState": "loaded",
+              "ActiveState": "active",
+              "UnitFileState": "enabled"
+            },
+            "docker": {
+              "version": "29.9.1",
+              "pid": "783",
+              "start_ticks": "576",
+              "executable": "/usr/bin/dockerd"
+            },
+            "binary_inode": 87752
+          }
+        }
+      ],
+      "status": "passed",
+      "completed_at": "2026-10-19T07:55:55.331914+00:00"
+    }
+  ],
+  "limitations": [
+    "A disposable native arm64 Ubuntu 24.04 systemd VM; other distribution/architecture combinations have separate candidate evidence.",
+    "No firewall rule is changed; remote network exposure is not asserted."
+  ],
+  "transport": {
+    "public_url": "https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh",
+    "command": "set -o pipefail; curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --",
+    "mocked_operations": []
+  },
+  "status": "passed",
+  "release": {
+    "tag": "v0.3.0",
+    "url": "https://github.com/Funnyrz/docklane/releases/tag/v0.3.0",
+    "source_commit": "3a53e0986eb4e84f355332974eb6662006673932",
+    "ci": "https://github.com/Funnyrz/docklane/actions/runs/39216500363",
+    "publication_run": "https://github.com/Funnyrz/docklane/actions/runs/39217575907"
+  },
+  "bootstrap_commit": "99ebac6ceba60791a46a4f23d5f6b5422a02c0f0",
+  "bootstrap_sha256": "b59e52d863347f7067953e8353aaeff8bd603509f683b5cee4133899dd5bf8e7",
+  "prior_attempts": [
+    {
+      "phases": [
+        {
+          "phase": "install",
+          "started_at": "2026-10-19T07:46:50.371102+00:00",
+          "checks": [],
+          "status": "failed",
+          "error": "public curl installation failed; inspect private log: /var/lib/docklane-online-public/report-state/public-installer-cdcd9709.log\n\nRunning kernel seems to be up-to-date.\n\nNo services need to be restarted.\n\nNo containers need to be restarted.\n\nNo user sessions are running outdated binaries.\n\nNo VM guests are running outdated hypervisor (qemu) binaries on this host.\ncurl: (22) The requested URL returned error: 403\nDocklane: installation failed (exit 22). Review the preceding error; existing source data and recovery backups are retained.\n",
+          "completed_at": "2026-10-19T07:47:09.252325+00:00"
+        }
+      ],
+      "limitations": [
+        "A disposable native arm64 Ubuntu 24.04 systemd VM; other distribution/architecture combinations have separate candidate evidence.",
+        "No firewall rule is changed; remote network exposure is not asserted."
+      ],
+      "transport": {
+        "public_url": "https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh",
+        "command": "set -o pipefail; curl -fsSL https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --",
+        "mocked_operations": []
+      }
+    }
+  ],
+  "prior_attempts_note": "Original public bootstrap safely stopped on anonymous GitHub REST quota exhaustion before Docker/app installation. Main bootstrap now validates GitHub official latest redirect, pins the same immutable v0.3.0 assets, and passes the real unauthenticated curl pipeline twice."
+}

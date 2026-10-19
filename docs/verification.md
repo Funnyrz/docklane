@@ -1,8 +1,26 @@
 # v0.3 验证记录
 
-> 最新本地重建（2026-10-17，中英文界面版，20261017-133718）：[发布包构建及校验证据](evidence/release-package-20261017-133718.json)。包含 Linux 双架构二进制、离线镜像和安装材料；本次通过 make check 与启动冒烟，未远端发布或重跑全部业务验收。
+## 2026-10-19 在线安装与正式发布
 
-> 2026-10-17：包含新界面的最新本地发布包已重建，见 [本次构建与校验证据](evidence/release-package-20261017.json)。下文平台/完整业务发布验收保持为此前版本的历史证据；本次未重新执行全部场景，也未远端发布。
+[v0.3.0 正式 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.0) 已发布并设为 latest。Tag 与应用产物来源为 [3a53e098](https://github.com/Funnyrz/docklane/commit/3a53e0986eb4e84f355332974eb6662006673932)，该精确提交的 [CI 39216500363](https://github.com/Funnyrz/docklane/actions/runs/39216500363) 与 [发布工作流 39217575907](https://github.com/Funnyrz/docklane/actions/runs/39217575907) 均成功。
+
+[公开 curl 验收](evidence/online-install/public-curl.json) 在原生 arm64 Ubuntu 24.04 独立 systemd VM 中直接执行公开命令，无下载或选择器 mock，覆盖缺少 Docker 时安装 Engine 29.9.1、后台运行、开机自启、首次管理员登录、重复安装保留与实际重启后的健康、密钥和会话保留。原匿名 GitHub API 限流失败记录仍保留；通用 `main` 引导脚本通过 [99ebac6](https://github.com/Funnyrz/docklane/commit/99ebac6ceba60791a46a4f23d5f6b5422a02c0f0) 增加公开 latest 链接回退，安装的仍是同一 v0.3.0 Release 资产，未覆盖正式 Tag 或已签发产物。该后续修正的 [CI 39218732043](https://github.com/Funnyrz/docklane/actions/runs/39218732043) 也已成功，包含静态检查、108 项安装/生命周期/打包/预检测试及 Docker 28/29 × amd64/arm64 四组真实集成。
+
+| 环境与场景 | 本轮独立内核候选验收记录 |
+| --- | --- |
+| Ubuntu 24.04 | [amd64 安装、重复执行与实际重启](evidence/online-install/ubuntu24-amd64.json) · [arm64 安装](evidence/online-install/ubuntu24-arm64.json) |
+| Debian 12 | [amd64 安装与重复执行](evidence/online-install/debian12-amd64.json) · [arm64 安装](evidence/online-install/debian12-arm64.json) · [arm64 失败恢复](evidence/online-install/debian12-arm64-recovery.json) |
+| Debian 13 | [amd64 安装与重复执行](evidence/online-install/debian13-amd64.json) · [arm64 手动实例迁移](evidence/online-install/debian13-arm64-migration.json) |
+| 正式发布资产 | [公开下载、双架构 ELF、MIT 与来源校验](evidence/online-install/published-assets.json) |
+| Worker | [经典与 containerd image store 转换](evidence/online-install/worker-image-stores.json) · [真实备份恢复等集成](evidence/online-install/worker-integration.json) |
+
+候选报告分别记录实际使用的脚本、产物摘要和失败重试，不能合并声称为最终 Tag 的六格公开下载验收。amd64 使用 QEMU/TCG 全系统 CPU 模拟，证明独立内核功能，不代表原生 amd64 性能；arm64 使用原生虚拟机。正式资产的公开传输与重启验收以上述公开 curl 报告为准。[本轮清理](evidence/online-install/cleanup.json) 确认七台验收 VM 均已停止，保留磁盘、源数据和配套备份；既存 Colima 构建 profile 留供镜像复查。现有测试服务器与宿主预览未被接管。
+
+> 以下各节为 2026-10-16/17 的历史验收与本地构建记录；其中当时的发布、工具版本及资源清理状态不代表当前状态。本轮状态以上述 2026-10-19 证据为准。
+
+> 历史本地重建（2026-10-17，中英文界面版，20261017-133718）：[发布包构建及校验证据](evidence/release-package-20261017-133718.json)。包含 Linux 双架构二进制、离线镜像和安装材料；本次通过 make check 与启动冒烟，未远端发布或重跑全部业务验收。
+
+> 2026-10-17：包含新界面的当时最新本地发布包已重建，见 [本次构建与校验证据](evidence/release-package-20261017.json)。下文平台/完整业务发布验收保持为此前版本的历史证据；本次未重新执行全部场景，也未远端发布。
 
 验证日期：2026-10-16。本轮继续补齐发布场景并直接修复发现的问题；原始失败、环境限制和最终正式产物的通过证据分别保留。**功能验收证据已覆盖首版适用的 44 项 AC 和 10 条发布场景；六组独立发行版内核功能验收已补齐；TCG 性能边界、远端 CI 与正式发布仍按下述范围记录。**
 
@@ -75,7 +93,7 @@ Ubuntu amd64 精简镜像的 iptables 前置准备因完整 apt 索引下载/解
 
 - 主矩阵三发行版 × 双架构均为独立内核完整 VM。amd64 为 QEMU/TCG 全系统软件 CPU 模拟，覆盖 Debian 6.1/6.12 与 Ubuntu 6.8；ARM64 为原生 VZ。原生 x86_64 LXD 三份历史证据另存，二者不混称为原生硬件性能或裸机认证。
 - 只有 schema v1。已验证同版本替换、真实 SQL 故障和恢复；未来出现历史业务版本后仍需加入实际跨版本升级。
-- 没有配置 Git remote/registry 目标；未推送镜像、签发正式发布或运行远端 CI。两版专属 Engine 的本地 CI 预演均通过，但 GitHub setup actions、目标 runner 分配与远端权限尚未验证。具体缺项和只读 preflight 见 [远端发布要求](remote-release-requirements.md)。
+- 截至 2026-10-16 历史验收结束时，尚未配置 Git remote/registry 目标，也未推送镜像、签发正式发布或运行远端 CI。两版专属 Engine 的本地 CI 预演均通过，但当时 GitHub setup actions、目标 runner 分配与远端权限尚未验证。原准备要求和只读 preflight 见 [远端发布要求](remote-release-requirements.md)；当前发布状态见顶部 [2026-10-19 记录](#2026-10-19-在线安装与正式发布)。
 - 数据库逻辑导出、Host Helper、多机、RBAC 等保持原定延期。ARCH-07 不计入首版适用 44 项。
 
 ## 清理与评审入口

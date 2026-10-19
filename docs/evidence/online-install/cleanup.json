@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "checked_at": "2026-10-19T08:00:57.561265+00:00",
+  "isolated_guests": {
+    "dm-release-debian12-arm64": "Stopped",
+    "dm-release-debian13-arm64": "Stopped",
+    "dm-release-debian12-amd64-kernel": "Stopped",
+    "dm-release-debian13-amd64-kernel": "Stopped",
+    "dm-release-ubuntu24-amd64-kernel": "Stopped",
+    "dm-online-clean-ubuntu24-arm64": "Stopped",
+    "dm-online-public-ubuntu24-arm64": "Stopped"
+  },
+  "retained": [
+    "Guest disks and root-private management data, source directories and matching recovery backups are retained for inspection",
+    "Existing Colima docker-manager-test build profile is retained for image review"
+  ],
+  "production_test_server": "Not connected to or migrated; no change to the existing test server",
+  "host_preview_services": "Not stopped or replaced"
+}
