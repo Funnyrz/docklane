@@ -1,0 +1,471 @@
+{
+  "version": "v0.3.2-beta.1",
+  "source_commit": "048aae7774c238ae7af6336769929649a69fc940",
+  "started_at": "2026-10-19T14:35:46.471675+00:00",
+  "local_checks": {
+    "make_check": "passed",
+    "python_checks": 176,
+    "python_skipped": 1,
+    "frontend_tests": 98,
+    "go_race_vet": "passed",
+    "shell_python_syntax": "passed",
+    "actionlint": "passed",
+    "final_lifecycle_regression": "59 checks passed with one Linux-only skip; retained reinstall avoids stopping absent unit"
+  },
+  "bootstrap_sha256": "23df850ed8431a4c04897538cff93dcdffd67689a24b9af272184c8a10933bca",
+  "limitations": [
+    "Native arm64 Ubuntu24.04 systemd fresh-application acceptance uses preinstalled dependencies; no new full distro/architecture VM matrix",
+    "No independent mainland ISP measurement",
+    "Beta for learning/testing only; do not use in production"
+  ],
+  "legacy_absent_service_systemd_probe": {
+    "load_state": "not-found",
+    "stop_returncode": 5
+  },
+  "legacy_refusal": {
+    "result": "passed",
+    "checked_at": "2026-10-19T14:33:38.368198+00:00",
+    "bootstrap_sha256": "23df850ed8431a4c04897538cff93dcdffd67689a24b9af272184c8a10933bca",
+    "checks": [
+      "Actual new installer refuses existing legacy service/data before dependency or download stages",
+      "Legacy binary, config, key and app/Docker processes remain unchanged"
+    ],
+    "environment": "Dedicated cloned native arm64 Ubuntu24.04 systemd guest"
+  },
+  "real_systemd_new_install_legacy_preflight": "Both online and offline guards accept the explicit absent legacy unit on the prepared guest",
+  "main_ci": {
+    "url": "https://github.com/Funnyrz/docklane/actions/runs/39270883287",
+    "head_sha": "048aae7774c238ae7af6336769929649a69fc940",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "Docker 28.5.1 / arm64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / amd64",
+        "conclusion": "success"
+      },
+      {
+        "name": "checks",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / arm64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 28.5.1 / amd64",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "tag_ci": {
+    "url": "https://github.com/Funnyrz/docklane/actions/runs/39272093523",
+    "head_sha": "048aae7774c238ae7af6336769929649a69fc940",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "checks",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / arm64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 28.5.1 / amd64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 28.5.1 / arm64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / amd64",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "publication_ci": {
+    "url": "https://github.com/Funnyrz/docklane/actions/runs/39272094843",
+    "head_sha": "048aae7774c238ae7af6336769929649a69fc940",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "prepare",
+        "conclusion": "success"
+      },
+      {
+        "name": "publish",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "published_assets": {
+    "names": [
+      "RELEASE-SHA256SUMS",
+      "docklane-images.tar.gz",
+      "docklane-installation.tar.gz",
+      "docklane-v0.3.2-beta.1-linux-amd64.tar.gz",
+      "docklane-v0.3.2-beta.1-linux-arm64.tar.gz",
+      "install-online.sh"
+    ],
+    "version": "0.3.2-beta.1",
+    "prerelease": true,
+    "evidence": {
+      "version": "0.3.2-beta.1",
+      "tag": "v0.3.2-beta.1",
+      "head_sha": "048aae7774c238ae7af6336769929649a69fc940",
+      "ci_run_url": "https://github.com/Funnyrz/docklane/actions/runs/39270883287",
+      "ci_run_id": 39270883287,
+      "publication": "candidate"
+    }
+  },
+  "actual_runtime_artifacts": {
+    "result": "passed",
+    "source_commit": "048aae7774c238ae7af6336769929649a69fc940",
+    "assets_path": "/tmp/docker-manager-release-platforms/docklane-032-published",
+    "checks": [
+      "Installation material version, 9999 defaults, beta channel and progress match attached script",
+      "Actual packaged arm64 binary defaults to 9999 without DM_LISTEN/DM_CONFIG; settings reports 0.3.2-beta.1",
+      "Actual arm64 runtime image serves health/settings 0.3.2-beta.1 on internal port9999"
+    ],
+    "images": [
+      {
+        "reference": "docklane:v0.3.2-beta.1-amd64",
+        "image_id": "sha256:d18fb5cbb8f4b80d1428e7298124ebf6df19d657e082653aa62431bad4284602",
+        "architecture": "amd64",
+        "port": 9999,
+        "MIT": "exact source bytes",
+        "worker_version": "v0.3.2-beta.1"
+      },
+      {
+        "reference": "docklane:v0.3.2-beta.1-arm64",
+        "image_id": "sha256:fe4db3a9120d2037a24f190ea49e7137df78ffff171be6efd5914f89d4f05825",
+        "architecture": "arm64",
+        "port": 9999,
+        "MIT": "exact source bytes",
+        "worker_version": "v0.3.2-beta.1"
+      }
+    ]
+  },
+  "fresh_public_install_and_reboot": {
+    "phases": [
+      {
+        "phase": "install",
+        "started_at": "2026-10-19T14:54:59.829436+00:00",
+        "checks": [
+          {
+            "name": "public curl installation starts and enables hardened systemd service",
+            "status": "passed",
+            "evidence": {
+              "unit": {
+                "MainPID": "2406",
+                "User": "docklane",
+                "Group": "docklane",
+                "ProtectHome": "yes",
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "UnitFileState": "enabled"
+              },
+              "docker_before": {
+                "version": "29.9.1",
+                "pid": "847",
+                "start_ticks": "589",
+                "executable": "/usr/bin/dockerd"
+              },
+              "docker_after": {
+                "version": "29.9.1",
+                "pid": "847",
+                "start_ticks": "589",
+                "executable": "/usr/bin/dockerd"
+              },
+              "docker_installed": false,
+              "private_log": "public-installer-e73f8f1f.log"
+            }
+          },
+          {
+            "name": "first administrator setup and fresh login succeed",
+            "status": "passed",
+            "evidence": {
+              "admin_id": "eccea48c23d731228fcce4c20136b92f"
+            }
+          },
+          {
+            "name": "same-version repeat preserves binary inode, master key, administrator and daemon",
+            "status": "passed",
+            "evidence": {
+              "binary_inode": 23499,
+              "binary_sha256": "9908c93301cc4a1a739cb0a136e164668e530c62493725cb1b8141359835df71",
+              "unit": {
+                "MainPID": "2406",
+                "User": "docklane",
+                "Group": "docklane",
+                "ProtectHome": "yes",
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "UnitFileState": "enabled"
+              },
+              "private_log": "public-installer-218b9c07.log"
+            }
+          }
+        ],
+        "status": "passed",
+        "completed_at": "2026-10-19T14:56:55.320606+00:00"
+      },
+      {
+        "phase": "resume",
+        "started_at": "2026-10-19T14:57:42.017613+00:00",
+        "checks": [
+          {
+            "name": "guest reboot retains automatic startup, health, key, administrator and session",
+            "status": "passed",
+            "evidence": {
+              "before": {
+                "boot_id": "24c82a59-9958-432b-adf2-9b6b2d8a9219",
+                "pid1_start_ticks": "0",
+                "pid1_comm": "systemd"
+              },
+              "after": {
+                "boot_id": "a4fec0fa-0565-4172-ba93-2a06684a1d67",
+                "pid1_start_ticks": "0",
+                "pid1_comm": "systemd"
+              },
+              "unit": {
+                "MainPID": "1074",
+                "User": "docklane",
+                "Group": "docklane",
+                "ProtectHome": "yes",
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "UnitFileState": "enabled"
+              },
+              "docker": {
+                "version": "29.9.1",
+                "pid": "785",
+                "start_ticks": "527",
+                "executable": "/usr/bin/dockerd"
+              },
+              "binary_inode": 23499
+            }
+          }
+        ],
+        "status": "passed",
+        "completed_at": "2026-10-19T14:57:42.134590+00:00"
+      }
+    ],
+    "limitations": [
+      "A disposable native arm64 Ubuntu 24.04 systemd VM; other distribution/architecture combinations have separate candidate evidence.",
+      "No firewall rule is changed; remote network exposure is not asserted."
+    ],
+    "transport": {
+      "public_url": "https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh",
+      "command": "set -o pipefail; curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --",
+      "mocked_operations": []
+    }
+  },
+  "fresh_install_details": {
+    "result": "passed",
+    "service": "docklane.service",
+    "account": "docklane",
+    "config": "/etc/docklane/config.json",
+    "data_dir": "/var/lib/docklane",
+    "listen": ":9999",
+    "installed_version": "v0.3.2-beta.1",
+    "settings_version": "0.3.2-beta.1",
+    "permissions": "canonical config/data/key/database/unit/receipt ownership and modes checked",
+    "installed_binary": "exact published arm64 bytes",
+    "worker": "canonical tag matches verified arm64 release image",
+    "progress": "eight ordered stages, Docklane file completion and bilingual warning on all recorded public curl invocations"
+  },
+  "offline_lifecycle": {
+    "status": "passed",
+    "release": "v0.3.2-beta.1",
+    "hostname": "lima-docklane-032-public-ubuntu24-arm64",
+    "started_at": "2026-10-19T14:57:42.204422+00:00",
+    "checks": [
+      {
+        "name": "published six-asset manifest and safe extraction match selected release",
+        "status": "passed",
+        "evidence": {
+          "source_evidence": {
+            "names": [
+              "RELEASE-SHA256SUMS",
+              "docklane-images.tar.gz",
+              "docklane-installation.tar.gz",
+              "docklane-v0.3.2-beta.1-linux-amd64.tar.gz",
+              "docklane-v0.3.2-beta.1-linux-arm64.tar.gz",
+              "install-online.sh"
+            ],
+            "version": "0.3.2-beta.1",
+            "prerelease": true,
+            "evidence": {
+              "version": "0.3.2-beta.1",
+              "tag": "v0.3.2-beta.1",
+              "head_sha": "048aae7774c238ae7af6336769929649a69fc940",
+              "ci_run_url": "https://github.com/Funnyrz/docklane/actions/runs/39270883287",
+              "ci_run_id": 39270883287,
+              "publication": "candidate"
+            }
+          }
+        }
+      },
+      {
+        "name": "same-version offline upgrade creates paired backup and preserves administrator/key/settings/Docker",
+        "status": "passed",
+        "evidence": {
+          "backup_group": "/var/backups/docklane/20261019T145743.219393Z",
+          "unit": {
+            "MainPID": "1784",
+            "WorkingDirectory": "/var/lib/docklane",
+            "User": "docklane",
+            "Group": "docklane",
+            "SupplementaryGroups": "docker",
+            "ProtectHome": "yes",
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "UnitFileState": "enabled"
+          }
+        }
+      },
+      {
+        "name": "invalid executable failure stops service and complete matching-group restore retains administrator/key/settings/Docker",
+        "status": "passed",
+        "evidence": {
+          "returncode": 1,
+          "restored_backup_group": "/var/backups/docklane/20261019T145743.796424Z",
+          "unit": {
+            "MainPID": "2229",
+            "WorkingDirectory": "/var/lib/docklane",
+            "User": "docklane",
+            "Group": "docklane",
+            "SupplementaryGroups": "docker",
+            "ProtectHome": "yes",
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "UnitFileState": "enabled"
+          },
+          "fixture": "Deliberately invalid executable, not schema or cross-version migration failure"
+        }
+      },
+      {
+        "name": "recognized uninstall removes only docklane unit/binary and retains config/data/key/account/receipt/Docker",
+        "status": "passed",
+        "evidence": {}
+      },
+      {
+        "name": "offline reinstall preserves administrator/key/settings and returns active enabled service",
+        "status": "passed",
+        "evidence": {
+          "retained_data_backup_group": "/var/backups/docklane/20261019T145845.920835Z",
+          "unit": {
+            "MainPID": "2560",
+            "WorkingDirectory": "/var/lib/docklane",
+            "User": "docklane",
+            "Group": "docklane",
+            "SupplementaryGroups": "docker",
+            "ProtectHome": "yes",
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "UnitFileState": "enabled"
+          },
+          "backup_scope": "Retained data, config and receipt; the preceding uninstall already removed binary/unit"
+        }
+      }
+    ],
+    "private_materials": "/var/lib/docklane-032-public/lifecycle-g5kub7hd",
+    "limitations": [
+      "One isolated native arm64 Ubuntu 24.04 real systemd VM with already-installed dependencies.",
+      "Offline same-version replacement/reinstallation only; no cross-version or old deployment migration claim.",
+      "Public curl install, repeat and actual reboot are covered by the preceding separate report.",
+      "Worker backup/restore and other distribution/architecture combinations are covered separately."
+    ],
+    "completed_at": "2026-10-19T14:58:46.255635+00:00"
+  },
+  "public_release_page": "GitHub page renders version0.3.2-beta.1, Docklane deployment names, 9999 and testing disclaimer",
+  "old_beta_withdrawal": {
+    "result": "passed",
+    "checked_at": "2026-10-19T15:01:10.040121+00:00",
+    "removed": {
+      "v0.3.1-beta.1": {
+        "release_http": 404,
+        "remote_tag_http": 404
+      },
+      "v0.3.1-beta.2": {
+        "release_http": 404,
+        "remote_tag_http": 404
+      }
+    },
+    "remaining_release": "v0.3.2-beta.1",
+    "new_release_prerelease": true,
+    "new_release_assets": 6,
+    "stable_latest_http": 404,
+    "v0.3.0_tag": "unchanged",
+    "local_old_tags": "removed",
+    "historical_commits": "retained as ancestors of main"
+  },
+  "public_command_after_withdrawal": {
+    "result": "passed",
+    "checked_at": "2026-10-19T15:02:00.794299+00:00",
+    "command": "set -o pipefail; curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --",
+    "bootstrap_matches_tagged_source": true,
+    "default_selected": "v0.3.2-beta.1",
+    "service": "active/enabled/healthy :9999",
+    "repeat_preserves": [
+      "binary digest/inode",
+      "master key",
+      "configuration",
+      "receipt",
+      "app and Docker PID",
+      "administrator login"
+    ],
+    "progress": "eight ordered stages",
+    "mocked_operations": []
+  },
+  "release_url": "https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1",
+  "asset_digests": [
+    {
+      "name": "docklane-images.tar.gz",
+      "size": 178578280,
+      "digest": "sha256:821dd7cbcac80107bca9dd691109b31f92db3e34a1e013ccb1c2ca55f147654e"
+    },
+    {
+      "name": "docklane-installation.tar.gz",
+      "size": 4830249,
+      "digest": "sha256:f6196c41f6740337c0a619568402d300e076b362b17af03beaa1a888399fd063"
+    },
+    {
+      "name": "docklane-v0.3.2-beta.1-linux-amd64.tar.gz",
+      "size": 10659046,
+      "digest": "sha256:430e0f06aeaaab40288a7aa9e0cc7299e29fd9375f3c6c53b45f6358592ad083"
+    },
+    {
+      "name": "docklane-v0.3.2-beta.1-linux-arm64.tar.gz",
+      "size": 9626241,
+      "digest": "sha256:93bd4109e42223569ecb68aea4f258f3cf283e0f337bfea63c71c539e34d57d1"
+    },
+    {
+      "name": "install-online.sh",
+      "size": 30102,
+      "digest": "sha256:23df850ed8431a4c04897538cff93dcdffd67689a24b9af272184c8a10933bca"
+    },
+    {
+      "name": "RELEASE-SHA256SUMS",
+      "size": 484,
+      "digest": "sha256:98a3856b5d65d19bb575a7d876b57742ad9c1c82f4b99a0cad436b75021ff8f8"
+    }
+  ],
+  "cleanup": {
+    "test_guests_stopped": [
+      "docklane-032-public-ubuntu24-arm64"
+    ],
+    "private_test_data_and_paired_backups": "retained",
+    "unrelated_primary_worktree_changes": "excluded"
+  },
+  "verified_at": "2026-10-19T15:03:34.065771+00:00",
+  "result": "passed"
+}

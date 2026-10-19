@@ -4,7 +4,15 @@
 
 当前源码与最新 Beta 为 [v0.3.2-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.1)。旧 v0.3.1-beta.1、v0.3.1-beta.2 的 Release、附件及远端 Tag 已撤回；v0.3.0 Release 也已撤回，但保留其 Tag。当前没有正式 Release 或正式版 latest，显式 `--channel stable` 会因暂无正式版而停止。当前安装请使用 [README 的一键安装命令](../README.md#一键在线安装推荐)，无参数默认选择最新 Beta，并在修改系统前显示测试版警告。
 
-本版部署名称统一为 `docklane`：服务、账号、配置/数据/安装备份目录、镜像及六附件使用新名称，默认端口为 9999，安装器保留阶段与下载进度提示。旧 `docker-manager` 服务、配置或数据残留会使安装停止，不自动更名、迁移、覆盖或删除。新版本的实际发布及验收证据按后续记录核对；以下旧版检查不能代替本版验证。
+本版部署名称统一为 `docklane`：服务、账号、配置/数据/安装备份目录、镜像及六附件使用新名称，默认端口为 9999，安装器保留阶段与下载进度提示。旧 `docker-manager` 服务、配置或数据残留会使安装停止，不自动更名、迁移、覆盖或删除。本版实际验收见下方记录；以下历史检查不能代替本版验证。
+
+## 2026-10-19 v0.3.2-beta.1 部署命名与旧 Beta 撤回
+
+[发布验收记录](evidence/beta-release-0.3.2-beta.1.json)对应 [048aae7](https://github.com/Funnyrz/docklane/commit/048aae7774c238ae7af6336769929649a69fc940)。[主分支 CI](https://github.com/Funnyrz/docklane/actions/runs/39270883287)、[Tag CI](https://github.com/Funnyrz/docklane/actions/runs/39272093523)及[发布工作流](https://github.com/Funnyrz/docklane/actions/runs/39272094843)均成功，包含 Docker 28/29 × amd64/arm64 实际集成和草稿上传后的下载复核。新版恰好六个 Docklane 命名附件，公开镜像下载的摘要与 GitHub 记录一致，双架构 ELF、MIT 原文、同版本安装材料及 worker 身份通过检查；包内 arm64 程序与镜像实际在 9999 健康并返回 `0.3.2-beta.1`，Compose 项目、服务和数据卷名称通过实际 Compose v2 配置校验。
+
+原生 arm64 Ubuntu 24.04 隔离 systemd VM 使用无参数公开 curl 完成全新应用安装、管理员初始化、重复安装及真实关机/启动后的自启。新服务、账号、配置和数据目录及权限正确，程序为已发布原生包的准确字节；安装阶段、文件下载提示和双语警告检查通过。实际离线同版本重装生成完整配套备份；刻意安装无效程序后服务按预期停止，使用同一备份组恢复程序、服务、配置、安装记录、数据库及密钥成功。识别后的卸载保留数据、账号及安装记录，随后重装保留管理员、密钥和设置。另通过真实旧实例确认旧部署残留在依赖/下载之前被拒绝，原文件和进程未改动；没有执行旧部署更名迁移。
+
+新版公开验证完成后，精确删除了 v0.3.1-beta.1、v0.3.1-beta.2 的 Release、六附件和远端/本地 Tag；对应 Release 与 Tag API 均返回 404。v0.3.0 Tag 未改变，旧 Git 提交与历史证据保留。当前仅有新版预发布，正式版 latest API 仍为 404。撤回后再次执行真实无参数公开命令，仍选择 `v0.3.2-beta.1`，程序 inode/摘要、密钥、配置、安装记录、应用/Docker 进程及管理员保留。完整本地 `make check` 及最终回归合计覆盖 176 项 Python 检查（macOS 跳过 1 项 Linux 专用场景），98 项前端测试、Go race/vet、Shell/Python、actionlint 通过。本次 VM 预装依赖，未新增完整发行版/架构 systemd 矩阵或独立国内运营商网络验收；失败恢复为同版本无效程序场景，不宣称旧版迁移或跨 schema 恢复。测试 VM 已停止并保留私有数据、配套备份；程序仍仅供学习与测试，请勿用于生产环境。
 
 ## 历史发布与验证记录
 
