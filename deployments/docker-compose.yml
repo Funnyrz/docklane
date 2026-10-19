@@ -1,6 +1,6 @@
 services:
   docker-manager:
-    image: docker-manager:v0.3.0
+    image: docker-manager:v0.3.1-beta.1
     build: ..
     restart: unless-stopped
     ports:

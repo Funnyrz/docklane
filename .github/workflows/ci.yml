@@ -61,7 +61,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: linux-binaries-and-checksums
-          path: bin/release/
+          path: bin/release-internal/
           if-no-files-found: error
           retention-days: 14
 
@@ -173,7 +173,7 @@ jobs:
           pnpm --dir web install --frozen-lockfile
           pnpm --dir web build
           sh scripts/release.sh
-          cp "bin/release/docklane-linux-${BINARY_ARCH}" "$DM_TEST_BINARY"
+          cp "bin/release-internal/docklane-linux-${BINARY_ARCH}" "$DM_TEST_BINARY"
           docker compose version --short
           "$DM_TEST_RESTIC" version
           docker build --tag "$DM_TEST_WORKER_IMAGE" .

@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"runtime"
 
+	"github.com/docker-manager/docker-manager/internal/buildinfo"
 	"github.com/docker-manager/docker-manager/internal/config"
 	"github.com/docker-manager/docker-manager/internal/database"
 	"github.com/docker-manager/docker-manager/internal/platform"
@@ -24,7 +25,7 @@ func settingsResponse(c *gin.Context, a *platform.App, saved config.CapabilitySe
 	if a.Config.Mode == "docker" {
 		restartSettings.EnableDaemonWrite = false
 	}
-	return gin.H{"version": "0.3.0", "mode": a.Config.Mode, "listen": a.Config.Listen, "data_dir": a.Config.DataDir, "allowed_paths": effective.AllowedPaths, "path_mappings": effective.PathMappings, "capabilities": capabilities(c.Request.Context(), a), "capability_settings": gin.H{"effective": effective, "saved": saved, "pending_restart": !reflect.DeepEqual(effective, restartSettings), "daemon_toggle_supported": daemonToggleSupported(a.Config.Mode)}}
+	return gin.H{"version": buildinfo.Version, "mode": a.Config.Mode, "listen": a.Config.Listen, "data_dir": a.Config.DataDir, "allowed_paths": effective.AllowedPaths, "path_mappings": effective.PathMappings, "capabilities": capabilities(c.Request.Context(), a), "capability_settings": gin.H{"effective": effective, "saved": saved, "pending_restart": !reflect.DeepEqual(effective, restartSettings), "daemon_toggle_supported": daemonToggleSupported(a.Config.Mode)}}
 }
 
 func getSettings(c *gin.Context, a *platform.App) {

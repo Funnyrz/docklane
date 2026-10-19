@@ -1,5 +1,6 @@
 GO ?= go
 PNPM ?= pnpm
+VERSION := $(shell python3 -c 'import json; print(json.load(open("web/package.json"))["version"])')
 
 .PHONY: setup web build test lint check release release-images integration
 setup:
@@ -9,7 +10,7 @@ web:
 	$(PNPM) --dir web build
 build: web
 	mkdir -p bin
-	CGO_ENABLED=0 $(GO) build -trimpath -o bin/docklane ./cmd/server
+	CGO_ENABLED=0 $(GO) build -trimpath -ldflags="-X github.com/docker-manager/docker-manager/internal/buildinfo.Version=$(VERSION)" -o bin/docklane ./cmd/server
 test: web
 	$(GO) test ./...
 	$(PNPM) --dir web test

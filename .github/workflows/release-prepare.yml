@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Existing tag with successful CI; this release supports v0.3.0'
+        description: 'Existing stable or beta.N tag matching the source package version and successful CI'
         required: true
-        default: v0.3.0
+        default: v0.3.1-beta.1
         type: string
       publish:
         description: 'Publish a new release only after the candidate has passed all checks'
@@ -32,14 +32,19 @@ jobs:
     outputs:
       source_sha: ${{ steps.verify-ci.outputs.source_sha }}
     steps:
-      - name: Validate the requested release
-        env:
-          RELEASE_TAG: ${{ inputs.release_tag }}
-        run: test "$RELEASE_TAG" = v0.3.0
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: refs/tags/${{ inputs.release_tag }}
           persist-credentials: false
+      - name: Validate the requested release against source version
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        shell: python
+        run: |
+          import json, os, re
+          version = json.load(open('web/package.json'))['version']
+          if not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+(?:-beta\.[1-9][0-9]*)?', version) or os.environ['RELEASE_TAG'] != 'v' + version:
+              raise SystemExit('Release tag must match the supported source package version')
       - name: Require successful CI for the exact tagged commit
         id: verify-ci
         env:
@@ -60,7 +65,8 @@ jobs:
           if not approved:
               raise SystemExit('No completed, successful CI push/manual run for this exact commit')
           with open(sys.argv[3], 'w') as output:
-              json.dump({'head_sha': sys.argv[2], 'ci_run_url': approved[0]['html_url'],
+              version = json.load(open('web/package.json'))['version']
+              json.dump({'version': version, 'tag': 'v' + version, 'head_sha': sys.argv[2], 'ci_run_url': approved[0]['html_url'],
                          'ci_run_id': approved[0]['id'], 'publication': 'candidate'}, output, indent=2)
           PY
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
@@ -87,15 +93,11 @@ jobs:
           pnpm --dir web build
           go test -race ./...
           go vet ./...
-          rm -rf -- bin/release
           sh scripts/release.sh
           sh scripts/build-images.sh
-          cp "$RUNNER_TEMP/release-ci-evidence.json" bin/release/
+          cp "$RUNNER_TEMP/release-ci-evidence.json" bin/release-internal/
           sh scripts/package-installation.sh
           cd bin/release
-          sha256sum --check SHA256SUMS
-          sha256sum --check IMAGE-SHA256SUMS
-          for checksum in docklane-v0.3.0-linux-*.tar.gz.sha256; do sha256sum --check "$checksum"; done
           sha256sum --check RELEASE-SHA256SUMS
       - name: Upload reviewable artifacts only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -114,6 +116,11 @@ jobs:
       contents: write
       actions: read
     steps:
+      - name: Check out the exact CI-approved source for candidate validation
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ needs.prepare.outputs.source_sha }}
+          persist-credentials: false
       - name: Download the candidate from this run
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
@@ -128,6 +135,7 @@ jobs:
         shell: python
         run: |
           import hashlib
+          import importlib.util
           import json
           import os
           from pathlib import Path
@@ -136,45 +144,21 @@ jobs:
           import tempfile
 
           repo, tag, sha = (os.environ[key] for key in ('GH_REPO', 'RELEASE_TAG', 'SOURCE_SHA'))
-          if tag != 'v0.3.0' or not re.fullmatch(r'[0-9a-f]{40}', sha):
+          version = json.loads(Path('web/package.json').read_text())['version']
+          if tag != 'v' + version or not re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+(?:-beta\.[1-9][0-9]*)?', tag) or not re.fullmatch(r'[0-9a-f]{40}', sha):
               raise SystemExit('Invalid release identity')
+          spec = importlib.util.spec_from_file_location('release_preflight', 'scripts/release-preflight.py')
+          helper = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(helper)
           root = Path('candidate').resolve()
-          required = {'SHA256SUMS', 'IMAGE-SHA256SUMS', 'docker-manager-images.tar.gz',
-                      'docker-manager-installation.tar.gz', 'IMAGES.txt', 'TOOL-VERSIONS.txt',
-                      'SECURITY-NOTES.md', 'LICENSE', 'release-ci-evidence.json', 'install-online.sh'}
-          for arch in ('amd64', 'arm64'):
-              required.update({f'docklane-linux-{arch}', f'docklane-{tag}-linux-{arch}.tar.gz',
-                               f'docklane-{tag}-linux-{arch}.tar.gz.sha256'})
+          beta = '-beta.' in tag
 
           def digest(path):
-              value = hashlib.sha256()
-              with path.open('rb') as stream:
-                  for block in iter(lambda: stream.read(1 << 20), b''):
-                      value.update(block)
-              return value.hexdigest()
+              return helper.file_digest(path)
 
           def validate(directory):
-              listed = {}
-              manifest = directory / 'RELEASE-SHA256SUMS'
-              if not manifest.is_file() or manifest.is_symlink():
-                  raise SystemExit('Missing checksum manifest')
-              for line in manifest.read_text().splitlines():
-                  match = re.fullmatch(r'([a-f0-9]{64})  ([A-Za-z0-9][A-Za-z0-9._-]*)', line)
-                  if not match or match[2] == manifest.name or match[2] in listed:
-                      raise SystemExit('Malformed checksum manifest')
-                  listed[match[2]] = match[1]
-              if not required.issubset(listed):
-                  raise SystemExit('Missing required release assets')
-              if {path.name for path in directory.iterdir()} != set(listed) | {manifest.name}:
-                  raise SystemExit('Unlisted release files')
-              for name, expected in listed.items():
-                  path = directory / name
-                  if not path.is_file() or path.is_symlink() or digest(path) != expected:
-                      raise SystemExit('Checksum mismatch: ' + name)
-              evidence = json.loads((directory / 'release-ci-evidence.json').read_text())
-              if evidence['head_sha'] != sha:
-                  raise SystemExit('Candidate was built from another commit')
-              return sorted(listed) + [manifest.name], evidence
+              result = helper.validate_candidate(directory, tag, sha)
+              return result['names'], result['evidence']
 
           def gh(*args):
               return subprocess.check_output(['gh', *args], text=True)
@@ -191,30 +175,41 @@ jobs:
               if obj['type'] != 'commit' or obj['sha'] != sha:
                   raise SystemExit('Remote tag no longer points at the CI-approved commit')
 
+          def verify_ci(evidence):
+              run = api('actions/runs/' + str(evidence['ci_run_id']))
+              if run.get('head_sha') != sha or run.get('status') != 'completed' or run.get('conclusion') != 'success' or run.get('event') not in ('push', 'workflow_dispatch') or run.get('path', '').split('@', 1)[0] != '.github/workflows/ci.yml':
+                  raise SystemExit('Candidate does not reference successful exact-commit CI')
+
+          previous_latest = api('releases/latest')['tag_name'] if beta else None
           names, evidence = validate(root)
+          verify_ci(evidence)
           verify_tag()
           pages = json.loads(gh('api', '--paginate', '--slurp', 'repos/' + repo + '/releases?per_page=100'))
           if any(release['tag_name'] == tag for page in pages for release in page):
               raise SystemExit('Release already exists; no existing draft or published release will be overwritten')
           notes = Path(os.environ['RUNNER_TEMP']) / 'release-notes.md'
+          channel_argument = ' --channel beta' if beta else ''
+          disclaimer = '本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。\nThis program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use.'
           notes.write_text(f'''Docklane {tag}
+
+          {disclaimer}
 
           One-command Linux installation with systemd background service and boot startup.
           Supports Ubuntu 24.04, Debian 12/13, amd64 and arm64.
 
           ```sh
-          curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/{repo}/main/scripts/install-online.sh | sudo bash -s --
+          curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/{repo}/main/scripts/install-online.sh | sudo bash -s --{channel_argument}
           ```
 
           Download assets from this same release and verify `RELEASE-SHA256SUMS` before offline use.
           Worker archive tags: `docker-manager:{tag}-amd64` and `docker-manager:{tag}-arm64`.
-          See the bundled README and SECURITY-NOTES.md for migration, backup and permissions.
+          See the installation archive's README and SECURITY-NOTES.md for migration, backup and permissions.
 
           Source commit: {sha}
           Successful exact-commit CI: {evidence['ci_run_url']}
           ''')
           gh('release', 'create', tag, '--repo', repo, '--draft', '--verify-tag',
-             '--target', sha, '--title', 'Docklane ' + tag, '--notes-file', str(notes))
+             '--target', sha, '--title', 'Docklane ' + tag, '--notes-file', str(notes), *(['--prerelease'] if beta else []))
           gh('release', 'upload', tag, '--repo', repo, *[str(root / name) for name in names])
           with tempfile.TemporaryDirectory(prefix='verify-release-') as temporary:
               gh('release', 'download', tag, '--repo', repo, '--dir', temporary)
@@ -222,8 +217,14 @@ jobs:
               if digest(Path(temporary) / 'RELEASE-SHA256SUMS') != digest(root / 'RELEASE-SHA256SUMS'):
                   raise SystemExit('Uploaded checksum manifest differs')
           verify_tag()
-          gh('release', 'edit', tag, '--repo', repo, '--draft=false', '--latest')
+          verify_ci(evidence)
+          gh('release', 'edit', tag, '--repo', repo, '--draft=false', '--prerelease=' + str(beta).lower(), '--latest=' + str(not beta).lower())
           release = api('releases/tags/' + tag)
-          if release['draft'] or release['prerelease']:
+          if release['draft'] or release['prerelease'] != beta:
               raise SystemExit('Release did not become a formal release')
+          current_latest = api('releases/latest')['tag_name']
+          if beta and current_latest != previous_latest:
+              raise SystemExit('Beta publication changed the stable latest release')
+          if not beta and current_latest != tag:
+              raise SystemExit('Stable release did not become latest')
           print('Published verified release: ' + release['html_url'])

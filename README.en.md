@@ -1,5 +1,9 @@
 # Docklane
 
+> This program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use.
+
+The current source version is `0.3.1-beta.1`. Online installation still defaults to the stable channel (currently `v0.3.0`); the beta is a prerelease and does not replace the latest stable release.
+
 **Your containers. Under control.**
 
 A single-host Docker management and local backup platform. Manage containers, Compose projects and Docker resources, follow tasks, and preview and verify local backups and restores through a bilingual web console.
@@ -132,7 +136,41 @@ sudo systemctl stop docker-manager         # Stop
 sudo systemctl disable docker-manager      # Disable startup at boot
 ```
 
-### Choose a download
+### Beta prerelease installation and downloads
+
+For learning and testing only. Select the published beta channel or pin this version; omitting these options continues to install stable:
+
+```sh
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.1-beta.1
+```
+
+The beta Release has exactly six attachments; `RELEASE-SHA256SUMS` covers the other five:
+
+| Attachment | Contents |
+| --- | --- |
+| `docklane-v0.3.1-beta.1-linux-amd64.tar.gz` | amd64 `docklane` and `LICENSE` |
+| `docklane-v0.3.1-beta.1-linux-arm64.tar.gz` | arm64 `docklane` and `LICENSE` |
+| `docker-manager-installation.tar.gz` | Installation scripts, configuration and documentation; root-level `VERSION`, license, internal binary/image checksums, `IMAGES.txt`, tool versions and CI evidence |
+| `docker-manager-images.tar.gz` | Application and backup worker images for both architectures |
+| `install-online.sh` | Version-matched online entrypoint |
+| `RELEASE-SHA256SUMS` | Top-level attachment SHA-256 manifest |
+
+Offline systemd installation requires the Docker, Compose, Restic, Python and account permissions listed below. Download the native package, installation materials, image archive and top-level manifest into an empty directory, then run these commands. On arm64, replace `amd64` with `arm64` in the package name and image tag:
+
+```sh
+sha256sum --check --ignore-missing RELEASE-SHA256SUMS
+tar -xzf docklane-v0.3.1-beta.1-linux-amd64.tar.gz
+tar -xzf docker-manager-installation.tar.gz
+sha256sum --check IMAGE-SHA256SUMS
+sudo docker load -i docker-manager-images.tar.gz
+sudo docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
+sudo ./scripts/install.sh ./docklane
+```
+
+The materials archive's root-level `VERSION` contains `0.3.1-beta.1` without a `v` prefix. The application version changes while configuration and database schemas remain v1. Raw binaries, `.sha256` sidecars, `IMAGES.txt` and the license are no longer separate beta attachments; these materials remain inside the installation archive. The v0.3.0 instructions below preserve its original release format and stable usage.
+
+### Stable downloads (v0.3.0)
 
 Download assets for your architecture from the [v0.3.0 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.0). Online installation fetches matching materials automatically; manual installation requires verifying the corresponding checksum manifest first.
 
@@ -183,7 +221,7 @@ Install Git, Docker Engine, Docker Buildx (for BuildKit builds) and Compose v2, 
 ```sh
 git clone https://github.com/Funnyrz/docklane.git
 cd docklane
-docker build -t docker-manager:v0.3.0 .
+docker build -t docker-manager:v0.3.1-beta.1 .
 export DM_BACKUP_HOST_DIR=/srv/docker-manager/backups
 export DM_RESTORE_HOST_DIR=/srv/docker-manager/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
@@ -249,7 +287,7 @@ make release        # Both Linux binary architectures, slim tar.gz packages and 
 make release-images # Both image architectures and offline archive; requires Docker Buildx
 ```
 
-Source release commands write their artifacts to `bin/release/` by default; `RELEASE_OUTPUT_DIR` overrides the release script's output directory. To install from source, use `sudo ./scripts/install.sh ./bin/release/docklane-linux-amd64`.
+Raw source-build binaries and internal checksums default to `bin/release-internal/`, overridden by `RELEASE_BUILD_DIR`; the final six attachments go to `bin/release/`, overridden by `RELEASE_OUTPUT_DIR`. To install from source, use `sudo ./scripts/install.sh ./bin/release-internal/docklane-linux-amd64`. For a beta Release, install the `./docklane` extracted from the native package.
 
 Translations live in `web/src/i18n/`. Add both languages with matching interpolation parameters for new text. `pnpm --dir web test` covers dictionary consistency and language switching.
 

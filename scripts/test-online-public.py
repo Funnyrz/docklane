@@ -7,6 +7,8 @@ running the resume phase.
 """
 import argparse
 import importlib.util
+import json
+import shlex
 import os
 from pathlib import Path
 import secrets
@@ -23,6 +25,7 @@ def main():
     parser.add_argument('--source', type=Path, required=True)
     parser.add_argument('--report', type=Path, required=True)
     parser.add_argument('--phase', choices=('install', 'resume'), required=True)
+    parser.add_argument('--channel', choices=('stable', 'beta'), default='stable')
     args = parser.parse_args()
     if sys.platform != 'linux' or os.geteuid() != 0 or os.getenv('DM_PLATFORM_ISOLATED') != '1':
         parser.error('Requires root in an explicitly isolated Linux guest')
@@ -46,13 +49,15 @@ def main():
 
     class PublicAcceptance(harness.Acceptance):
         def invoke_online(self):
-            result = self.helper.command(['bash', '-c', COMMAND], env=self.env,
+            result = self.helper.command(['bash', '-c', COMMAND + ' --channel ' + shlex.quote(args.channel)], env=self.env,
                                          timeout=2400, allow_failure=True)
             log = self.state / ('public-installer-' + secrets.token_hex(4) + '.log')
             log.write_bytes(result.stdout + b'\n' + result.stderr)
             log.chmod(0o600)
             self.check(result.returncode == 0, 'public curl installation failed; inspect private log: ' + str(log) + '\n' +
                        self.helper.clean_message(result.stderr.decode(errors='replace')[-2500:]))
+            self.control['version'] = json.loads(Path('/var/lib/docklane-installer/release.json').read_text())['version']
+            self.save()
             return log.name
 
         def run(self):

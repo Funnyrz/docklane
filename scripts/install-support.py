@@ -48,7 +48,7 @@ GO_DEFAULTS = {
     'version': 1, 'log_level': 'info', 'listen': ':8080', 'data_dir': './data',
     'docker_endpoint': 'unix:///var/run/docker.sock', 'mode': 'binary',
     'daemon_config_path': '/etc/docker/daemon.json', 'compose_path': 'docker',
-    'restic_path': 'restic', 'backup_worker_image': 'docker-manager:v0.3.0',
+    'restic_path': 'restic', 'backup_worker_image': 'docker-manager:v0.3.1-beta.1',
     'allowed_paths': [], 'path_mappings': [], 'enable_daemon_write': False,
     'session_secure': False, 'backup_temp_dir': '',
 }
@@ -56,6 +56,26 @@ GO_DEFAULTS = {
 
 class InstallError(Exception):
     pass
+
+
+def material_version(source_dir):
+    version_file = Path(source_dir) / 'VERSION'
+    package = Path(source_dir) / 'web/package.json'
+    value = version_file.read_text().strip() if version_file.is_file() else (read_json(package).get('version') if package.is_file() else '0.3.1-beta.1')
+    version_key(value)
+    return 'v' + value.removeprefix('v')
+
+
+def version_key(value):
+    match = re.fullmatch(r'v?(\d+)\.(\d+)\.(\d+)(?:-beta\.(\d+))?', value or '')
+    if not match:
+        raise InstallError('Cannot safely compare installed/selected release version.')
+    return tuple(map(int, match.group(1, 2, 3))) + (1 if match[4] is None else 0, int(match[4] or 0))
+
+
+def prevent_implicit_downgrade(selected, installed, explicit=False):
+    if installed and not explicit and version_key(selected) < version_key(installed):
+        raise InstallError('Implicit downgrade refused; specify --version explicitly and retain a matching recovery backup.')
 
 
 def run(args, check=True, **kwargs):
@@ -216,6 +236,8 @@ def service_context():
 def effective_config(source_dir, env, cwd, explicit=None, migration=False, live_context=False):
     # An existing process began from Go defaults, not the fresh-install example.
     config = copy.deepcopy(GO_DEFAULTS) if migration else read_json(source_dir / 'deployments/config.example.json')
+    if migration:
+        config['backup_worker_image'] = 'docker-manager:' + material_version(source_dir)
     selected = explicit or env.get('DM_CONFIG')
     if selected:
         config.update(read_json(absolute(selected, cwd)))
@@ -470,7 +492,7 @@ def checked_worker_image(configured, version):
         return value
 
     expected_id = image_id(expected)
-    if re.fullmatch(r'docker-manager:v\d+\.\d+\.\d+(?:-(?:amd64|arm64))?', configured or ''):
+    if re.fullmatch(r'docker-manager:v\d+\.\d+\.\d+(?:-beta\.\d+)?(?:-(?:amd64|arm64))?', configured or ''):
         return expected
     if image_id(configured) != expected_id:
         raise InstallError('The custom backup_worker_image does not match the verified worker from the selected release; provide a matching alias or the release default.')
@@ -545,6 +567,8 @@ def deploy(args):
     if sys.platform != 'linux' or os.geteuid() != 0 or not Path('/run/systemd/system').is_dir():
         raise InstallError('Deployment requires root on Linux with systemd running.')
     source_dir = Path(args.source_dir).resolve(strict=True)
+    if material_version(source_dir) != args.version:
+        raise InstallError('Installation material version does not match the selected release.')
     candidate = Path(args.binary).resolve(strict=True)
     if digest(candidate) != args.sha256.lower():
         raise InstallError('Binary SHA-256 does not match; installation refused.')
@@ -569,6 +593,8 @@ def deploy(args):
 
 def _deploy_locked(args, source_dir, candidate):
     managed = service_context()
+    installed_state = read_json(STATE) if STATE.is_file() else {}
+    prevent_implicit_downgrade(args.version, installed_state.get('version'), getattr(args, 'explicit_version', False))
     # Uninstall deliberately retains this private receipt and the data/config.
     if not managed and STATE.is_file() and CONFIG.is_file() and not BINARY.exists() and not UNIT.exists():
         if STATE.is_symlink() or STATE.stat().st_uid != os.geteuid() or STATE.stat().st_mode & 0o077:
@@ -648,7 +674,7 @@ def _deploy_locked(args, source_dir, candidate):
         listen_address(config['listen'])
         same_binary = BINARY.is_file() and digest(BINARY) == args.sha256.lower()
         old_state = read_json(STATE) if STATE.is_file() else {}
-        same = existing and old_pid and same_binary and old_state.get('version') == args.version and not args.config and not args.listen and not worker_changed
+        same = existing and old_pid and same_binary and old_state.get('version') == args.version and not args.config and not args.listen and not worker_changed and not getattr(args, 'explicit_version', False)
         if same:
             lock.close()
             run(['systemctl', 'enable', '--now', SERVICE])
@@ -740,8 +766,17 @@ def main():
     command.add_argument('--listen')
     command.add_argument('--migrate-from')
     command.add_argument('--config')
+    command.add_argument('--explicit-version', action='store_true')
+    inspect_version = commands.add_parser('version')
+    inspect_version.add_argument('--source-dir', required=True)
     args = parser.parse_args()
     try:
+        if args.command == 'version':
+            print(material_version(args.source_dir))
+            return 0
+        if os.environ.get('DOCKLANE_NOTICE_SHOWN') != '1':
+            print('本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。', flush=True)
+            print('This program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use.', flush=True)
         deploy(args)
     except (InstallError, OSError, ValueError, sqlite3.Error) as exc:
         print(f'Installation refused: {exc}', file=sys.stderr)

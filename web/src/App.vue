@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { version as appVersion } from '../package.json'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { NConfigProvider, NButton, NInput, zhCN, dateZhCN, enUS, dateEnUS } from 'naive-ui'
 import { useAuth } from './stores/auth'
@@ -145,7 +146,7 @@ onUnmounted(() => {
             <span><AppIcon name="activity" />{{ t('auth.activity') }}</span>
           </div>
         </div>
-        <small class="auth-story-footer">{{ t('common.privateOperations') }} <span>/</span> v0.3</small>
+        <small class="auth-story-footer">{{ t('common.privateOperations') }} <span>/</span> v{{ appVersion }}</small>
       </aside>
       <main class="auth-form">
         <div class="auth-form-inner">
@@ -187,7 +188,7 @@ onUnmounted(() => {
           </button>
         </nav>
         <div class="sidebar-bottom">
-          <span class="version">v0.3 <span>{{ t('nav.platform') }}</span></span>
+          <span class="version">v{{ appVersion }} <span>{{ t('nav.platform') }}</span></span>
           <button class="sidebar-user" :aria-label="`${t('nav.logout')} · ${str(auth.user.username)}`" :title="desktopCollapsed ? `${t('nav.logout')} · ${str(auth.user.username)}` : undefined" @click="logout">
             <span class="avatar">{{ userInitial }}</span>
             <span class="sidebar-user-copy"><strong>{{ str(auth.user.username) }}</strong><small>{{ t('nav.logout') }}</small></span>
@@ -217,7 +218,7 @@ onUnmounted(() => {
           <TasksView v-else-if="page === 'tasks'" />
           <SettingsView v-else-if="page === 'settings'" />
           <DashboardView v-else @navigate="navigate" />
-          <footer class="page-footer"><span>{{ t('nav.footer') }}</span><span>Docklane / v0.3</span></footer>
+          <footer class="page-footer"><span>{{ t('nav.footer') }}</span><span>Docklane / v{{ appVersion }}</span></footer>
         </main>
       </div>
     </div>

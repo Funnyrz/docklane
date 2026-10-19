@@ -17,6 +17,9 @@ from unittest import mock
 spec = importlib.util.spec_from_file_location('release_preflight', Path(__file__).with_name('release-preflight.py'))
 preflight = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(preflight)
+fixture_spec = importlib.util.spec_from_file_location('package_fixtures', Path(__file__).with_name('test-package-installation.py'))
+fixtures = importlib.util.module_from_spec(fixture_spec)
+fixture_spec.loader.exec_module(fixtures)
 
 
 class ReleasePreflightTests(unittest.TestCase):
@@ -24,10 +27,7 @@ class ReleasePreflightTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
-        (self.root / 'web').mkdir()
-        (self.root / 'web/package.json').write_text('{"version":"0.3.0"}')
-        self.artifacts = self.root / 'candidate'
-        self.artifacts.mkdir()
+        self.build, self.artifacts = fixtures.fixture(self.root)
         self.sha = 'a' * 40
         self.tag_sha = self.sha
         self.workflow = (Path(__file__).resolve().parents[1] / '.github/workflows/release-prepare.yml').read_text()
@@ -35,20 +35,8 @@ class ReleasePreflightTests(unittest.TestCase):
         self.releases = [[]]
         self.ci = [{'id': 123, 'head_sha': self.sha, 'status': 'completed',
                     'conclusion': 'success', 'event': 'push', 'html_url': 'https://example.invalid/ci'}]
-        for name in preflight.release_assets('v0.3.0'):
-            (self.artifacts / name).write_text('asset ' + name + '\n')
-        for arch, machine in [('amd64', 62), ('arm64', 183)]:
-            header = bytearray(20)
-            header[:6] = b'\x7fELF\x02\x01'
-            header[18:20] = machine.to_bytes(2, 'little')
-            (self.artifacts / ('docklane-linux-' + arch)).write_bytes(header)
-            archive = f'docklane-v0.3.0-linux-{arch}.tar.gz'
-            self.manifest(archive + '.sha256', [archive])
-        (self.artifacts / 'release-ci-evidence.json').write_text(json.dumps({
-            'head_sha': self.sha, 'ci_run_id': 123, 'ci_run_url': 'https://example.invalid/ci'}))
-        self.manifest('SHA256SUMS', ['docklane-linux-amd64', 'docklane-linux-arm64', 'LICENSE'])
-        self.manifest('IMAGE-SHA256SUMS', ['docker-manager-images.tar.gz'])
-        self.refresh()
+        result = fixtures.package(self.root, self.build, self.artifacts)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def manifest(self, name, names):
         (self.artifacts / name).write_text(''.join(
@@ -56,7 +44,7 @@ class ReleasePreflightTests(unittest.TestCase):
             for item in sorted(names)))
 
     def refresh(self):
-        self.manifest('RELEASE-SHA256SUMS', preflight.release_assets('v0.3.0'))
+        self.manifest('RELEASE-SHA256SUMS', preflight.release_assets('v0.3.1-beta.1'))
 
     def run_command(self, args, root, timeout=30):
         if args[:2] == ['git', 'rev-parse']:
@@ -95,7 +83,7 @@ class ReleasePreflightTests(unittest.TestCase):
 
     def inspect(self, *options):
         args = ['release-preflight.py', '--root', str(self.root), '--artifacts', str(self.artifacts),
-                '--tag', 'v0.3.0', '--actionlint', '/mock/actionlint', *options]
+                '--tag', 'v0.3.1-beta.1', '--actionlint', '/mock/actionlint', *options]
         stream = io.StringIO()
         with mock.patch.object(sys, 'argv', args), mock.patch.object(preflight, 'run', self.run_command), \
                 mock.patch.object(preflight.shutil, 'which', return_value='/mock/gh'), contextlib.redirect_stdout(stream):
@@ -140,7 +128,7 @@ class ReleasePreflightTests(unittest.TestCase):
 
     def test_existing_release_is_never_overwritten(self):
         for draft in (True, False):
-            self.releases = [[{'tag_name': 'v0.3.0', 'draft': draft}]]
+            self.releases = [[{'tag_name': 'v0.3.1-beta.1', 'draft': draft}]]
             code, _ = self.inspect('--online')
             self.assertEqual(code, 2)
 
@@ -150,8 +138,11 @@ class ReleasePreflightTests(unittest.TestCase):
         self.assertEqual(code, 2)
 
     def test_wrong_candidate_source_fails(self):
-        (self.artifacts / 'release-ci-evidence.json').write_text('{"head_sha":"wrong"}')
-        self.refresh()
+        evidence = json.loads((self.build / 'release-ci-evidence.json').read_text())
+        evidence['head_sha'] = 'b' * 40
+        (self.build / 'release-ci-evidence.json').write_text(json.dumps(evidence))
+        result = fixtures.package(self.root, self.build, self.artifacts)
+        self.assertEqual(result.returncode, 0, result.stderr)
         code, _ = self.inspect('--online')
         self.assertEqual(code, 1)
 

@@ -31,6 +31,7 @@ async function apply(){if(actionBusy.value)return;actionBusy.value=true;try{awai
 onMounted(load)
 </script>
 <template>
+  <p class="notice warning release-disclaimer" role="note">{{ t('settings.releaseDisclaimer') }}</p>
   <div class="toolbar">
     <p class="muted">{{ t('settings.capabilityInfo') }}</p>
     <n-button @click="load" :loading="busy"><AppIcon name="refresh" />{{ t('settings.refresh') }}</n-button>

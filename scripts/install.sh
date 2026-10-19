@@ -8,4 +8,5 @@ command -v python3 >/dev/null 2>&1 || { echo 'Python 3 is required for safe inst
 script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 binary=$(python3 -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "$1")
 checksum=$(python3 -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' "$binary")
-exec python3 "$script_dir/install-support.py" deploy --binary "$binary" --source-dir "$script_dir/.." --version v0.3.0 --sha256 "$checksum"
+version=$(python3 "$script_dir/install-support.py" version --source-dir "$script_dir/..")
+exec python3 "$script_dir/install-support.py" deploy --binary "$binary" --source-dir "$script_dir/.." --version "$version" --sha256 "$checksum" --explicit-version

@@ -8,6 +8,7 @@ vi.mock('naive-ui', async () => {
   }
 })
 import SettingsView from './SettingsView.vue'
+import { version as appVersion } from '../../package.json'
 import { setLocale } from '../i18n'
 import type { Capability } from '../capabilities'
 vi.mock('../components/ConfirmDialog.vue', () => ({ default: { template: '<div />' } }))
@@ -17,7 +18,7 @@ afterEach(() => vi.unstubAllGlobals())
 function fixture(capabilities: Record<string, Capability>, mode = 'binary') {
   const fetch = vi.fn(async (input: string, options?: RequestInit) => {
     const url = String(input)
-    let data: unknown = url.endsWith('/settings') ? { mode, allowed_paths: null, path_mappings: null } : url.endsWith('/capabilities') ? { capabilities } : []
+    let data: unknown = url.endsWith('/settings') ? { version: appVersion, mode, allowed_paths: null, path_mappings: null } : url.endsWith('/capabilities') ? { capabilities } : []
     if (url.endsWith('/host/daemon')) data = { available: false, reason: 'raw backend diagnosis', manual_guide: 'raw English guide' }
     if (url.endsWith('/host/daemon/preview')) data = { revision: 'fixture', configuration: {} }
     return new Response(JSON.stringify(data), { status: 200 })
@@ -95,6 +96,25 @@ describe('Settings capability explanations', () => {
     expect(wrapper.find('.settings-paths').text()).toContain('宿主机与容器')
     expect(wrapper.find('[id="capability-backup.bind_mount"] .tag').text()).toBe('未配置')
     expect(wrapper.find('[id="capability-backup.bind_mount"] .capability-help').text()).toContain('DM_PATH_MAPPINGS')
+    wrapper.unmount()
+  })
+})
+
+
+describe('Beta release information', () => {
+  it.each([
+    ['zh-CN', "本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。"],
+    ['en', "This program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use."],
+  ] as const)('shows the full version and a nonmodal disclaimer in %s', async (language, disclaimer) => {
+    setLocale(language, false)
+    const fetch = fixture({})
+    const wrapper = mount(SettingsView)
+    await flushPromises()
+    expect(wrapper.find('.release-disclaimer').text()).toBe(disclaimer)
+    expect(wrapper.find('.release-disclaimer').attributes('role')).toBe('note')
+    expect(wrapper.find('.facts').text()).toContain(appVersion)
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false)
+    expect(fetch.mock.calls.every(([, options]) => !options?.method)).toBe(true)
     wrapper.unmount()
   })
 })

@@ -14,6 +14,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tarfile
 import urllib.parse
 
 
@@ -58,13 +59,128 @@ def checksum_manifest(root, manifest, required):
 
 
 def release_assets(tag):
-    names = {"SHA256SUMS", "IMAGE-SHA256SUMS", "docker-manager-images.tar.gz",
-             "docker-manager-installation.tar.gz", "IMAGES.txt", "TOOL-VERSIONS.txt",
-             "SECURITY-NOTES.md", "LICENSE", "release-ci-evidence.json", "install-online.sh"}
-    for arch in ("amd64", "arm64"):
-        names.update({"docklane-linux-" + arch, f"docklane-{tag}-linux-{arch}.tar.gz",
-                      f"docklane-{tag}-linux-{arch}.tar.gz.sha256"})
-    return names
+    return {f"docklane-{tag}-linux-{arch}.tar.gz" for arch in ("amd64", "arm64")} | {
+        "docker-manager-installation.tar.gz", "docker-manager-images.tar.gz", "install-online.sh"}
+
+
+def parsed_manifest(content):
+    result = {}
+    for line in content.decode().splitlines():
+        match = re.fullmatch(r"([a-f0-9]{64}) [ *]([A-Za-z0-9][A-Za-z0-9._-]*)", line)
+        if not match or match[2] in result:
+            raise ValueError("Malformed or duplicate checksum entry")
+        result[match[2]] = match[1]
+    if not result:
+        raise ValueError("Empty checksum manifest")
+    return result
+
+
+def file_digest(path):
+    value = hashlib.sha256()
+    with path.open('rb') as stream:
+        for block in iter(lambda: stream.read(1 << 20), b''):
+            value.update(block)
+    return value.hexdigest()
+
+
+def archive_members(archive):
+    members = {}
+    for entry in archive.getmembers():
+        path = pathlib.PurePosixPath(entry.name)
+        name = str(path)
+        if path.is_absolute() or '..' in path.parts or not path.parts or name in members or not (entry.isfile() or entry.isdir()):
+            raise ValueError('Unsafe archive entry: ' + entry.name)
+        members[name] = entry
+    for name in members:
+        for parent in pathlib.PurePosixPath(name).parents:
+            if str(parent) in members and not members[str(parent)].isdir():
+                raise ValueError('Archive file is an ancestor of another entry: ' + str(parent))
+    return members
+
+
+def member_bytes(archive, members, name):
+    entry = members.get(name)
+    if entry is None or not entry.isfile() or entry.size > 4 * 1024 * 1024:
+        raise ValueError('Missing or oversized metadata: ' + name)
+    return archive.extractfile(entry).read()
+
+
+def validate_candidate(directory, tag, expected_sha=None):
+    """Validate exact public inventory and nested metadata without extracting archives."""
+    import tarfile
+    if not re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+(?:-beta\.[1-9][0-9]*)?', tag):
+        raise ValueError('Unsupported release tag')
+    expected = release_assets(tag)
+    actual = {path.name for path in directory.iterdir()}
+    if actual != expected | {'RELEASE-SHA256SUMS'}:
+        raise ValueError('Candidate must contain exactly the six public assets')
+    for path in directory.iterdir():
+        if not path.is_file() or path.is_symlink():
+            raise ValueError('Unsafe candidate asset: ' + path.name)
+    sums = parsed_manifest((directory / 'RELEASE-SHA256SUMS').read_bytes())
+    if set(sums) != expected:
+        raise ValueError('Release checksum manifest must list exactly the other five assets')
+    for name, value in sums.items():
+        if file_digest(directory / name) != value:
+            raise ValueError('Checksum mismatch: ' + name)
+    with tarfile.open(directory / 'docker-manager-installation.tar.gz', 'r:gz') as archive:
+        members = archive_members(archive)
+        metadata = {name: member_bytes(archive, members, name) for name in (
+            'VERSION', 'SHA256SUMS', 'IMAGE-SHA256SUMS', 'IMAGES.txt', 'TOOL-VERSIONS.txt',
+            'release-ci-evidence.json', 'SECURITY-NOTES.md', 'LICENSE', 'scripts/install-online.sh',
+            'scripts/install-support.py', 'scripts/install.sh', 'scripts/upgrade.sh',
+            'scripts/uninstall.sh', 'deployments/docker-manager.service', 'deployments/config.example.json')}
+    if metadata['VERSION'] != (tag[1:] + '\n').encode():
+        raise ValueError('Installation VERSION disagrees with release tag')
+    if metadata['scripts/install-online.sh'] != (directory / 'install-online.sh').read_bytes():
+        raise ValueError('Public entrypoint differs from versioned installation material')
+    if not metadata['TOOL-VERSIONS.txt'].strip() or not metadata['SECURITY-NOTES.md'].strip() or not metadata['LICENSE'].strip():
+        raise ValueError('Empty release documentation metadata')
+    evidence = json.loads(metadata['release-ci-evidence.json'])
+    if not isinstance(evidence, dict) or not re.fullmatch(r'[0-9a-f]{40}', evidence.get('head_sha', '')):
+        raise ValueError('Invalid candidate source evidence')
+    if expected_sha and evidence['head_sha'] != expected_sha:
+        raise ValueError('Candidate was built from another commit')
+    if evidence.get('version') != tag[1:] or evidence.get('tag') != tag:
+        raise ValueError('Candidate evidence version disagrees with release')
+    if not isinstance(evidence.get('ci_run_id'), int) or evidence['ci_run_id'] <= 0 or not evidence.get('ci_run_url', '').startswith('https://'):
+        raise ValueError('Missing successful CI run identity')
+    binary_sums = parsed_manifest(metadata['SHA256SUMS'])
+    if set(binary_sums) != {'docklane-linux-amd64', 'docklane-linux-arm64', 'LICENSE'}:
+        raise ValueError('Incomplete internal binary checksum manifest')
+    if binary_sums['LICENSE'] != hashlib.sha256(metadata['LICENSE']).hexdigest():
+        raise ValueError('Internal license checksum mismatch')
+    for arch, machine in (('amd64', 62), ('arm64', 183)):
+        with tarfile.open(directory / f'docklane-{tag}-linux-{arch}.tar.gz', 'r:gz') as archive:
+            members = archive_members(archive)
+            if set(members) != {'docklane', 'LICENSE'} or not members['docklane'].isfile():
+                raise ValueError('Unexpected slim binary archive layout')
+            license = member_bytes(archive, members, 'LICENSE')
+            if license != metadata['LICENSE']:
+                raise ValueError('Slim archive license mismatch')
+            stream = archive.extractfile(members['docklane'])
+            header = stream.read(20)
+            if len(header) != 20 or header[:6] != b'\x7fELF\x02\x01' or int.from_bytes(header[18:20], 'little') != machine:
+                raise ValueError('Wrong ELF architecture: ' + arch)
+            value = hashlib.sha256(header)
+            for block in iter(lambda: stream.read(1 << 20), b''):
+                value.update(block)
+            if value.hexdigest() != binary_sums['docklane-linux-' + arch]:
+                raise ValueError('Internal binary checksum mismatch: ' + arch)
+    image_sums = parsed_manifest(metadata['IMAGE-SHA256SUMS'])
+    if image_sums != {'docker-manager-images.tar.gz': sums['docker-manager-images.tar.gz']}:
+        raise ValueError('Internal image checksum manifest mismatch')
+    image_lines = metadata['IMAGES.txt'].decode().splitlines()
+    wanted = {f'docker-manager:{tag}-{arch}': arch for arch in ('amd64', 'arm64')}
+    seen = {}
+    for line in image_lines:
+        match = re.fullmatch(r'\[([^]]+)\] sha256:[a-f0-9]{64} linux/(amd64|arm64)', line)
+        if not match or match[1] in seen:
+            raise ValueError('Invalid internal image inventory')
+        seen[match[1]] = match[2]
+    if seen != wanted:
+        raise ValueError('Worker image versions or architectures do not match the release')
+    return {'names': sorted(actual), 'version': tag[1:], 'prerelease': '-beta.' in tag, 'evidence': evidence}
 
 
 def publication_workflow(source):
@@ -88,7 +204,17 @@ def main():
     parser.add_argument("--online", action="store_true", help="Read GitHub account, repo settings, CI and tag using gh; never write")
     parser.add_argument("--actionlint", help="Optional existing actionlint executable")
     parser.add_argument("--report", type=pathlib.Path, help="JSON output path; stdout always receives the report")
+    parser.add_argument('--validate-candidate', type=pathlib.Path, help='Only validate a six-asset candidate, without git or network')
+    parser.add_argument('--expected-sha', help='Required source SHA in nested CI evidence')
     args = parser.parse_args()
+    if args.validate_candidate:
+        try:
+            result = validate_candidate(args.validate_candidate.resolve(), args.tag or '', args.expected_sha)
+            print(json.dumps(result))
+            return 0
+        except (OSError, ValueError, KeyError, UnicodeError, tarfile.TarError) as error:
+            print(str(error), file=sys.stderr)
+            return 1
     root = args.root.resolve()
     artifacts = args.artifacts.resolve() if args.artifacts else root / "bin/release"
     checks = []
@@ -116,44 +242,13 @@ def main():
     record("registry_target", "failed" if args.registry and not registry_valid else "passed",
            "Optional future destination: " + args.registry if registry_valid else
            "Invalid optional GHCR destination" if args.registry else "Not requested; the installer loads the Release worker archive", "publication")
-    manifests = [("SHA256SUMS", ["docklane-linux-amd64", "docklane-linux-arm64", "LICENSE"]),
-                 ("IMAGE-SHA256SUMS", ["docker-manager-images.tar.gz"]),
-                 ("RELEASE-SHA256SUMS", release_assets(expected))]
-    for arch in ("amd64", "arm64"):
-        archive = f"docklane-{expected}-linux-{arch}.tar.gz"
-        manifests.append((archive + ".sha256", [archive]))
-    for manifest, names in manifests:
-        ok, detail = checksum_manifest(artifacts, manifest, names)
-        record(manifest, "passed" if ok else "failed", detail, "local_artifacts")
-    inventory = artifacts / "RELEASE-SHA256SUMS"
-    listed = set()
-    if inventory.is_file() and not inventory.is_symlink():
-        for line in inventory.read_text().splitlines():
-            match = re.fullmatch(r"[a-fA-F0-9]{64} [ *]([A-Za-z0-9][A-Za-z0-9._-]*)", line)
-            if match:
-                listed.add(match[1])
-    actual = {path.name for path in artifacts.iterdir()} if artifacts.is_dir() else set()
-    ok = bool(listed) and actual == listed | {"RELEASE-SHA256SUMS"}
-    record("release_asset_inventory", "passed" if ok else "failed",
-           "Every candidate asset is listed in RELEASE-SHA256SUMS" if ok else "Candidate contains unlisted files or has no complete checksum inventory", "local_artifacts")
     evidence = {}
     try:
-        evidence = json.loads((artifacts / "release-ci-evidence.json").read_text())
-    except (OSError, ValueError):
-        pass
-    if not isinstance(evidence, dict):
-        evidence = {}
-    candidate_matches = bool(head and evidence.get("head_sha") == head)
-    record("candidate_source", "passed" if candidate_matches else "failed",
-           "Candidate CI evidence identifies local HEAD" if candidate_matches else "Candidate CI evidence is missing or identifies another commit", "local_artifacts")
-    for name, machine in [("amd64", 62), ("arm64", 183)]:
-        payload = artifacts / ("docklane-linux-" + name)
-        header = b""
-        if payload.is_file():
-            with payload.open("rb") as stream:
-                header = stream.read(20)
-        ok = len(header) == 20 and header[:6] == b"\x7fELF\x02\x01" and int.from_bytes(header[18:20], "little") == machine
-        record("ELF_" + name, "passed" if ok else "failed", "Linux ELF64 machine verified" if ok else "Missing or wrong architecture ELF payload", "local_artifacts")
+        candidate = validate_candidate(artifacts, expected, head)
+        evidence = candidate['evidence']
+        record('release_candidate', 'passed', 'Exactly six public assets and all version-bound internal metadata verified', 'local_artifacts')
+    except (OSError, ValueError, KeyError, UnicodeError, tarfile.TarError) as error:
+        record('release_candidate', 'failed', str(error), 'local_artifacts')
     if args.actionlint:
         result = run([args.actionlint, "-shellcheck=", "-pyflakes="], root)
         ok = result is not None and result.returncode == 0

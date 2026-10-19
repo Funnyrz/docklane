@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/docker-manager/docker-manager/internal/buildinfo"
 )
 
 func TestDockerModeCannotGrantHostDaemonWrite(t *testing.T) {
@@ -36,5 +38,20 @@ func TestNewerConfigurationIsRejected(t *testing.T) {
 	t.Setenv("DM_CONFIG", p)
 	if _, e := Load(); e == nil {
 		t.Fatal("future config accepted")
+	}
+}
+
+func TestApplicationReleaseDoesNotChangeConfigurationSchema(t *testing.T) {
+	t.Setenv("DM_CONFIG", "")
+	t.Setenv("DM_BACKUP_WORKER_IMAGE", "")
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Version != 1 {
+		t.Fatalf("configuration schema changed: %d", c.Version)
+	}
+	if c.BackupWorkerImage != "docker-manager:v"+buildinfo.Version {
+		t.Fatal(c.BackupWorkerImage)
 	}
 }

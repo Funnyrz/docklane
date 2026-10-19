@@ -1,5 +1,9 @@
 # Docklane
 
+> 本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。
+
+当前源码版本为 `0.3.1-beta.1`。默认在线安装仍选择稳定通道（当前为 `v0.3.0`）；Beta 为预发布，不替换 latest 稳定版。
+
 **Your containers. Under control.**
 
 单机 Docker 管理与本地备份恢复平台。通过一个中英文 Web 控制台管理容器、Compose 项目和 Docker 资源，查看任务进度，并完成可预检、可验证的本地备份与恢复。
@@ -132,7 +136,41 @@ sudo systemctl stop docker-manager         # 停止
 sudo systemctl disable docker-manager      # 取消开机自启
 ```
 
-### 选择下载包
+### Beta 预发布安装与下载
+
+仅用于学习与测试。选择已发布的 Beta 通道，或固定本次版本；省略这些参数仍安装稳定版：
+
+```sh
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.1-beta.1
+```
+
+Beta Release 仅提供六个附件，`RELEASE-SHA256SUMS` 校验其余五个文件：
+
+| 附件 | 内容 |
+| --- | --- |
+| `docklane-v0.3.1-beta.1-linux-amd64.tar.gz` | amd64 的 `docklane` 与 `LICENSE` |
+| `docklane-v0.3.1-beta.1-linux-arm64.tar.gz` | arm64 的 `docklane` 与 `LICENSE` |
+| `docker-manager-installation.tar.gz` | 安装脚本、配置与文档；根目录含 `VERSION`、许可、内部二进制/镜像校验清单、`IMAGES.txt`、工具版本及 CI 证据 |
+| `docker-manager-images.tar.gz` | 双架构应用及备份 worker 镜像 |
+| `install-online.sh` | 同版本在线入口 |
+| `RELEASE-SHA256SUMS` | 顶层附件 SHA-256 清单 |
+
+离线 systemd 安装需先准备下方列出的 Docker、Compose、Restic、Python 与账号权限。在空目录下载本机架构包、安装材料、镜像归档和顶层校验清单后执行；arm64 将包名和镜像标签中的 `amd64` 改为 `arm64`：
+
+```sh
+sha256sum --check --ignore-missing RELEASE-SHA256SUMS
+tar -xzf docklane-v0.3.1-beta.1-linux-amd64.tar.gz
+tar -xzf docker-manager-installation.tar.gz
+sha256sum --check IMAGE-SHA256SUMS
+sudo docker load -i docker-manager-images.tar.gz
+sudo docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
+sudo ./scripts/install.sh ./docklane
+```
+
+安装材料根目录的 `VERSION` 为 `0.3.1-beta.1`（无 `v` 前缀）；应用版本变化不改变配置或数据库的 schema v1。Beta 不再单独发布原始二进制、`.sha256`、`IMAGES.txt` 或许可附件；这些材料保留在安装归档内。下方 v0.3.0 说明保留其原有发布格式与稳定版使用方式。
+
+### 稳定版下载（v0.3.0）
 
 从 [v0.3.0 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.0) 下载匹配架构的资产。在线安装会自动取得同一版本所需材料；手工安装先校验相应校验清单。
 
@@ -183,7 +221,7 @@ docker compose -f deployments/docker-compose.yml up -d --no-build
 ```sh
 git clone https://github.com/Funnyrz/docklane.git
 cd docklane
-docker build -t docker-manager:v0.3.0 .
+docker build -t docker-manager:v0.3.1-beta.1 .
 export DM_BACKUP_HOST_DIR=/srv/docker-manager/backups
 export DM_RESTORE_HOST_DIR=/srv/docker-manager/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
@@ -249,7 +287,7 @@ make release        # Linux 双架构二进制、精简 tar.gz 包与校验文�
 make release-images # 双架构镜像及离线归档，需要 Docker Buildx
 ```
 
-源码发布命令的产物默认位于 `bin/release/`，可通过 `RELEASE_OUTPUT_DIR` 指定发布脚本输出目录；从源码安装时使用 `sudo ./scripts/install.sh ./bin/release/docklane-linux-amd64`。
+源码发布的原始二进制及内部校验材料默认位于 `bin/release-internal/`，由 `RELEASE_BUILD_DIR` 覆盖；最终六个附件位于 `bin/release/`，由 `RELEASE_OUTPUT_DIR` 覆盖。从源码安装使用 `sudo ./scripts/install.sh ./bin/release-internal/docklane-linux-amd64`；从 Beta Release 安装则使用原生架构包解出的 `./docklane`。
 
 中英文词典位于 `web/src/i18n/`；新增文案需同时补齐两种语言及相同插值参数。`pnpm --dir web test` 覆盖词条一致性和切换行为。
 

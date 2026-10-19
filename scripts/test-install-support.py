@@ -29,6 +29,7 @@ class LifecycleTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.material = self.root / 'material'
         (self.material / 'deployments').mkdir(parents=True)
+        (self.material / 'VERSION').write_text('0.3.0\n')
         self.example = {'version': 1, 'data_dir': str(self.root / 'managed-data'), 'listen': ':8080', 'mode': 'binary', 'allowed_paths': [], 'path_mappings': [], 'backup_temp_dir': '', 'restic_path': 'restic', 'compose_path': 'docker'}
         (self.material / 'deployments/config.example.json').write_text(json.dumps(self.example))
         (self.material / 'deployments/docker-manager.service').write_text('test unit')
@@ -67,6 +68,45 @@ class LifecycleTests(unittest.TestCase):
     def deploy(self):
         with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
             m._deploy_locked(self.args, self.material, self.binary)
+
+    def test_material_version_uses_release_file_then_package_fallback(self):
+        self.assertEqual(m.material_version(self.material), 'v0.3.0')
+        (self.material / 'VERSION').unlink()
+        (self.material / 'web').mkdir()
+        (self.material / 'web/package.json').write_text('{"version":"0.3.1-beta.10"}')
+        self.assertEqual(m.material_version(self.material), 'v0.3.1-beta.10')
+        (self.material / 'web/package.json').unlink()
+        self.assertEqual(m.material_version(self.material), 'v0.3.1-beta.1')
+
+    def test_numeric_version_order_places_stable_after_same_core_beta(self):
+        self.assertGreater(m.version_key('v0.3.1-beta.10'), m.version_key('v0.3.1-beta.2'))
+        self.assertGreater(m.version_key('v0.3.1'), m.version_key('v0.3.1-beta.100'))
+        self.assertGreater(m.version_key('v0.4.0-beta.1'), m.version_key('v0.3.99'))
+
+    def test_implicit_downgrade_retains_schema_credentials_and_configuration(self):
+        self.deploy()
+        self.db(m.DATA).close()
+        prior = json.loads(m.STATE.read_text())
+        m.STATE.write_text(json.dumps({**prior, 'version': 'v0.3.1-beta.10'}))
+        patch.object(m, 'service_context', return_value=({'DM_CONFIG': str(m.CONFIG)}, m.DATA, 0)).start()
+        before = {str(path): path.read_bytes() for path in (m.CONFIG, m.DATA / 'master.key', m.DATA / 'docker-manager.db', m.STATE)}
+        stop = patch.object(m, 'stop_process').start()
+        with self.assertRaisesRegex(m.InstallError, 'Implicit downgrade'):
+            self.deploy()
+        stop.assert_not_called()
+        for name, content in before.items():
+            self.assertEqual(Path(name).read_bytes(), content)
+        self.args.explicit_version = True
+        self.deploy()
+        snapshot = next(m.BACKUPS.iterdir())
+        self.assertEqual((snapshot / 'data/master.key').read_bytes(), before[str(m.DATA / 'master.key')])
+        with contextlib.closing(sqlite3.connect(m.DATA / 'docker-manager.db')) as db:
+            self.assertEqual(db.execute('SELECT username,password_hash FROM users').fetchone(), ('admin', 'saved-password-hash'))
+        self.assertEqual(json.loads(m.STATE.read_text())['version'], 'v0.3.0')
+
+    def test_beta_worker_default_with_architecture_tracks_selected_release(self):
+        self.run.return_value = subprocess.CompletedProcess([], 0, 'sha256:' + 'a' * 64, '')
+        self.assertEqual(REAL_CHECK_WORKER('docker-manager:v0.3.1-beta.2-arm64', 'v0.3.1-beta.10'), 'docker-manager:v0.3.1-beta.10')
 
     def test_fresh_install_enables_health_and_tool_path_contract(self):
         self.deploy()

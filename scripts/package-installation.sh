@@ -1,30 +1,61 @@
 #!/usr/bin/env sh
-# Package only version-matched source materials; run after release.sh/build-images.sh.
+# Build exactly six public assets from a separate, version-bound staging directory.
 set -eu
 cd "$(dirname "$0")/.."
-python3 - "${RELEASE_OUTPUT_DIR:-bin/release}" <<'PY'
+python3 - "${RELEASE_BUILD_DIR:-bin/release-internal}" "${RELEASE_OUTPUT_DIR:-bin/release}" <<'PY'
 import hashlib
+import importlib.util
+import io
 import json
 import os
 from pathlib import Path
 import re
-import tarfile
-import tempfile
 import shutil
 import sys
+import tarfile
+import tempfile
 
 root = Path.cwd()
-output = Path(sys.argv[1]).resolve()
+build, output = (Path(value).resolve() for value in sys.argv[1:])
+if build == output or build in output.parents or output in build.parents:
+    raise SystemExit('Internal staging and public output directories must be separate')
+version = json.loads((root / 'web/package.json').read_text())['version']
+if not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+(?:-beta\.[1-9][0-9]*)?', version):
+    raise SystemExit('Unsupported source release version')
+tag = 'v' + version
+spec = importlib.util.spec_from_file_location('release_preflight', root / 'scripts/release-preflight.py')
+helper = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(helper)
+public = helper.release_assets(tag) | {'RELEASE-SHA256SUMS'}
 output.mkdir(parents=True, exist_ok=True)
-version = 'v' + json.loads((root / 'web/package.json').read_text())['version']
-if version != 'v0.3.0':
-    raise SystemExit('Update the release contract before packaging another version')
-sources = [
-    'scripts/install-online.sh', 'scripts/install-support.py', 'scripts/install.sh',
-    'scripts/upgrade.sh', 'scripts/uninstall.sh', 'deployments', 'README.md',
-    'README.en.md', 'LICENSE', 'docker-manager-prd-v0.3.md', 'docs',
-    'web/qa/release-browser-results.json',
-]
+for path in output.iterdir():
+    if path.name not in public or not path.is_file() or path.is_symlink():
+        raise SystemExit('Refusing contaminated public output directory: ' + str(path))
+required = {'SHA256SUMS', 'IMAGE-SHA256SUMS', 'IMAGES.txt', 'release-ci-evidence.json',
+            'docklane-linux-amd64', 'docklane-linux-arm64', 'LICENSE', 'docker-manager-images.tar.gz'}
+for arch in ('amd64', 'arm64'):
+    required |= {f'docklane-{tag}-linux-{arch}.tar.gz', f'docklane-{tag}-linux-{arch}.tar.gz.sha256'}
+allowed = required | {'VERSION'}
+if not build.is_dir():
+    raise SystemExit('Internal build directory missing')
+for path in build.iterdir():
+    if path.name not in allowed or not path.is_file() or path.is_symlink():
+        raise SystemExit('Refusing contaminated internal build directory: ' + str(path))
+if not required.issubset({path.name for path in build.iterdir()}):
+    raise SystemExit('Missing internal build output')
+for manifest in ['SHA256SUMS', 'IMAGE-SHA256SUMS', *[
+        f'docklane-{tag}-linux-{arch}.tar.gz.sha256' for arch in ('amd64', 'arm64')]]:
+    for name, expected in helper.parsed_manifest((build / manifest).read_bytes()).items():
+        path = build / name
+        if name not in allowed or not path.is_file() or path.is_symlink() or helper.file_digest(path) != expected:
+            raise SystemExit('Internal checksum mismatch: ' + name)
+if (build / 'LICENSE').read_bytes() != (root / 'LICENSE').read_bytes():
+    raise SystemExit('Internal license differs from source')
+if (build / 'VERSION').exists() and (build / 'VERSION').read_text().strip() != version:
+    raise SystemExit('Internal VERSION differs from source')
+sources = ['scripts/install-online.sh', 'scripts/install-support.py', 'scripts/install.sh',
+           'scripts/upgrade.sh', 'scripts/uninstall.sh', 'deployments', 'README.md', 'README.en.md',
+           'LICENSE', 'docker-manager-prd-v0.3.md', 'docs', 'web/qa/release-browser-results.json']
 entries = []
 for source in sources:
     path = root / source
@@ -36,56 +67,26 @@ for source in sources:
         if entry.is_symlink() or not (entry.is_file() or entry.is_dir()):
             raise SystemExit('Unsafe installation source: ' + str(entry))
         entries.append(entry)
-
-# Check all build outputs before replacing any previously prepared materials.
-required = ['SHA256SUMS', 'IMAGE-SHA256SUMS', 'docker-manager-images.tar.gz',
-            'IMAGES.txt', 'release-ci-evidence.json']
-for arch in ('amd64', 'arm64'):
-    required += ['docklane-linux-' + arch, f'docklane-{version}-linux-{arch}.tar.gz',
-                 f'docklane-{version}-linux-{arch}.tar.gz.sha256']
-for name in required:
-    if not (output / name).is_file() or (output / name).is_symlink():
-        raise SystemExit('Missing build output or symlink: ' + name)
-
-def digest(path):
-    result = hashlib.sha256()
-    with path.open('rb') as stream:
-        for block in iter(lambda: stream.read(1 << 20), b''):
-            result.update(block)
-    return result.hexdigest()
-
-for name in ['SHA256SUMS', 'IMAGE-SHA256SUMS', *[
-        f'docklane-{version}-linux-{arch}.tar.gz.sha256' for arch in ('amd64', 'arm64')]]:
-    seen = set()
-    for line in (output / name).read_text().splitlines():
-        match = re.fullmatch(r'([a-fA-F0-9]{64}) [ *]([A-Za-z0-9][A-Za-z0-9._-]*)', line)
-        if not match or match[2] in seen:
-            raise SystemExit('Malformed checksum manifest: ' + name)
-        seen.add(match[2])
-        payload = output / match[2]
-        if not payload.is_file() or payload.is_symlink() or digest(payload) != match[1].lower():
-            raise SystemExit('Checksum mismatch: ' + str(payload))
-    if not seen:
-        raise SystemExit('Empty checksum manifest: ' + name)
-
-with tempfile.TemporaryDirectory(prefix='.installation-', dir=output) as temporary:
-    archive = Path(temporary) / 'docker-manager-installation.tar.gz'
-    with tarfile.open(archive, 'w:gz', format=tarfile.PAX_FORMAT) as bundle:
+metadata = {name: (build / name).read_bytes() for name in
+            ('SHA256SUMS', 'IMAGE-SHA256SUMS', 'IMAGES.txt', 'release-ci-evidence.json')}
+metadata.update({'VERSION': (version + '\n').encode(), 'TOOL-VERSIONS.txt': (root / '.tool-versions').read_bytes(),
+                 'SECURITY-NOTES.md': (root / 'docs/security-notes.md').read_bytes()})
+with tempfile.TemporaryDirectory(prefix='.docklane-candidate-', dir=output.parent) as temporary:
+    candidate = Path(temporary)
+    for name in helper.release_assets(tag) - {'docker-manager-installation.tar.gz', 'install-online.sh'}:
+        shutil.copyfile(build / name, candidate / name)
+    shutil.copyfile(root / 'scripts/install-online.sh', candidate / 'install-online.sh')
+    with tarfile.open(candidate / 'docker-manager-installation.tar.gz', 'w:gz', format=tarfile.PAX_FORMAT) as archive:
         for entry in entries:
-            bundle.add(entry, arcname=entry.relative_to(root).as_posix(), recursive=False)
-    os.replace(archive, output / archive.name)
-for source, destination in [('scripts/install-online.sh', 'install-online.sh'),
-                            ('LICENSE', 'LICENSE'), ('.tool-versions', 'TOOL-VERSIONS.txt'),
-                            ('docs/security-notes.md', 'SECURITY-NOTES.md')]:
-    shutil.copyfile(root / source, output / destination)
-payloads = sorted(path for path in output.iterdir() if path.name != 'RELEASE-SHA256SUMS')
-for path in payloads:
-    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*', path.name) or not path.is_file() or path.is_symlink():
-        raise SystemExit('Unsafe release asset: ' + str(path))
-manifest = ''.join(f'{digest(path)}  {path.name}\n' for path in payloads)
-with tempfile.NamedTemporaryFile(mode='w', dir=output, prefix='.checksums-', delete=False) as stream:
-    stream.write(manifest)
-    temporary = stream.name
-os.replace(temporary, output / 'RELEASE-SHA256SUMS')
-print(f'Prepared installation archive and {len(payloads)} verified release assets in {output}')
+            archive.add(entry, arcname=entry.relative_to(root).as_posix(), recursive=False)
+        for name, content in metadata.items():
+            item = tarfile.TarInfo(name)
+            item.size, item.mode = len(content), 0o644
+            archive.addfile(item, io.BytesIO(content))
+    manifest = ''.join(f'{helper.file_digest(candidate / name)}  {name}\n' for name in sorted(helper.release_assets(tag)))
+    (candidate / 'RELEASE-SHA256SUMS').write_text(manifest)
+    helper.validate_candidate(candidate, tag)
+    for name in sorted(public):
+        os.replace(candidate / name, output / name)
+print(f'Prepared exactly six verified public assets for {tag}: {output}')
 PY

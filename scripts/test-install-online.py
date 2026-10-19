@@ -63,6 +63,7 @@ class InstallerTest(unittest.TestCase):
         source = SOURCE.read_text()
         replacements = {
             '/etc/os-release': str(self.os_release),
+            '/var/lib/docklane-installer': str(self.root / 'receipt'),
             '/run/systemd/system': str(self.systemd),
             '/usr/local/lib/docker': str(self.root / 'docker-tools'),
             '/usr/local/lib/docklane': str(self.root / 'docklane-tools'),
@@ -80,7 +81,7 @@ class InstallerTest(unittest.TestCase):
         common = f'''
 source {quote(self.script)}
 work={quote(self.work)}
-version=; arch=amd64; docker_arch=x86_64; ID=ubuntu; VERSION_ID=24.04; VERSION_CODENAME=noble
+version=; channel=stable; arch=amd64; docker_arch=x86_64; ID=ubuntu; VERSION_ID=24.04; VERSION_CODENAME=noble
 download_source=direct
 trace={quote(self.trace)}
 assets={quote(self.assets)}
@@ -131,7 +132,7 @@ fetch() {{
             f'{hashlib.sha256(self.license).hexdigest()}  LICENSE\n')
         self.rehash()
         names = [p.name for p in self.assets.iterdir() if p.name != 'release.json']
-        release = {'tag_name': TAG, 'draft': False, 'prerelease': False, 'assets': [
+        release = {'tag_name': TAG, 'draft': False, 'prerelease': False, 'published_at': '2026-10-19T00:00:00Z', 'assets': [
             {'name': name, 'state': 'uploaded', 'browser_download_url':
              f'https://github.com/Funnyrz/docklane/releases/download/{TAG}/{name}'}
             for name in names]}
@@ -146,6 +147,175 @@ fetch() {{
                        if p.name not in ('release.json', 'RELEASE-SHA256SUMS'))
         (self.assets / 'RELEASE-SHA256SUMS').write_text(''.join(
             f'{checksum(p)}  {p.name}\n' for p in paths))
+
+    def make_slim_release(self, tag='v0.3.1-beta.1'):
+        for path in self.assets.iterdir():
+            path.unlink()
+        self.slim_tag = tag
+        self.license = b'MIT License\nCopyright (c) 2026 Funnyrz\n'
+        sums = []
+        for arch, machine in [('amd64', 62), ('arm64', 183)]:
+            header = bytearray(64)
+            header[:6] = b'\x7fELF\x02\x01'
+            header[18:20] = struct.pack('<H', machine)
+            if arch == 'amd64':
+                self.binary = bytes(header)
+            archive(self.assets / f'docklane-{tag}-linux-{arch}.tar.gz', {'docklane': bytes(header), 'LICENSE': self.license})
+            sums.append(f'{hashlib.sha256(header).hexdigest()}  docklane-linux-{arch}\n')
+        (self.assets / 'docker-manager-images.tar.gz').write_bytes(b'fixture worker')
+        (self.assets / 'install-online.sh').write_bytes(SOURCE.read_bytes())
+        sums.append(f'{hashlib.sha256(self.license).hexdigest()}  LICENSE\n')
+        self.slim_materials = {name: b'fixture' for name in ('scripts/install-online.sh', 'scripts/install-support.py', 'scripts/install.sh', 'scripts/upgrade.sh', 'scripts/uninstall.sh', 'deployments/docker-manager.service')}
+        self.slim_materials.update({
+            'VERSION': (tag[1:] + '\n').encode(), 'LICENSE': self.license,
+            'SHA256SUMS': ''.join(sums).encode(),
+            'IMAGE-SHA256SUMS': f'{checksum(self.assets / "docker-manager-images.tar.gz")}  docker-manager-images.tar.gz\n'.encode(),
+            'IMAGES.txt': ''.join(f'[docker-manager:{tag}-{arch}] sha256:{"1" * 64} linux/{arch}\n' for arch in ('amd64','arm64')).encode(),
+            'TOOL-VERSIONS.txt': b'golang 1.27.2\nnodejs 22.22.0\npnpm 10.28.2\n',
+            'SECURITY-NOTES.md': b'Test only; keep data backed up.',
+            'release-ci-evidence.json': json.dumps({'version': tag[1:], 'tag': tag, 'head_sha': 'a' * 40, 'ci_run_id': 123, 'ci_run_url': 'https://github.com/Funnyrz/docklane/actions/runs/123', 'publication': 'candidate'}).encode(),
+            'deployments/config.example.json': json.dumps({'version': 1, 'backup_worker_image': 'docker-manager:' + tag}).encode(),
+        })
+        self.repack_slim()
+        names = [path.name for path in self.assets.iterdir() if path.name != 'release.json']
+        self.slim_metadata = {'tag_name': tag, 'draft': False, 'prerelease': '-beta.' in tag,
+                              'published_at': '2026-10-19T00:00:00Z', 'assets': [
+            {'name': name, 'state': 'uploaded', 'browser_download_url': f'https://github.com/Funnyrz/docklane/releases/download/{tag}/{name}'} for name in names]}
+        (self.assets / 'release.json').write_text(json.dumps(self.slim_metadata))
+
+    def repack_slim(self):
+        archive(self.assets / 'docker-manager-installation.tar.gz', self.slim_materials)
+        names = ['install-online.sh', 'docker-manager-installation.tar.gz', 'docker-manager-images.tar.gz',
+                 f'docklane-{self.slim_tag}-linux-amd64.tar.gz', f'docklane-{self.slim_tag}-linux-arm64.tar.gz']
+        (self.assets / 'RELEASE-SHA256SUMS').write_text(''.join(f'{checksum(self.assets / name)}  {name}\n' for name in names))
+
+    def test_beta_dry_run_describes_selected_channel(self):
+        result = self.bash('main --channel beta --dry-run')
+        self.assertIn('release latest beta', result.stdout)
+        self.assertNotIn('release latest stable', result.stdout)
+        self.assertFalse(self.trace.exists())
+
+    def test_stable_web_fallback_detects_new_layout_from_manifest(self):
+        self.make_slim_release('v0.3.1')
+        prelude = '''
+fetch() {
+ if [[ $1 == https://api.github.com/* ]]; then return 22; fi
+ printf 'fetch %s\\n' "$1" >> "$trace"
+ cp "$assets/${1##*/}" "$2"
+}
+fetch_release_page() { printf '%s' 'https://github.com/Funnyrz/docklane/releases/tag/v0.3.1' > "$work/release-page-url"; }
+'''
+        self.bash('resolve_release; verify_release', prelude=prelude)
+        self.assertEqual((self.work / 'layout').read_text(), 'slim')
+        calls = self.trace.read_text()
+        self.assertEqual(sum('/RELEASE-SHA256SUMS' in line for line in calls.splitlines()), 1)
+        self.assertNotIn('/LICENSE', calls)
+
+    def test_disclaimer_is_printed_before_dependency_mutation(self):
+        result = self.bash('main --version v0.3.0', prelude='bootstrap_tools() { echo mutation-started; return 23; }', ok=False)
+        chinese = '本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。'
+        self.assertIn(chinese, result.stdout)
+        self.assertLess(result.stdout.index(chinese), result.stdout.index('mutation-started'))
+        self.assertIn('do not use it in production', result.stdout)
+
+    def test_invalid_channel_is_refused_without_mutation(self):
+        self.bash('main --channel nightly', ok=False)
+        self.assertFalse(self.trace.exists())
+
+    def test_new_stable_six_asset_layout_and_explicit_stable_on_beta_channel(self):
+        self.make_slim_release('v0.3.1')
+        self.bash('channel=beta; version=v0.3.1; resolve_release; verify_release')
+        shutil.rmtree(self.work)
+        self.work.mkdir()
+        self.bash('channel=stable; resolve_release; verify_release')
+
+    def test_new_six_assets_use_hashed_internal_metadata(self):
+        self.make_slim_release()
+        self.bash('version=v0.3.1-beta.1; resolve_release; verify_release')
+        calls = self.trace.read_text()
+        self.assertEqual(sum('download/' in line for line in calls.splitlines()), 4)
+        self.assertNotIn('linux-arm64.tar.gz', calls)
+        self.assertNotIn('/install-online.sh', calls)
+        self.assertEqual((self.work / 'VERSION').exists(), False)
+        self.assertEqual((self.work / 'materials/VERSION').read_text().strip(), '0.3.1-beta.1')
+        self.assertEqual((self.work / 'binary/docklane').read_bytes(), self.binary)
+
+    def test_internal_version_ci_worker_license_and_archive_integrity(self):
+        for name, value in [('VERSION', b'9.0.0'), ('release-ci-evidence.json', b'{"version":"0.3.1-beta.1","tag":"v0.3.0","head_sha":"bad"}'),
+                            ('deployments/config.example.json', b'{"backup_worker_image":"docker-manager:v0.3.0"}'),
+                            ('LICENSE', b'other license'), ('IMAGES.txt', b'[docker-manager:v0.3.0-amd64] sha256:' + b'1' * 64 + b' linux/amd64\n'), ('TOOL-VERSIONS.txt', b''), ('SECURITY-NOTES.md', b''),
+                            ('unsafe-link', (tarfile.SYMTYPE, '/etc/passwd'))]:
+            with self.subTest(metadata=name):
+                shutil.rmtree(self.work)
+                self.work.mkdir()
+                self.make_slim_release()
+                self.slim_materials[name] = value
+                self.repack_slim()
+                self.bash('version=v0.3.1-beta.1; resolve_release; verify_release', ok=False)
+                self.assertFalse((self.work / 'binary.sha256').exists())
+
+    def test_six_asset_manifest_must_list_both_archives_and_script(self):
+        self.make_slim_release()
+        manifest = self.assets / 'RELEASE-SHA256SUMS'
+        manifest.write_text(''.join(line + '\n' for line in manifest.read_text().splitlines() if 'arm64' not in line))
+        self.assertIn('other five assets', self.bash('version=v0.3.1-beta.1; resolve_release; verify_release', ok=False).stderr)
+
+    def test_beta_pages_select_highest_numeric_published_beta(self):
+        self.make_slim_release('v0.3.1-beta.10')
+        latest = self.slim_metadata
+        older = {**latest, 'tag_name': 'v0.3.1-beta.2'}
+        draft = {**latest, 'tag_name': 'v99.0.0-beta.1', 'draft': True}
+        (self.root / 'page1').write_text(json.dumps([older] * 99 + [draft]))
+        (self.root / 'page2').write_text(json.dumps([{**latest, 'tag_name': 'v0.3.1-beta.99', 'published_at': None}, latest]))
+        prelude = f"""
+fetch() {{
+ printf 'fetch %s\\n' "$1" >> "$trace"
+ if [[ $1 == *'per_page=100&page=1' ]]; then cp {quote(self.root / 'page1')} "$2"
+ elif [[ $1 == *'per_page=100&page=2' ]]; then cp {quote(self.root / 'page2')} "$2"
+ else cp "$assets/${{1##*/}}" "$2"; fi
+}}
+"""
+        self.bash('channel=beta; resolve_release; [[ $version == v0.3.1-beta.10 ]]; verify_release', prelude=prelude)
+        self.assertIn('page=2', self.trace.read_text())
+
+    def test_explicit_version_overrides_channel_but_checks_prerelease_status(self):
+        self.make_slim_release()
+        self.bash('channel=stable; version=v0.3.1-beta.1; resolve_release; verify_release')
+        shutil.rmtree(self.work)
+        self.work.mkdir()
+        self.change_release(lambda release: release.update(prerelease=False))
+        self.bash('channel=beta; version=v0.3.1-beta.1; resolve_release', ok=False)
+
+    def test_nonboolean_or_missing_draft_is_never_a_published_release(self):
+        for value in (None, 0, '', True, 'false', 'missing'):
+            with self.subTest(draft=value):
+                shutil.rmtree(self.work)
+                self.work.mkdir()
+                self.make_slim_release()
+                if value == 'missing':
+                    self.slim_metadata.pop('draft')
+                else:
+                    self.slim_metadata['draft'] = value
+                (self.assets / 'release.json').write_text(json.dumps(self.slim_metadata))
+                self.bash('version=v0.3.1-beta.1; resolve_release', ok=False)
+                (self.assets / 'release.json').write_text(json.dumps([self.slim_metadata]))
+                self.bash('channel=beta; resolve_release', prelude='fetch() { cp "$assets/release.json" "$2"; }', ok=False)
+
+    def test_beta_metadata_failure_never_falls_back_to_web(self):
+        result = self.bash('channel=beta; resolve_release', prelude='fetch() { return 22; }; fetch_release_page() { echo unwanted-web >&2; }', ok=False)
+        self.assertIn('Beta release metadata is unavailable', result.stderr)
+        self.assertNotIn('unwanted-web', result.stderr)
+        result = self.bash('version=v0.3.1-beta.1; resolve_release', prelude='fetch() { return 22; }; fetch_release_page() { echo unwanted-web >&2; }', ok=False)
+        self.assertNotIn('unwanted-web', result.stderr)
+
+    def test_implicit_downgrade_is_rejected_for_legacy_bootstrap(self):
+        receipt = self.root / 'receipt'
+        receipt.mkdir()
+        (receipt / 'release.json').write_text(json.dumps({'version': 'v0.3.1-beta.10'}))
+        self.assertIn('downgrade', self.bash('version=v0.3.0; check_selected_downgrade', ok=False).stderr)
+        self.bash('version=v0.3.0; explicit_version=true; check_selected_downgrade')
+        self.bash('version=v0.3.1; check_selected_downgrade')
+        self.assertIn('downgrade', self.bash('version=v0.3.1-beta.2; check_selected_downgrade', ok=False).stderr)
 
     def change_release(self, change):
         p = self.assets / 'release.json'
@@ -347,7 +517,7 @@ curl() {{
     def test_rate_limited_explicit_older_version_is_safely_rejected(self):
         result = self.bash('version=v0.2.0; resolve_release',
                            prelude=self.api_unavailable_prelude(), ok=False)
-        self.assertIn('Retry the requested older version after API access recovers', result.stderr)
+        self.assertIn('only the current formal latest can be verified', result.stderr)
         self.assertEqual(len(self.trace.read_text().splitlines()), 2)
         self.assertFalse((self.work / 'binary').exists())
 
@@ -394,7 +564,7 @@ curl() {{
         result = self.bash('resolve_release', prelude='''
 fetch_release_page() { echo 'unexpected web fallback' >&2; exit 90; }
 ''', ok=False)
-        self.assertIn('A published stable release is required', result.stderr)
+        self.assertIn('No published release matches', result.stderr)
         self.assertNotIn('unexpected web fallback', result.stderr)
         self.assertEqual(len(self.trace.read_text().splitlines()), 1)
 
@@ -457,7 +627,7 @@ fetch() { if [[ $1 == *LICENSE ]]; then printf partial > "$2"; return 22; fi; fi
                 self.rehash()
                 result = self.bash('resolve_release; verify_release', ok=False)
                 self.assertIn('Binary checksum manifest disagrees with archive', result.stderr)
-                self.assertFalse((self.work / 'materials').exists())
+                self.assertFalse((self.work / 'binary.sha256').exists())
 
     def test_unsafe_binary_archives(self):
         for extra in [{'../escaped': b'bad'}, {'/absolute': b'bad'},

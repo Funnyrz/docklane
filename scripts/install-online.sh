@@ -43,7 +43,7 @@ local_docker() {
 }
 usage() {
   cat <<'EOF'
-Usage: install-online.sh [--version vX.Y.Z] [--listen :8080]
+Usage: install-online.sh [--channel stable|beta] [--version vX.Y.Z[-beta.N]] [--listen :8080]
                          [--migrate-from /absolute/data] [--config /absolute/config.json]
                          [--download-source mirror|direct] [--dry-run] [--help]
 Requires root, systemd, Ubuntu 24.04 or Debian 12/13, amd64 or arm64.
@@ -79,39 +79,87 @@ bootstrap_tools() {
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${packages[@]}"
   fi
 }
-resolve_release() {
-  local endpoint=latest
-  [[ -z $version ]] || endpoint="tags/$version"
-  if ! fetch "https://api.github.com/repos/Funnyrz/docklane/releases/$endpoint" "$work/release.json"; then
-    log 'GitHub API unavailable; checking the public latest formal release.'
-    resolve_release_web
-    return
-  fi
-  python3 - "$work/release.json" "$version" "$arch" > "$work/release-selection" <<'PY'
-import json, re, sys
-r=json.load(open(sys.argv[1])); tag=r.get('tag_name','')
-if not re.fullmatch(r'v\d+\.\d+\.\d+', tag) or r.get('draft') or r.get('prerelease'):
-    raise SystemExit('A published stable release is required')
-if sys.argv[2] and sys.argv[2] != tag: raise SystemExit('Release version mismatch')
-required=['RELEASE-SHA256SUMS','LICENSE','SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt',
-          'docker-manager-images.tar.gz','docker-manager-installation.tar.gz',
-          f'docklane-{tag}-linux-{sys.argv[3]}.tar.gz',
-          f'docklane-{tag}-linux-{sys.argv[3]}.tar.gz.sha256']
-assets=r.get('assets',[])
-for name in required:
-    found=[a for a in assets if a.get('name')==name]
+write_release_selection() {
+  python3 - "$work" "${requested_version:-$version}" "${channel:-stable}" "$arch" "$@" > "$work/release-selection" <<'PY'
+import json,pathlib,re,sys
+root=pathlib.Path(sys.argv[1]); requested,channel,arch=sys.argv[2:5]
+pattern=re.compile(r'v(\d+)\.(\d+)\.(\d+)(?:-beta\.(\d+))?')
+def key(tag):
+    match=pattern.fullmatch(tag)
+    return tuple(map(int,match.group(1,2,3)))+(1 if match[4] is None else 0,int(match[4] or 0))
+releases=[]
+for name in sys.argv[5:]:
+    value=json.load(open(name)); releases.extend(value if isinstance(value,list) else [value])
+valid=[]
+for release in releases:
+    tag=release.get('tag_name',''); match=pattern.fullmatch(tag)
+    if not match or release.get('draft') is not False or not isinstance(release.get('published_at'),str) or not release['published_at']:continue
+    beta=match[4] is not None
+    if release.get('prerelease') is not beta:continue
+    if requested:
+        if tag!=requested:continue
+    elif beta != (channel=='beta'):continue
+    valid.append(release)
+if not valid:raise SystemExit('No published release matches the requested version/channel')
+r=max(valid,key=lambda release:key(release['tag_name']));tag=r['tag_name']
+slim={'RELEASE-SHA256SUMS','install-online.sh','docker-manager-images.tar.gz','docker-manager-installation.tar.gz',
+      f'docklane-{tag}-linux-amd64.tar.gz',f'docklane-{tag}-linux-arm64.tar.gz'}
+legacy=['RELEASE-SHA256SUMS','LICENSE','SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt',
+        'docker-manager-images.tar.gz','docker-manager-installation.tar.gz',
+        f'docklane-{tag}-linux-{arch}.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz.sha256']
+assets=r.get('assets',[]);names=[asset.get('name') for asset in assets]
+if set(names)==slim and len(names)==6:
+    required=['RELEASE-SHA256SUMS','docker-manager-installation.tar.gz','docker-manager-images.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz']
+    validate=slim
+    layout='slim'
+elif tag=='v0.3.0':required=legacy;validate=legacy;layout='legacy'
+else:raise SystemExit('Release must provide exactly the six supported assets')
+for name in validate:
+    found=[asset for asset in assets if asset.get('name')==name]
     expected=f'https://github.com/Funnyrz/docklane/releases/download/{tag}/{name}'
     if len(found)!=1 or found[0].get('state')!='uploaded' or found[0].get('browser_download_url')!=expected:
         raise SystemExit('Missing or invalid release asset: '+name)
-print(tag)
-print('\n'.join(required))
+(root/'layout').write_text(layout)
+print(tag);print('\n'.join(required))
 PY
+}
+resolve_release() {
+  local endpoint=latest page=1 count
+  local pages=()
+  requested_version=${requested_version:-$version}
+  if [[ -z $requested_version && ${channel:-stable} == beta ]]; then
+    while :; do
+      fetch "https://api.github.com/repos/Funnyrz/docklane/releases?per_page=100&page=$page" "$work/releases-$page.json" || die 'Beta release metadata is unavailable; no web inference is allowed.'
+      count=$(python3 - "$work/releases-$page.json" <<'PY'
+import json,sys
+releases=json.load(open(sys.argv[1]))
+if not isinstance(releases,list) or len(releases)>100:raise SystemExit('Invalid release pagination response')
+print(len(releases))
+PY
+)
+      pages+=("$work/releases-$page.json")
+      ((count==100)) || break
+      ((page<100)) || die 'Release pagination limit reached; cannot safely select the newest beta.'
+      page=$((page+1))
+    done
+    write_release_selection "${pages[@]}"
+  else
+    [[ -z $requested_version ]] || endpoint="tags/$requested_version"
+    if ! fetch "https://api.github.com/repos/Funnyrz/docklane/releases/$endpoint" "$work/release.json"; then
+      [[ $requested_version != *-beta.* && ( ${channel:-stable} != beta || -n $requested_version ) ]] || die 'Beta release metadata is unavailable; no web inference is allowed.'
+      log 'GitHub API unavailable; checking the public latest formal release.'
+      resolve_release_web
+      return
+    fi
+    write_release_selection "$work/release.json"
+  fi
   version=$(head -n 1 "$work/release-selection")
   download_release_assets
 }
 download_release_assets() {
   local name
   while IFS= read -r name; do
+    if [[ $name == RELEASE-SHA256SUMS && ${release_manifest_downloaded:-false} == true ]]; then continue; fi
     fetch "https://github.com/Funnyrz/docklane/releases/download/$version/$name" "$work/$name"
   done < <(tail -n +2 "$work/release-selection")
 }
@@ -119,79 +167,118 @@ fetch_release_page() {
   fetch_url 'https://github.com/Funnyrz/docklane/releases/latest' "$work/release-page.html" "$work/release-page-url" 120
 }
 resolve_release_web() {
-  # GitHub documents /releases/latest independently of REST API quotas:
-  # https://docs.github.com/en/repositories/releasing-projects-on-github/linking-to-releases
-  # Only the formal latest redirect is trusted. An older explicitly requested
-  # version still requires API metadata; do not infer prerelease status from HTML.
   fetch_release_page
-  python3 - "$work/release-page-url" "$version" "$arch" > "$work/release-selection" <<'PY'
+  python3 - "$work/release-page-url" "${requested_version:-$version}" > "$work/web-tag" <<'PY'
 import pathlib,re,sys
 url=pathlib.Path(sys.argv[1]).read_text().strip()
 match=re.fullmatch(r'https://github\.com/Funnyrz/docklane/releases/tag/(v\d+\.\d+\.\d+)',url)
 if not match:raise SystemExit('Public latest did not resolve to a stable Docklane release')
-tag=match[1]
-if sys.argv[2] and sys.argv[2]!=tag:
-    raise SystemExit('GitHub API unavailable: only the current formal latest can be verified. Retry the requested older version after API access recovers.')
-print(tag)
-print('\n'.join(['RELEASE-SHA256SUMS','LICENSE','SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt',
-                 'docker-manager-images.tar.gz','docker-manager-installation.tar.gz',
-                 f'docklane-{tag}-linux-{sys.argv[3]}.tar.gz',
-                 f'docklane-{tag}-linux-{sys.argv[3]}.tar.gz.sha256']))
+if sys.argv[2] and sys.argv[2]!=match[1]:raise SystemExit('GitHub API unavailable: only the current formal latest can be verified.')
+print(match[1])
 PY
-  version=$(head -n 1 "$work/release-selection")
+  version=$(cat "$work/web-tag")
+  fetch "https://github.com/Funnyrz/docklane/releases/download/$version/RELEASE-SHA256SUMS" "$work/RELEASE-SHA256SUMS"
+  release_manifest_downloaded=true
+  python3 - "$work" "$version" "$arch" > "$work/release-selection" <<'PY'
+import pathlib,re,sys
+root=pathlib.Path(sys.argv[1]);tag,arch=sys.argv[2:]
+names=set()
+for line in (root/'RELEASE-SHA256SUMS').read_text().splitlines():
+    match=re.fullmatch(r'[a-fA-F0-9]{64} [ *]([A-Za-z0-9][A-Za-z0-9._-]*)',line)
+    if not match or match[1] in names:raise SystemExit('Unsafe checksum manifest')
+    names.add(match[1])
+slim={'install-online.sh','docker-manager-installation.tar.gz','docker-manager-images.tar.gz',f'docklane-{tag}-linux-amd64.tar.gz',f'docklane-{tag}-linux-arm64.tar.gz'}
+required=['RELEASE-SHA256SUMS','docker-manager-installation.tar.gz','docker-manager-images.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz']
+layout='slim'
+if names!=slim:
+    layout='legacy'
+    required=['RELEASE-SHA256SUMS','LICENSE','SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt','docker-manager-images.tar.gz','docker-manager-installation.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz',f'docklane-{tag}-linux-{arch}.tar.gz.sha256']
+    if tag!='v0.3.0' or not set(required[1:])<=names:raise SystemExit('Unsupported release asset layout')
+(root/'layout').write_text(layout)
+print(tag);print('\n'.join(required))
+PY
   download_release_assets
 }
 verify_release() {
   python3 - "$work" "$version" "$arch" <<'PY'
-import hashlib, pathlib, re, struct, sys, tarfile
-root=pathlib.Path(sys.argv[1]); version,arch=sys.argv[2:]
+import hashlib,json,pathlib,re,struct,sys,tarfile
+root=pathlib.Path(sys.argv[1]);version,arch=sys.argv[2:]
 def digest(p):
     h=hashlib.sha256()
     with p.open('rb') as f:
-        for b in iter(lambda:f.read(1024*1024),b''): h.update(b)
+        for b in iter(lambda:f.read(1024*1024),b''):h.update(b)
     return h.hexdigest()
 def manifest(path):
     result={}
     for line in path.read_text().splitlines():
         m=re.fullmatch(r'([a-fA-F0-9]{64}) [ *]([A-Za-z0-9][A-Za-z0-9._-]*)',line)
-        if not m or m[2] in result: raise SystemExit('Unsafe checksum manifest: '+path.name)
+        if not m or m[2] in result:raise SystemExit('Unsafe checksum manifest: '+path.name)
         result[m[2]]=m[1].lower()
-    if not result: raise SystemExit('Empty checksum manifest')
+    if not result:raise SystemExit('Empty checksum manifest')
     return result
-sums=manifest(root/'RELEASE-SHA256SUMS')
+sums=manifest(root/'RELEASE-SHA256SUMS');slim=(root/'layout').read_text()=='slim'
+expected={'install-online.sh','docker-manager-installation.tar.gz','docker-manager-images.tar.gz',f'docklane-{version}-linux-amd64.tar.gz',f'docklane-{version}-linux-arm64.tar.gz'}
+if slim and set(sums)!=expected:raise SystemExit('Six-asset checksum manifest must cover exactly the other five assets')
 for name in (root/'release-selection').read_text().splitlines()[2:]:
-    if name not in sums or digest(root/name)!=sums[name]: raise SystemExit('Checksum mismatch: '+name)
-binary_name=f'docklane-{version}-linux-{arch}.tar.gz'
-for file,required in [('IMAGE-SHA256SUMS','docker-manager-images.tar.gz'),(binary_name+'.sha256',binary_name)]:
-    sub=manifest(root/file)
-    if sub.get(required)!=sums[required]: raise SystemExit('Inconsistent manifest: '+file)
+    if name not in sums or digest(root/name)!=sums[name]:raise SystemExit('Checksum mismatch: '+name)
 def unpack(name,destination):
     destination.mkdir()
     with tarfile.open(root/name,'r:gz') as archive:
         seen=set()
         for item in archive.getmembers():
             p=pathlib.PurePosixPath(item.name)
-            if p.is_absolute() or '..' in p.parts or not p.parts or str(p) in seen or not (item.isfile() or item.isdir()):
-                raise SystemExit('Unsafe archive entry: '+item.name)
+            if p.is_absolute() or '..' in p.parts or not p.parts or str(p) in seen or not(item.isfile() or item.isdir()):raise SystemExit('Unsafe archive entry: '+item.name)
             seen.add(str(p))
-        # Links and special files have been rejected; destination is private and empty.
         archive.extractall(destination)
     return seen
-binary=root/'binary'; members=unpack(binary_name,binary)
-if members!={'docklane','LICENSE'}: raise SystemExit('Unexpected binary archive layout')
+materials=root/'materials';unpack('docker-manager-installation.tar.gz',materials)
+for name in ['scripts/install-support.py','scripts/install.sh','scripts/upgrade.sh','scripts/uninstall.sh','deployments/docker-manager.service','deployments/config.example.json','LICENSE']:
+    if not(materials/name).is_file():raise SystemExit('Missing installation material: '+name)
+if slim:
+    for name in ('VERSION','SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt','TOOL-VERSIONS.txt','release-ci-evidence.json','SECURITY-NOTES.md'):
+        if not(materials/name).is_file():raise SystemExit('Missing installation metadata: '+name)
+    if (materials/'VERSION').read_text().strip()!=version.removeprefix('v'):raise SystemExit('Material VERSION mismatch')
+    evidence=json.loads((materials/'release-ci-evidence.json').read_text())
+    if evidence.get('version')!=version[1:] or evidence.get('tag')!=version or not re.fullmatch(r'[a-fA-F0-9]{40}',evidence.get('head_sha','')):raise SystemExit('Release CI version/commit metadata mismatch')
+    if json.loads((materials/'deployments/config.example.json').read_text()).get('backup_worker_image')!='docker-manager:'+version:raise SystemExit('Configuration worker version mismatch')
+    image_lines=(materials/'IMAGES.txt').read_text().splitlines()
+    image_arches=[]
+    for line in image_lines:
+        match=re.fullmatch(r'\[docker-manager:'+re.escape(version)+r'-(amd64|arm64)\] sha256:[a-f0-9]{64} linux/\1',line)
+        if not match:raise SystemExit('Worker image metadata version/architecture mismatch')
+        image_arches.append(match[1])
+    if sorted(image_arches)!=['amd64','arm64']:raise SystemExit('Worker image metadata must identify both architectures once')
+    if not(materials/'TOOL-VERSIONS.txt').read_text().strip() or not(materials/'SECURITY-NOTES.md').read_text().strip():raise SystemExit('Empty required release metadata')
+    for name in ('SHA256SUMS','IMAGE-SHA256SUMS','IMAGES.txt','LICENSE'):(root/name).write_bytes((materials/name).read_bytes())
+else:
+    sidecar=manifest(root/(f'docklane-{version}-linux-{arch}.tar.gz.sha256'))
+    archive_name=f'docklane-{version}-linux-{arch}.tar.gz'
+    if sidecar.get(archive_name)!=sums[archive_name]:raise SystemExit('Inconsistent manifest: binary sidecar')
+image_sums=manifest(root/'IMAGE-SHA256SUMS')
+if image_sums.get('docker-manager-images.tar.gz')!=sums['docker-manager-images.tar.gz']:raise SystemExit('Inconsistent manifest: IMAGE-SHA256SUMS')
+binary_name=f'docklane-{version}-linux-{arch}.tar.gz'
+binary=root/'binary';members=unpack(binary_name,binary)
+if members!={'docklane','LICENSE'}:raise SystemExit('Unexpected binary archive layout')
 header=(binary/'docklane').read_bytes()[:20]
-if len(header)!=20 or header[:6]!=b'\x7fELF\x02\x01' or struct.unpack('<H',header[18:20])[0]!={'amd64':62,'arm64':183}[arch]:
-    raise SystemExit('Binary architecture mismatch')
+if len(header)!=20 or header[:6]!=b'\x7fELF\x02\x01' or struct.unpack('<H',header[18:20])[0]!={'amd64':62,'arm64':183}[arch]:raise SystemExit('Binary architecture mismatch')
 (binary/'docklane').chmod(0o755)
 binary_sums=manifest(root/'SHA256SUMS')
-if binary_sums.get('docklane-linux-'+arch)!=digest(binary/'docklane') or binary_sums.get('LICENSE')!=digest(root/'LICENSE'):
-    raise SystemExit('Binary checksum manifest disagrees with archive')
-materials=root/'materials'; unpack('docker-manager-installation.tar.gz',materials)
-for name in ['scripts/install-support.py','scripts/install.sh','scripts/upgrade.sh','scripts/uninstall.sh','deployments/docker-manager.service','deployments/config.example.json','LICENSE']:
-    if not (materials/name).is_file(): raise SystemExit('Missing installation material: '+name)
-for license in [binary/'LICENSE',materials/'LICENSE']:
-    if license.read_bytes()!=(root/'LICENSE').read_bytes(): raise SystemExit('License mismatch')
+if binary_sums.get('docklane-linux-'+arch)!=digest(binary/'docklane') or binary_sums.get('LICENSE')!=digest(root/'LICENSE'):raise SystemExit('Binary checksum manifest disagrees with archive')
+if (binary/'LICENSE').read_bytes()!=(materials/'LICENSE').read_bytes() or (materials/'LICENSE').read_bytes()!=(root/'LICENSE').read_bytes():raise SystemExit('License mismatch')
 (root/'binary.sha256').write_text(digest(binary/'docklane'))
+PY
+}
+check_selected_downgrade() {
+  python3 - "$version" "${explicit_version:-false}" <<'PY'
+import json,pathlib,re,sys
+state=pathlib.Path('/var/lib/docklane-installer/release.json')
+def key(tag):
+    match=re.fullmatch(r'v?(\d+)\.(\d+)\.(\d+)(?:-beta\.(\d+))?',tag)
+    if not match:raise SystemExit('Cannot safely compare installed/selected release version')
+    return tuple(map(int,match.group(1,2,3)))+(1 if match[4] is None else 0,int(match[4] or 0))
+if state.exists() and sys.argv[2]!='true':
+    installed=json.loads(state.read_text()).get('version','')
+    if key(sys.argv[1])<key(installed):raise SystemExit('Implicit downgrade refused; use an explicit --version after reviewing a matching backup/recovery plan')
 PY
 }
 install_docker() {
@@ -318,25 +405,30 @@ PY
   local_docker tag "$native" "docker-manager:$version"
 }
 main() {
-  version=; listen=; migrate=; config=; dry_run=false; download_source=mirror
+  version=; listen=; migrate=; config=; dry_run=false; download_source=mirror; channel=stable; explicit_version=false
   while (($#)); do
     case "$1" in
       --help|-h) usage; return ;;
       --dry-run) dry_run=true; shift ;;
-      --version|--listen|--migrate-from|--config|--download-source)
+      --version|--listen|--migrate-from|--config|--download-source|--channel)
         (($#>=2)) && [[ -n $2 && $2 != --* ]] || die "Missing value for $1."
-        case "$1" in --version) version=$2 ;; --listen) listen=$2 ;; --migrate-from) migrate=$2 ;; --config) config=$2 ;; --download-source) download_source=$2 ;; esac
+        case "$1" in --version) version=$2; explicit_version=true ;; --channel) channel=$2 ;; --listen) listen=$2 ;; --migrate-from) migrate=$2 ;; --config) config=$2 ;; --download-source) download_source=$2 ;; esac
         shift 2 ;;
       *) die "Unknown argument: $1" ;;
     esac
   done
   [[ $download_source == mirror || $download_source == direct ]] || die '--download-source must be mirror or direct.'
-  [[ -z $version || $version =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || die 'Use a stable version such as v0.3.0.'
+  [[ -z $version || $version =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-beta\.[0-9]+)?$ ]] || die 'Use vX.Y.Z or vX.Y.Z-beta.N.'
   [[ -z $migrate || $migrate == /* ]] || die '--migrate-from must be an absolute path.'
   [[ -z $config || $config == /* ]] || die '--config must be an absolute path.'
+  [[ $channel == stable || $channel == beta ]] || die 'Use --channel stable or beta.'
+  requested_version=$version
   platform
+  log '本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。'
+  log 'This program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use.'
+  export DOCKLANE_NOTICE_SHOWN=1
   if $dry_run; then
-    log "Plan: $ID $VERSION_ID $arch; release ${version:-latest stable}; listen ${listen:-preserve existing or :8080}; migration ${migrate:-none}."
+    log "Plan: $ID $VERSION_ID $arch; release ${version:-latest $channel}; listen ${listen:-preserve existing or :8080}; migration ${migrate:-none}."
     log "GitHub download source: $download_source; Docker apt repository: official (unchanged)."
     log 'Verify release assets; prepare missing dependencies; load matching worker; install/upgrade systemd service; enable and check /healthz. No changes made.'
     return
@@ -349,6 +441,7 @@ main() {
   resolve_release
   verify_release
   log "Verified $version for $arch."
+  check_selected_downgrade
   install_docker
   install_tools
   install_worker
@@ -356,6 +449,7 @@ main() {
   export DOCKER_CONFIG="$work/docker-config"
   unset DOCKER_CONTEXT DOCKER_TLS_VERIFY DOCKER_CERT_PATH
   local args=(deploy --binary "$work/binary/docklane" --source-dir "$work/materials" --version "$version" --sha256 "$(cat "$work/binary.sha256")")
+  if $explicit_version && [[ $(cat "$work/layout") == slim ]]; then args+=(--explicit-version); fi
   [[ -z $listen ]] || args+=(--listen "$listen")
   [[ -z $migrate ]] || args+=(--migrate-from "$migrate")
   [[ -z $config ]] || args+=(--config "$config")

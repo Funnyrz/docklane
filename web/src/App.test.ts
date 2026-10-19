@@ -2,6 +2,7 @@ import { enableAutoUnmount, shallowMount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App.vue'
+import { version as appVersion } from '../package.json'
 import { setLocale } from './i18n'
 import { useAuth } from './stores/auth'
 
@@ -32,11 +33,13 @@ describe('Docklane branding', () => {
 
     expect(document.title).toBe(title)
     expect(wrapper.find('.auth-story .brand').text()).toBe('DOCKLANE')
+    expect(wrapper.find('.auth-story-footer').text()).toContain(`v${appVersion}`)
 
     auth.authenticated = true
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.sidebar-brand .brand-copy').text()).toBe('DOCKLANE')
-    expect(wrapper.find('.page-footer').text()).toContain('Docklane / v0.3')
+    expect(wrapper.find('.page-footer').text()).toContain(`Docklane / v${appVersion}`)
+    expect(wrapper.find('.version').text()).toContain(`v${appVersion}`)
     expect(wrapper.text()).not.toMatch(/docker\s*manager/i)
     wrapper.unmount()
   })

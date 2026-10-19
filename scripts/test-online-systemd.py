@@ -26,7 +26,9 @@ import urllib.request
 DATA = Path('/var/lib/docker-manager')
 BINARY = Path('/usr/local/bin/docklane')
 UNIT = Path('/etc/systemd/system/docker-manager.service')
-VERSION = 'v0.3.0'
+_ROOT = Path(__file__).resolve().parent.parent
+_VERSION_FILE = _ROOT / 'VERSION'
+VERSION = 'v' + (_VERSION_FILE.read_text().strip() if _VERSION_FILE.is_file() else json.loads((_ROOT / 'web/package.json').read_text())['version']).removeprefix('v')
 
 
 def digest(path):
@@ -199,9 +201,15 @@ fetch() {
 resolve_release() {
   version=${version:-$TEST_VERSION}
   [[ $version == "$TEST_VERSION" ]] || die 'Unexpected acceptance version.'
-  local required=(RELEASE-SHA256SUMS LICENSE SHA256SUMS IMAGE-SHA256SUMS IMAGES.txt
-    docker-manager-images.tar.gz docker-manager-installation.tar.gz
-    "docklane-$version-linux-$arch.tar.gz" "docklane-$version-linux-$arch.tar.gz.sha256")
+  local required=(RELEASE-SHA256SUMS docker-manager-installation.tar.gz docker-manager-images.tar.gz
+    "docklane-$version-linux-$arch.tar.gz")
+  printf slim > "$work/layout"
+  if [[ $version == v0.3.0 ]]; then
+    required=(RELEASE-SHA256SUMS LICENSE SHA256SUMS IMAGE-SHA256SUMS IMAGES.txt
+      docker-manager-images.tar.gz docker-manager-installation.tar.gz
+      "docklane-$version-linux-$arch.tar.gz" "docklane-$version-linux-$arch.tar.gz.sha256")
+    printf legacy > "$work/layout"
+  fi
   printf '%s\\n' "$version" "${required[@]}" > "$work/release-selection"
   local name
   for name in "${required[@]}"; do

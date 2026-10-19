@@ -1,5 +1,9 @@
 # 安装、权限、升级与灾难恢复
 
+> 本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。
+
+当前源码为 `0.3.1-beta.1`，配置与数据库 schema 仍为 v1。默认在线安装使用稳定通道（当前 `v0.3.0`），Beta 预发布不会替换 latest 稳定版。
+
 ## 一键在线安装
 
 支持 Ubuntu 24.04、Debian 12/13，架构为 `amd64` / `arm64`，要求 root 和正在运行的 systemd。在线入口位于公开仓库，默认安装最新正式 GitHub Release；解析版本后固定该版本的下载地址，所有安装材料与 worker 镜像必须来自同一 Release。匿名 GitHub API 限流时，可通过公开的最新正式 Release 链接完成 latest 或同版本安装；明确指定旧版本仍需 API 元数据，限流时安全停止并提示稍后重试。
@@ -20,7 +24,8 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 
 | 参数 | 行为 |
 | --- | --- |
-| `--version v0.3.0` | 安装指定正式版本；省略时使用一次解析得到的最新正式版本 |
+| `--channel stable` / `beta` | 默认为稳定版；显式选择 `beta` 才安装预发布 |
+| `--version v0.3.0` | 固定稳定版；Beta 可用 `--channel beta --version v0.3.1-beta.1` |
 | `--download-source mirror` / `direct` | 默认镜像优先并回退直连；`direct` 使安装器后续下载完全直连 |
 | `--listen :8080` | 设置监听地址；新装默认 `:8080`，已有安装保留原值，显式指定时覆盖 |
 | `--migrate-from /绝对路径/data` | 显式迁移手动实例的完整应用数据；保留源目录 |
@@ -40,6 +45,15 @@ sudo journalctl -u docker-manager -f
 sudo systemctl restart docker-manager
 sudo systemctl stop docker-manager
 sudo systemctl disable docker-manager
+```
+
+### Beta 通道
+
+仅在学习与测试环境显式选择 Beta；旧的无参数命令和 `--version v0.3.0` 仍按稳定版方式使用：
+
+```sh
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.1-beta.1
 ```
 
 ### 手动实例迁移
@@ -74,18 +88,21 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
 
 ## 离线安装
 
-离线安装保留单参数入口。提前准备可用的本地 Docker Engine 28/29、Compose v2（验证版本 v2.40.3）、服务 PATH 可用的 Restic 0.19.1、Python 3 与 `runuser`（util-linux）；`docker` 组须存在，服务账号须能通过该附加组访问 Docker Socket。下载同一 Release 的原始二进制、`docker-manager-installation.tar.gz`、`docker-manager-images.tar.gz`、`IMAGE-SHA256SUMS`、`IMAGES.txt` 与 `RELEASE-SHA256SUMS` 到空目录，先校验资产，再加载并为本机架构设置必需的 worker 通用标签：
+Beta 离线安装保留单参数入口。准备本地 Docker Engine 28/29、Compose v2（验证版本 v2.40.3）、服务 PATH 可用的 Restic 0.19.1、Python 3 与 `runuser`（util-linux）；`docker` 组须存在，服务账号须能通过该附加组访问 Docker Socket。
+
+Beta Release 只有六个附件：双架构原生 `tar.gz`、安装材料、镜像归档、在线脚本及 `RELEASE-SHA256SUMS`。顶层清单校验其余五个附件；安装材料根目录携带 `VERSION`（不含 `v`）、`LICENSE`、内部 `SHA256SUMS`、`IMAGE-SHA256SUMS`、`IMAGES.txt`、工具版本和 CI 证据，不再单独发布这些元数据或原始二进制。在空目录下载本机架构包、安装材料、镜像归档和顶层清单后执行：
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-sha256sum --check IMAGE-SHA256SUMS
+tar -xzf docklane-v0.3.1-beta.1-linux-amd64.tar.gz
 tar -xzf docker-manager-installation.tar.gz
+sha256sum --check IMAGE-SHA256SUMS
 sudo docker load -i docker-manager-images.tar.gz
-sudo docker tag docker-manager:v0.3.0-amd64 docker-manager:v0.3.0
-sudo ./scripts/install.sh ./docklane-linux-amd64
+sudo docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
+sudo ./scripts/install.sh ./docklane
 ```
 
-arm64 将二进制文件名和镜像标签中的 `amd64` 改为 `arm64`。精简二进制包只包含 `docklane` 和 `LICENSE`；需要 `scripts/`、服务文件和辅助程序时必须同时下载安装材料，不应混用 `main` 上的服务文件与旧版本程序。
+arm64 将包名和镜像标签中的 `amd64` 改为 `arm64`。原生包仅含 `docklane` 和 `LICENSE`，安装时还需要同版本材料，不应混用 `main` 的配置或服务文件。源码构建的原始二进制在 `bin/release-internal/`（`RELEASE_BUILD_DIR`），最终附件在 `bin/release/`（`RELEASE_OUTPUT_DIR`）；源码安装使用 `sudo ./scripts/install.sh ./bin/release-internal/docklane-linux-amd64`。v0.3.0 的旧附件布局仍有效，见 [README 稳定版下载](../README.md#稳定版下载v030)。
 
 ## 授权与路径
 
@@ -103,7 +120,7 @@ arm64 将二进制文件名和镜像标签中的 `amd64` 改为 `arm64`。精简
 
 非 root 服务备份其他 UID 的本地 Volume 时，临时执行容器只获得指定只读数据源、可写仓库和私有临时目录，并以仓库所有者身份写入仓库。恢复不同 UID/GID 的文件需要受限恢复容器：仓库只读、仓库锁目录可写、恢复目标可写，禁用网络，不挂载 Docker Socket；授予恢复文件元数据必需的 Linux capabilities。缺少镜像、Docker 权限或能力时任务失败，不将未校验的恢复标记成功。运行镜像和 `backup_worker_image` 应使用相同版本。
 
-本地构建和离线归档使用 `docker-manager:v0.3.0`；若以后从正式 registry 安装，需同时将应用镜像与 `DM_BACKUP_WORKER_IMAGE`（二进制模式为 `backup_worker_image`）设为实际发布的完整镜像引用，建议固定已核对架构的 Digest。只拉取 `ghcr.io/…` 不会生成默认的本地 tag。启动后先执行一次 Volume 备份和新目录恢复，确认 worker 镜像可用。远端仓库、权限和签发要求见 [发布配置要求](remote-release-requirements.md)。
+当前 Beta 本地构建和离线归档使用 `docker-manager:v0.3.1-beta.1`；若以后从正式 registry 安装，需同时将应用镜像与 `DM_BACKUP_WORKER_IMAGE`（二进制模式为 `backup_worker_image`）设为实际发布的完整镜像引用，建议固定已核对架构的 Digest。只拉取 `ghcr.io/…` 不会生成默认的本地 tag。启动后先执行一次 Volume 备份和新目录恢复，确认 worker 镜像可用。远端仓库、权限和签发要求见 [发布配置要求](remote-release-requirements.md)。
 
 Docker 模式应将目录备份源单独只读挂入管理容器，将仓库和恢复目录分别可写映射；不要将三者共同的父目录可写挂入面板。停机备份会拒绝停止面板自身或共享其应用数据的容器；无法确认自身身份时也会拒绝，以免停止执行备份和补偿的进程。需要在线文件备份时可显式选择 file 模式并接受一致性风险。临时备份容器将 HOME、临时文件和 Restic 缓存放在私有 `/tmp` tmpfs，兼容只读根目录。
 

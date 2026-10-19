@@ -15,6 +15,7 @@ import (
 	"testing"
 	"testing/fstest"
 
+	"github.com/docker-manager/docker-manager/internal/buildinfo"
 	"github.com/docker-manager/docker-manager/internal/config"
 	"github.com/docker-manager/docker-manager/internal/database"
 	"github.com/docker-manager/docker-manager/internal/platform"
@@ -253,5 +254,13 @@ func TestCapabilitySettingsDockerLegacyGrantDoesNotRemainPending(t *testing.T) {
 	status, out = request(t, hc, "GET", s.URL+"/api/v1/settings", "", "")
 	if status != 200 || out["capability_settings"].(map[string]any)["pending_restart"] != true {
 		t.Fatal("directory change no longer reports pending", status, out)
+	}
+}
+
+func TestSettingsReportsApplicationBuildVersion(t *testing.T) {
+	s, hc, _, _ := capabilitySettingsServer(t, "binary")
+	status, out := request(t, hc, "GET", s.URL+"/api/v1/settings", "", "")
+	if status != 200 || out["version"] != buildinfo.Version {
+		t.Fatal(status, out)
 	}
 }

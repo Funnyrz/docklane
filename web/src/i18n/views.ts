@@ -144,6 +144,7 @@ export const viewsZh = {
   },
   "settings": {
     "capabilityInfo": "查看功能是否可用，以及缺少的工具、配置或操作权限。",
+    "releaseDisclaimer": "本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。",
     "refresh": "重新检测",
     "platform": "平台配置",
     "application": "应用",
@@ -334,6 +335,7 @@ export const viewsEn = {
   },
   "settings": {
     "capabilityInfo": "Check feature availability and identify missing tools, configuration or permissions.",
+    "releaseDisclaimer": "This program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use.",
     "refresh": "Check again",
     "platform": "Platform configuration",
     "application": "APPLICATION",
