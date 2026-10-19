@@ -48,7 +48,7 @@ GO_DEFAULTS = {
     'version': 1, 'log_level': 'info', 'listen': ':9999', 'data_dir': './data',
     'docker_endpoint': 'unix:///var/run/docker.sock', 'mode': 'binary',
     'daemon_config_path': '/etc/docker/daemon.json', 'compose_path': 'docker',
-    'restic_path': 'restic', 'backup_worker_image': 'docker-manager:v0.3.1-beta.1',
+    'restic_path': 'restic', 'backup_worker_image': 'docker-manager:v0.3.1-beta.2',
     'allowed_paths': [], 'path_mappings': [], 'enable_daemon_write': False,
     'session_secure': False, 'backup_temp_dir': '',
 }
@@ -61,7 +61,7 @@ class InstallError(Exception):
 def material_version(source_dir):
     version_file = Path(source_dir) / 'VERSION'
     package = Path(source_dir) / 'web/package.json'
-    value = version_file.read_text().strip() if version_file.is_file() else (read_json(package).get('version') if package.is_file() else '0.3.1-beta.1')
+    value = version_file.read_text().strip() if version_file.is_file() else (read_json(package).get('version') if package.is_file() else '0.3.1-beta.2')
     version_key(value)
     return 'v' + value.removeprefix('v')
 

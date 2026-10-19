@@ -13,5 +13,5 @@
   "restic_path": "restic",
   "daemon_config_path": "/etc/docker/daemon.json",
   "enable_daemon_write": false,
-  "backup_worker_image": "docker-manager:v0.3.1-beta.1"
+  "backup_worker_image": "docker-manager:v0.3.1-beta.2"
 }

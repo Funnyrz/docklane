@@ -2,7 +2,7 @@
 
 > 本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。
 
-当前源码及唯一可下载版本为 [v0.3.1-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)。旧 v0.3.0 Release 已撤回，目前没有正式版；正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
+当前源码及最新 Beta 为 [v0.3.1-beta.2 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2)。旧 v0.3.0 Release 已撤回，目前没有正式版；正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
 
 **Your containers. Under control.**
 
@@ -108,7 +108,7 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 
 安装过程显示 8 个阶段及当前下载文件、来源和尝试序号；交互式终端还会显示真实下载进度条，重定向日志时使用普通文本。
 
-本页命令从已发布元数据选择最新 Beta，或通过 `--version` 固定版本（当前为 [v0.3.1-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)），并校验下载资产的 SHA-256、架构和归档路径，安装 `/usr/local/bin/docklane`，创建专用账号及 `docker-manager.service`，自动后台启动并设置开机自启。结束时检查服务状态、自启和 `/healthz`，输出访问地址；首次打开页面创建管理员。新装默认监听 `:9999`，不自动修改防火墙。已有配置保留原监听地址；需要改为 9999 时，在安装命令末尾显式追加 `--listen :9999`。
+本页命令从已发布元数据选择最新 Beta，或通过 `--version` 固定版本（当前为 [v0.3.1-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2)），并校验下载资产的 SHA-256、架构和归档路径，安装 `/usr/local/bin/docklane`，创建专用账号及 `docker-manager.service`，自动后台启动并设置开机自启。结束时检查服务状态、自启和 `/healthz`，输出访问地址；首次打开页面创建管理员。新装默认监听 `:9999`，不自动修改防火墙。已有配置保留原监听地址；需要改为 9999 时，在安装命令末尾显式追加 `--listen :9999`。
 
 Beta 安装需要可用的 GitHub API 元数据；API 不可达或限流时安全停止并提示稍后重试，不从网页推断 Beta 状态。当前没有可供正式通道使用的 Release。
 
@@ -118,7 +118,7 @@ Beta 安装需要可用的 GitHub API 元数据；API 不可达或限流时安�
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --channel beta --version v0.3.1-beta.1 --listen :9999 --dry-run
+  | sudo bash -s -- --channel beta --version v0.3.1-beta.2 --listen :9999 --dry-run
 ```
 
 若通过 `--config` 提供的配置中已设置 `listen`，未指定 `--listen` 时会保留该地址。去掉 `--dry-run` 执行安装；`--help` 查看参数。再次执行会保留现有配置与数据，同版本且校验和相同则跳过二进制替换；版本变化先停机备份再升级。已有手动运行实例必须显式迁移，不能直接当作全新安装：
@@ -144,15 +144,15 @@ sudo systemctl disable docker-manager      # 取消开机自启
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.1-beta.1
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.1-beta.2
 ```
 
 Beta Release 仅提供六个附件，`RELEASE-SHA256SUMS` 校验其余五个文件：
 
 | 附件 | 内容 |
 | --- | --- |
-| `docklane-v0.3.1-beta.1-linux-amd64.tar.gz` | amd64 的 `docklane` 与 `LICENSE` |
-| `docklane-v0.3.1-beta.1-linux-arm64.tar.gz` | arm64 的 `docklane` 与 `LICENSE` |
+| `docklane-v0.3.1-beta.2-linux-amd64.tar.gz` | amd64 的 `docklane` 与 `LICENSE` |
+| `docklane-v0.3.1-beta.2-linux-arm64.tar.gz` | arm64 的 `docklane` 与 `LICENSE` |
 | `docker-manager-installation.tar.gz` | 安装脚本、配置与文档；根目录含 `VERSION`、许可、内部二进制/镜像校验清单、`IMAGES.txt`、工具版本及 CI 证据 |
 | `docker-manager-images.tar.gz` | 双架构应用及备份 worker 镜像 |
 | `install-online.sh` | 同版本在线入口 |
@@ -162,25 +162,25 @@ Beta Release 仅提供六个附件，`RELEASE-SHA256SUMS` 校验其余五个文�
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.1-beta.1-linux-amd64.tar.gz
+tar -xzf docklane-v0.3.1-beta.2-linux-amd64.tar.gz
 tar -xzf docker-manager-installation.tar.gz
 sha256sum --check IMAGE-SHA256SUMS
 sudo docker load -i docker-manager-images.tar.gz
-sudo docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
+sudo docker tag docker-manager:v0.3.1-beta.2-amd64 docker-manager:v0.3.1-beta.2
 sudo ./scripts/install.sh ./docklane
 ```
 
-上述在线命令使用 `main` 的最新入口。已发布的 v0.3.1-beta.1 附件保留发布时快照；单独运行附件中的 `install-online.sh` 时，仍需传入 `--channel beta`。该版本附件的默认端口仍为 8080；使用包内离线安装脚本前，可将 `deployments/config.example.json` 中的 `listen` 改为 `:9999`，已有安装则修改 `/etc/docker-manager/config.json` 后重启服务。
+v0.3.1-beta.2 的在线入口、原生程序、离线安装配置和 Docker 部署统一默认使用 9999 端口；随包在线脚本默认选择最新 Beta，并包含安装阶段及下载进度提示。已有安装保留已配置的监听地址，只有显式 `--listen` 才覆盖。旧 v0.3.1-beta.1 附件保留发布时快照：默认端口为 8080，其附带在线脚本需显式传入 `--channel beta`。
 
-安装材料根目录的 `VERSION` 为 `0.3.1-beta.1`（无 `v` 前缀）；应用版本变化不改变配置或数据库的 schema v1。Beta 不再单独发布原始二进制、`.sha256`、`IMAGES.txt` 或许可附件；这些材料保留在安装归档内。已撤回版本的验收记录仅作历史留存，不提供当前下载入口。
+安装材料根目录的 `VERSION` 为 `0.3.1-beta.2`（无 `v` 前缀）；应用版本变化不改变配置或数据库的 schema v1。Beta 不再单独发布原始二进制、`.sha256`、`IMAGES.txt` 或许可附件；这些材料保留在安装归档内。已撤回版本的验收记录仅作历史留存，不提供当前下载入口。
 
 ### 原生二进制包：直接运行
 
-从 [v0.3.1-beta.1 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1) 下载本机架构包及 `RELEASE-SHA256SUMS`，放入空目录。以下以 amd64 为例，arm64 替换包名中的架构：
+从 [v0.3.1-beta.2 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2) 下载本机架构包及 `RELEASE-SHA256SUMS`，放入空目录。以下以 amd64 为例，arm64 替换包名中的架构：
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.1-beta.1-linux-amd64.tar.gz
+tar -xzf docklane-v0.3.1-beta.2-linux-amd64.tar.gz
 DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:9999 ./docklane
 ```
 
@@ -195,14 +195,14 @@ sha256sum --check --ignore-missing RELEASE-SHA256SUMS
 tar -xzf docker-manager-installation.tar.gz
 sha256sum --check IMAGE-SHA256SUMS
 docker load -i docker-manager-images.tar.gz
-docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
+docker tag docker-manager:v0.3.1-beta.2-amd64 docker-manager:v0.3.1-beta.2
 export DM_BACKUP_HOST_DIR=/srv/docker-manager/backups
 export DM_RESTORE_HOST_DIR=/srv/docker-manager/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
-归档提供两种架构镜像，启动前为本机架构设置通用标签；临时备份/恢复容器使用相同版本的本地 worker。v0.3.1-beta.1 包内 Compose 使用 `127.0.0.1:8080:8080`；若需 9999，将端口映射改为 `127.0.0.1:9999:9999`，并在服务的 `environment` 中加入 `DM_LISTEN: ":9999"`。当前源码的 Compose 示例已包含这两项设置。
+归档提供两种架构镜像，启动前为本机架构设置通用标签；临时备份/恢复容器使用相同版本的本地 worker。v0.3.1-beta.2 包内 Compose 已设置 `127.0.0.1:9999:9999` 端口映射和 `DM_LISTEN: ":9999"`。
 
 ### Docker：从源码构建
 
@@ -211,7 +211,7 @@ docker compose -f deployments/docker-compose.yml up -d --no-build
 ```sh
 git clone https://github.com/Funnyrz/docklane.git
 cd docklane
-docker build -t docker-manager:v0.3.1-beta.1 .
+docker build -t docker-manager:v0.3.1-beta.2 .
 export DM_BACKUP_HOST_DIR=/srv/docker-manager/backups
 export DM_RESTORE_HOST_DIR=/srv/docker-manager/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"

@@ -76,7 +76,7 @@ class LifecycleTests(unittest.TestCase):
         (self.material / 'web/package.json').write_text('{"version":"0.3.1-beta.10"}')
         self.assertEqual(m.material_version(self.material), 'v0.3.1-beta.10')
         (self.material / 'web/package.json').unlink()
-        self.assertEqual(m.material_version(self.material), 'v0.3.1-beta.1')
+        self.assertEqual(m.material_version(self.material), 'v0.3.1-beta.2')
 
     def test_numeric_version_order_places_stable_after_same_core_beta(self):
         self.assertGreater(m.version_key('v0.3.1-beta.10'), m.version_key('v0.3.1-beta.2'))

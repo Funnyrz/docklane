@@ -2,7 +2,7 @@
 
 > 本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。
 
-当前源码及唯一可下载版本为 [v0.3.1-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)，配置与数据库 schema 仍为 v1。旧 v0.3.0 Release 已撤回，目前没有正式版，正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
+当前源码及最新 Beta 为 [v0.3.1-beta.2 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2)，配置与数据库 schema 仍为 v1。旧 v0.3.0 Release 已撤回，目前没有正式版，正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
 
 ## 一键在线安装
 
@@ -27,7 +27,7 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 | 参数 | 行为 |
 | --- | --- |
 | `--channel stable` / `beta` | 默认 `beta`，选择最新已发布 Beta；显式 `stable` 请求正式版，目前无正式版会停止 |
-| `--version v0.3.1-beta.1` | 固定当前 Beta，优先于渠道参数；示例同时显式传入 `--channel beta` |
+| `--version v0.3.1-beta.2` | 固定当前 Beta，优先于渠道参数；示例同时显式传入 `--channel beta` |
 | `--download-source mirror` / `direct` | 默认镜像优先并回退直连；`direct` 使安装器后续下载完全直连 |
 | `--listen :9999` | 设置监听地址；新装默认 `:9999`，已有安装保留原值，显式指定时覆盖 |
 | `--migrate-from /绝对路径/data` | 显式迁移手动实例的完整应用数据；保留源目录 |
@@ -55,7 +55,7 @@ sudo systemctl disable docker-manager
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.1-beta.1
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.1-beta.2
 ```
 
 ### 手动实例迁移
@@ -67,7 +67,7 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
   | sudo bash -s -- --channel beta --migrate-from /home/ubuntu/docklane/data --dry-run
 ```
 
-若无法可靠取得旧实例配置或确认旧监听地址，追加 `--config /绝对路径/config.json`，其中 `listen` 必须明确写出旧实例实际生效的监听地址；同一 Beta 版本可能来自默认 8080 的旧发布包或默认 9999 的新源码，不能按版本号猜测。迁移保留该监听地址，只有显式 `--listen` 才覆盖。配置中的相对路径按旧工作目录转换为绝对路径，应用数据和临时目录按受管安装调整；有效配置、数据库内保存的设置及密钥继续保留。不要为了通过路径检查，把旧配置替换成空白示例。
+若无法可靠取得旧实例配置或确认旧监听地址，追加 `--config /绝对路径/config.json`，其中 `listen` 必须明确写出旧实例实际生效的监听地址；旧实例可能使用历史默认端口或自定义配置，不能仅按版本号猜测。迁移保留该监听地址，只有显式 `--listen` 才覆盖。配置中的相对路径按旧工作目录转换为绝对路径，应用数据和临时目录按受管安装调整；有效配置、数据库内保存的设置及密钥继续保留。不要为了通过路径检查，把旧配置替换成空白示例。
 
 迁移前检查外部 Compose 项目、备份源与仓库是否能被专用账号访问。`ProtectHome=true` 会屏蔽 home 下的业务路径，即使 Unix 权限允许也无法访问；先安排迁移到 `/srv` 等适当的授权目录。脚本不会自动放宽隔离或对这些路径递归 `chown`。非空目标数据目录、未知进程或无法还原的配置会使迁移停止。
 
@@ -81,7 +81,7 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --channel beta --version v0.3.1-beta.1
+  | sudo bash -s -- --channel beta --version v0.3.1-beta.2
 ```
 
 标准受管安装会保留现有配置和实际生效的数据目录；同版本且二进制 SHA-256 一致时跳过替换。版本变化先停服务，再备份实际数据目录、配置、服务单元和旧二进制，之后安装同版本材料并检查健康。显式指定 `--listen` 才更改已有监听地址。要将既有 8080 监听改为 9999，在上述在线命令末尾追加 `--listen :9999`；无参数重跑会继续保留 8080。需要降级时应按下方回退说明恢复配套备份，不能用旧程序直接打开升级后的数据库。
@@ -96,15 +96,15 @@ Beta Release 只有六个附件：双架构原生 `tar.gz`、安装材料、镜�
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.1-beta.1-linux-amd64.tar.gz
+tar -xzf docklane-v0.3.1-beta.2-linux-amd64.tar.gz
 tar -xzf docker-manager-installation.tar.gz
 sha256sum --check IMAGE-SHA256SUMS
 sudo docker load -i docker-manager-images.tar.gz
-sudo docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
+sudo docker tag docker-manager:v0.3.1-beta.2-amd64 docker-manager:v0.3.1-beta.2
 sudo ./scripts/install.sh ./docklane
 ```
 
-已发布的 v0.3.1-beta.1 附件保留发布时的 8080 默认端口。包内离线安装脚本新装前，可将 `deployments/config.example.json` 的 `listen` 改为 `:9999`；已有安装则修改 `/etc/docker-manager/config.json` 后重启服务。直接运行旧二进制可用 `DM_LISTEN=:9999` 覆盖。Docker 部署还需将端口映射改为 `127.0.0.1:9999:9999`，并设置 `DM_LISTEN=:9999`；当前源码已包含这些设置。
+v0.3.1-beta.2 的在线入口、原生程序、离线安装配置和 Docker 部署统一默认使用 9999 端口；包内 Compose 已设置 `127.0.0.1:9999:9999` 和 `DM_LISTEN=:9999`。随包在线脚本默认选择最新 Beta，并包含安装阶段及下载进度提示。已有安装保留已配置的监听地址；在线升级时只有显式 `--listen` 才覆盖。旧 v0.3.1-beta.1 附件保留发布时快照：默认端口为 8080，其附带在线脚本需显式传入 `--channel beta`。
 
 arm64 将包名和镜像标签中的 `amd64` 改为 `arm64`。原生包仅含 `docklane` 和 `LICENSE`，安装时还需要同版本材料，不应混用 `main` 的配置或服务文件。源码构建的原始二进制在 `bin/release-internal/`（`RELEASE_BUILD_DIR`），最终附件在 `bin/release/`（`RELEASE_OUTPUT_DIR`）；源码安装使用 `sudo ./scripts/install.sh ./bin/release-internal/docklane-linux-amd64`。已撤回版本不再提供当前下载命令，旧验收记录仅作历史留存。
 
@@ -124,7 +124,7 @@ arm64 将包名和镜像标签中的 `amd64` 改为 `arm64`。原生包仅含 `d
 
 非 root 服务备份其他 UID 的本地 Volume 时，临时执行容器只获得指定只读数据源、可写仓库和私有临时目录，并以仓库所有者身份写入仓库。恢复不同 UID/GID 的文件需要受限恢复容器：仓库只读、仓库锁目录可写、恢复目标可写，禁用网络，不挂载 Docker Socket；授予恢复文件元数据必需的 Linux capabilities。缺少镜像、Docker 权限或能力时任务失败，不将未校验的恢复标记成功。运行镜像和 `backup_worker_image` 应使用相同版本。
 
-当前 Beta 本地构建和离线归档使用 `docker-manager:v0.3.1-beta.1`；若以后从正式 registry 安装，需同时将应用镜像与 `DM_BACKUP_WORKER_IMAGE`（二进制模式为 `backup_worker_image`）设为实际发布的完整镜像引用，建议固定已核对架构的 Digest。只拉取 `ghcr.io/…` 不会生成默认的本地 tag。启动后先执行一次 Volume 备份和新目录恢复，确认 worker 镜像可用。远端仓库、权限和签发要求见 [发布配置要求](remote-release-requirements.md)。
+当前 Beta 本地构建和离线归档使用 `docker-manager:v0.3.1-beta.2`；若以后从正式 registry 安装，需同时将应用镜像与 `DM_BACKUP_WORKER_IMAGE`（二进制模式为 `backup_worker_image`）设为实际发布的完整镜像引用，建议固定已核对架构的 Digest。只拉取 `ghcr.io/…` 不会生成默认的本地 tag。启动后先执行一次 Volume 备份和新目录恢复，确认 worker 镜像可用。远端仓库、权限和签发要求见 [发布配置要求](remote-release-requirements.md)。
 
 Docker 模式应将目录备份源单独只读挂入管理容器，将仓库和恢复目录分别可写映射；不要将三者共同的父目录可写挂入面板。停机备份会拒绝停止面板自身或共享其应用数据的容器；无法确认自身身份时也会拒绝，以免停止执行备份和补偿的进程。需要在线文件备份时可显式选择 file 模式并接受一致性风险。临时备份容器将 HOME、临时文件和 Restic 缓存放在私有 `/tmp` tmpfs，兼容只读根目录。
 

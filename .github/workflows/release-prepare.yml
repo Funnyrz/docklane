@@ -6,7 +6,7 @@ on:
       release_tag:
         description: 'Existing stable or beta.N tag matching the source package version and successful CI'
         required: true
-        default: v0.3.1-beta.1
+        default: v0.3.1-beta.2
         type: string
       publish:
         description: 'Publish a new release only after the candidate has passed all checks'
@@ -215,6 +215,13 @@ jobs:
 
           One-command Linux installation with systemd background service and boot startup.
           Supports Ubuntu 24.04, Debian 12/13, amd64 and arm64.
+          新安装默认端口为 9999，源码、二进制、Docker 镜像及安装材料保持一致。
+          New installations default to port 9999 across binaries, Docker images and installation materials.
+          安装过程显示 8 个阶段、下载文件与来源尝试，交互式终端显示真实下载进度条。
+          Installation shows eight stages, download files/source attempts and a real progress bar in interactive terminals.
+          已有配置的监听地址会保留；需要切换时显式追加 `--listen :9999`。
+          Existing configured listeners are preserved; append `--listen :9999` to change an existing installation.
+          This beta does not create or replace a stable release.
 
           ```sh
           curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/{repo}/main/scripts/install-online.sh | sudo bash -s --{channel_argument}
