@@ -1,0 +1,363 @@
+{
+  "version": "v0.3.1-beta.2",
+  "source_commit": "bc0c775fa98d9b249108aff5ab32b27e58114139",
+  "started_at": "2026-10-19T13:41:12.667872+00:00",
+  "local_checks": {
+    "make_check": "passed",
+    "python_checks": 162,
+    "python_skipped": 1,
+    "frontend_tests": 98,
+    "go_race_vet": "passed",
+    "shell_python_syntax": "passed",
+    "actionlint": "passed"
+  },
+  "limitations": [
+    "New runtime acceptance uses isolated native arm64 Ubuntu 24.04 with dependencies already installed; CI separately covers Docker28/29 on amd64/arm64",
+    "No new three-distribution × two-architecture systemd matrix",
+    "No independent mainland ISP measurement",
+    "Beta remains for learning/testing only; do not use in production"
+  ],
+  "main_ci": {
+    "url": "https://github.com/Funnyrz/docklane/actions/runs/39261562974",
+    "head_sha": "bc0c775fa98d9b249108aff5ab32b27e58114139",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "checks",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / arm64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 28.5.1 / amd64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / amd64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 28.5.1 / arm64",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "tag_ci": {
+    "url": "https://github.com/Funnyrz/docklane/actions/runs/39262606812",
+    "head_sha": "bc0c775fa98d9b249108aff5ab32b27e58114139",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "Docker 28.5.1 / arm64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / arm64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 28.5.1 / amd64",
+        "conclusion": "success"
+      },
+      {
+        "name": "checks",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / amd64",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "candidate_build": {
+    "run_id": 39262607783,
+    "url": "https://github.com/Funnyrz/docklane/actions/runs/39262607783",
+    "result": "success",
+    "publication": false,
+    "local_download_limitation": "GitHub Actions artifact storage transferred too slowly for local runtime acceptance; publication workflow repeats candidate checks and draft download validation; public assets will be checked locally after publication."
+  },
+  "publication_run": {
+    "url": "https://github.com/Funnyrz/docklane/actions/runs/39264009565",
+    "head_sha": "bc0c775fa98d9b249108aff5ab32b27e58114139",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "prepare",
+        "conclusion": "success"
+      },
+      {
+        "name": "publish",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "published_assets": {
+    "names": [
+      "RELEASE-SHA256SUMS",
+      "docker-manager-images.tar.gz",
+      "docker-manager-installation.tar.gz",
+      "docklane-v0.3.1-beta.2-linux-amd64.tar.gz",
+      "docklane-v0.3.1-beta.2-linux-arm64.tar.gz",
+      "install-online.sh"
+    ],
+    "version": "0.3.1-beta.2",
+    "prerelease": true,
+    "evidence": {
+      "version": "0.3.1-beta.2",
+      "tag": "v0.3.1-beta.2",
+      "head_sha": "bc0c775fa98d9b249108aff5ab32b27e58114139",
+      "ci_run_url": "https://github.com/Funnyrz/docklane/actions/runs/39262606812",
+      "ci_run_id": 39262606812,
+      "publication": "candidate"
+    }
+  },
+  "release_state": {
+    "result": "passed",
+    "beta1_release_unchanged": true,
+    "beta2_prerelease": true,
+    "beta2_public": true,
+    "assets": [
+      {
+        "name": "docker-manager-images.tar.gz",
+        "size": 178581301,
+        "digest": "sha256:3d898541df42844a32baa017d82c7d8438109cb8f5268a790da0ed703db86148"
+      },
+      {
+        "name": "docker-manager-installation.tar.gz",
+        "size": 4825082,
+        "digest": "sha256:ecc53d67aba122b85b1c2afadf737951a65219ba5403a41d43bcd0dc0466b839"
+      },
+      {
+        "name": "docklane-v0.3.1-beta.2-linux-amd64.tar.gz",
+        "size": 10659020,
+        "digest": "sha256:afa862cf672d8d3bf2275276f89fb50c21d64c655122e1f7996ef3640f0a08d9"
+      },
+      {
+        "name": "docklane-v0.3.1-beta.2-linux-arm64.tar.gz",
+        "size": 9627211,
+        "digest": "sha256:f6c027dab61048449bcaf999d396aefc375c9ea6809aebc8cc46279999e405d4"
+      },
+      {
+        "name": "install-online.sh",
+        "size": 29553,
+        "digest": "sha256:c58010641d84098d67a014713c2d85e7552f11b61e9360d713a65384efd83048"
+      },
+      {
+        "name": "RELEASE-SHA256SUMS",
+        "size": 496,
+        "digest": "sha256:a3cad74cd7d436ed925c007c74bde816393084d62fa4e72787eee91d461d599f"
+      }
+    ],
+    "stable_latest_http": 404,
+    "release_url": "https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.2"
+  },
+  "actual_runtime_artifacts": {
+    "result": "passed",
+    "source_commit": "bc0c775fa98d9b249108aff5ab32b27e58114139",
+    "assets_path": "/tmp/docker-manager-release-platforms/beta2-published",
+    "checks": [
+      "Installation material version, 9999 defaults, beta channel and progress match attached script",
+      "Actual packaged arm64 binary defaults to 9999 without DM_LISTEN/DM_CONFIG; settings reports beta.2",
+      "Actual arm64 runtime image serves health/settings beta.2 on internal port9999"
+    ],
+    "images": [
+      {
+        "reference": "docker-manager:v0.3.1-beta.2-amd64",
+        "image_id": "sha256:996a019fb470769b8e87d555c0bb1e234e32a3150f680ded60ee84e60cf4662d",
+        "architecture": "amd64",
+        "port": 9999,
+        "MIT": "exact source bytes",
+        "worker_version": "v0.3.1-beta.2"
+      },
+      {
+        "reference": "docker-manager:v0.3.1-beta.2-arm64",
+        "image_id": "sha256:306ed60c9733caeedac636cf52687de99e6e25e677d7bcf8c39a11271e721f15",
+        "architecture": "arm64",
+        "port": 9999,
+        "MIT": "exact source bytes",
+        "worker_version": "v0.3.1-beta.2"
+      }
+    ]
+  },
+  "post_publication_preflight": {
+    "ci": "passed",
+    "local_artifacts": "passed",
+    "immutable_release_guard": "Existing release refuses overwrite, as expected after publication; no republish attempted."
+  },
+  "fresh_public_install_and_reboot": {
+    "phases": [
+      {
+        "phase": "install",
+        "started_at": "2026-10-19T14:01:22.676281+00:00",
+        "checks": [
+          {
+            "name": "public curl installation starts and enables hardened systemd service",
+            "status": "passed",
+            "evidence": {
+              "unit": {
+                "MainPID": "2360",
+                "User": "docker-manager",
+                "Group": "docker-manager",
+                "ProtectHome": "yes",
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "UnitFileState": "enabled"
+              },
+              "docker_before": {
+                "version": "29.9.1",
+                "pid": "836",
+                "start_ticks": "553",
+                "executable": "/usr/bin/dockerd"
+              },
+              "docker_after": {
+                "version": "29.9.1",
+                "pid": "836",
+                "start_ticks": "553",
+                "executable": "/usr/bin/dockerd"
+              },
+              "docker_installed": false,
+              "private_log": "public-installer-4833ea51.log"
+            }
+          },
+          {
+            "name": "first administrator setup and fresh login succeed",
+            "status": "passed",
+            "evidence": {
+              "admin_id": "2b5b93510bb2575976a74db5058b3f45"
+            }
+          },
+          {
+            "name": "same-version repeat preserves binary inode, master key, administrator and daemon",
+            "status": "passed",
+            "evidence": {
+              "binary_inode": 87928,
+              "binary_sha256": "9b407a07996a96009a88a718f0fd50ab4079f23f7d422247b9216b833de27e38",
+              "unit": {
+                "MainPID": "2360",
+                "User": "docker-manager",
+                "Group": "docker-manager",
+                "ProtectHome": "yes",
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "UnitFileState": "enabled"
+              },
+              "private_log": "public-installer-3c5d76a6.log"
+            }
+          }
+        ],
+        "status": "passed",
+        "completed_at": "2026-10-19T14:03:29.009791+00:00"
+      },
+      {
+        "phase": "resume",
+        "started_at": "2026-10-19T14:04:08.092178+00:00",
+        "checks": [
+          {
+            "name": "guest reboot retains automatic startup, health, key, administrator and session",
+            "status": "passed",
+            "evidence": {
+              "before": {
+                "boot_id": "4c4c09d6-a7c3-4bdb-abd6-8e489374d38f",
+                "pid1_start_ticks": "0",
+                "pid1_comm": "systemd"
+              },
+              "after": {
+                "boot_id": "a1ae435f-04c3-4da3-a9d7-1044e2fe133d",
+                "pid1_start_ticks": "0",
+                "pid1_comm": "systemd"
+              },
+              "unit": {
+                "MainPID": "1073",
+                "User": "docker-manager",
+                "Group": "docker-manager",
+                "ProtectHome": "yes",
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "UnitFileState": "enabled"
+              },
+              "docker": {
+                "version": "29.9.1",
+                "pid": "812",
+                "start_ticks": "561",
+                "executable": "/usr/bin/dockerd"
+              },
+              "binary_inode": 87928
+            }
+          }
+        ],
+        "status": "passed",
+        "completed_at": "2026-10-19T14:04:08.220916+00:00"
+      }
+    ],
+    "limitations": [
+      "A disposable native arm64 Ubuntu 24.04 systemd VM; other distribution/architecture combinations have separate candidate evidence.",
+      "No firewall rule is changed; remote network exposure is not asserted."
+    ],
+    "transport": {
+      "public_url": "https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh",
+      "command": "set -o pipefail; curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --",
+      "mocked_operations": []
+    }
+  },
+  "fresh_install_details": {
+    "result": "passed",
+    "fresh_install_listen": ":9999",
+    "installed_version": "v0.3.1-beta.2",
+    "settings_version": "0.3.1-beta.2",
+    "installed_binary": "exact published arm64 bytes",
+    "worker": "local common tag matches verified arm64 release image",
+    "progress": "eight ordered stages, file completion and bilingual warning on both public curl invocations"
+  },
+  "public_beta1_upgrade_repeat_and_explicit_listen": {
+    "source_commit": "bc0c775fa98d9b249108aff5ab32b27e58114139",
+    "result": "passed",
+    "checks": [
+      {
+        "name": "Public default beta upgrades beta.1 to beta.2 and preserves 8080, administrator, saved settings, key and Docker",
+        "status": "passed",
+        "evidence": {
+          "backup_group": "/var/backups/docker-manager/20261019T140014.610769Z",
+          "private_log": "beta2-upgrade-public.log"
+        }
+      },
+      {
+        "name": "Repeat installation preserves binary inode, listener, key and application/Docker PID",
+        "status": "passed",
+        "evidence": {
+          "private_log": "beta2-upgrade-repeat-public.log"
+        }
+      },
+      {
+        "name": "Explicit --listen :9999 changes listener and retains administrator/settings/key",
+        "status": "passed",
+        "evidence": {
+          "private_log": "beta2-upgrade-listen-public.log"
+        }
+      }
+    ],
+    "mocked_operations": [],
+    "limitations": [
+      "Native arm64 Ubuntu 24.04 VM with existing dependencies; no new full platform matrix",
+      "No independent mainland ISP measurement"
+    ],
+    "verified_at": "2026-10-19T14:02:21.451395+00:00"
+  },
+  "bootstrap_sha256": "c58010641d84098d67a014713c2d85e7552f11b61e9360d713a65384efd83048",
+  "default_listen": ":9999",
+  "verified_at": "2026-10-19T14:04:54.751507+00:00",
+  "result": "passed",
+  "cleanup": {
+    "test_guests_stopped": [
+      "dm-beta-ubuntu24-arm64",
+      "dm-beta2-public-ubuntu24-arm64"
+    ],
+    "private_test_data_and_paired_backups": "retained",
+    "unrelated_primary_worktree_changes": "excluded"
+  },
+  "public_release_page": "GitHub page renders beta.2, port9999 and testing-only warning"
+}
