@@ -3,7 +3,10 @@
 
 Run stable, beta, then resume after an actual guest reboot. Credentials and logs
 stay in the root-owned state directory; the report contains no credentials.
-The stable phase uses the reviewed local bootstrap and public stable downloads.
+The stable phase is a historical scenario requiring the verified archived
+v0.3.0 baseline (or its retained test state). v0.3.0 is no longer a public Release;
+its absence must not be mistaken for a successful baseline installation. Any
+public baseline request explicitly selects stable and v0.3.0.
 The beta phase uses the literal public mirror curl command, without mocks.
 """
 import argparse
@@ -113,7 +116,7 @@ def main():
         if args.phase == 'stable':
             if not control:
                 assert not DATA.exists() and not BINARY.exists(), 'Refusing an existing installation'
-                invoke()
+                invoke(('--channel', 'stable', '--version', 'v0.3.0'))
                 control['credentials'] = {'username': 'beta-test-' + secrets.token_hex(5), 'password': secrets.token_urlsafe(36)}
                 save()
             else:
@@ -129,7 +132,7 @@ def main():
             control['saved_settings'] = api.call('GET', '/settings')['capability_settings']['saved']
             control['docker_pid'] = command('systemctl', 'show', 'docker', '--property=MainPID', '--value')
             healthy('0.3.0')
-            record('Default stable channel installs legacy v0.3.0 and permits administrator setup')
+            record('Explicit historical stable baseline installs legacy v0.3.0 and permits administrator setup')
         elif args.phase == 'beta':
             assert control and json.loads(RECEIPT.read_text())['version'] == 'v0.3.0'
             with urllib.request.urlopen(URL, timeout=45) as response:
@@ -148,11 +151,13 @@ def main():
             assert BINARY.stat().st_ino == inode and digest(BINARY) == binary_hash
             assert command('systemctl', 'show', 'docker-manager', '--property=MainPID', '--value') == pid
             record('Repeated public beta installation preserves binary inode and running process')
-            result = invoke(public=True, success=False)
-            assert 'downgrade' in (result.stdout + result.stderr).decode().lower()
+            result = invoke(('--channel', 'stable'), public=True, success=False)
+            rejection = (result.stdout + result.stderr).decode().lower()
+            assert 'downgrade' in rejection or 'no stable release could be verified' in rejection
+            control['stable_rejection'] = 'downgrade blocked' if 'downgrade' in rejection else 'no verified stable release'
             healthy(expected)
             assert digest(BINARY) == binary_hash and command('systemctl', 'show', 'docker-manager', '--property=MainPID', '--value') == pid
-            record('Default stable command refuses an implicit downgrade without stopping beta')
+            record('Explicit stable request is safely refused without stopping beta: ' + control['stable_rejection'])
             control.update(binary_hash=binary_hash, boot=Path('/proc/sys/kernel/random/boot_id').read_text())
         else:
             assert control.get('boot') and Path('/proc/sys/kernel/random/boot_id').read_text() != control['boot']
@@ -167,7 +172,7 @@ def main():
         phase['completed_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
         report['environment'] = {'system': os.uname().sysname, 'machine': os.uname().machine, 'pid1': 'systemd'}
         report['limitations'] = ['One isolated native arm64 Ubuntu 24.04 VM; no independent mainland ISP measurement',
-                                 'Stable phase uses local reviewed bootstrap and public downloads; beta phase has no transport or selector mocks']
+                                 'Historical stable phase requires archived v0.3.0 baseline availability; v0.3.0 is no longer a public Release. Beta phase has no transport or selector mocks']
         save()
 
 

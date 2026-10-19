@@ -2,20 +2,20 @@
 
 > 本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。
 
-当前源码为 `0.3.1-beta.1`，配置与数据库 schema 仍为 v1。默认在线安装使用稳定通道（当前 `v0.3.0`），Beta 预发布不会替换 latest 稳定版。
+当前源码及唯一可下载版本为 [v0.3.1-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)，配置与数据库 schema 仍为 v1。旧 v0.3.0 Release 已撤回，目前没有正式版，正式通道在未来正式发布前不可用。安装器默认仍为 `stable`，当前无参数安装会停止并提示使用 `--channel beta`；本页命令均显式选择 Beta。
 
 ## 一键在线安装
 
-支持 Ubuntu 24.04、Debian 12/13，架构为 `amd64` / `arm64`，要求 root 和正在运行的 systemd。在线入口位于公开仓库，默认安装最新正式 GitHub Release；解析版本后固定该版本的下载地址，所有安装材料与 worker 镜像必须来自同一 Release。匿名 GitHub API 限流时，可通过公开的最新正式 Release 链接完成 latest 或同版本安装；明确指定旧版本仍需 API 元数据，限流时安全停止并提示稍后重试。
+支持 Ubuntu 24.04、Debian 12/13，架构为 `amd64` / `arm64`，要求 root 和正在运行的 systemd。在线入口位于公开仓库，本页命令选择当前 Beta；解析版本后固定该版本的下载地址，所有安装材料与 worker 镜像必须来自同一 Release。Beta 安装要求可用的 GitHub API 元数据，API 不可达或限流时安全停止，不从网页推断 Beta 状态。
 
 ```sh
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
 ```
 
 主入口不可达时，可使用备用公共镜像：
 
 ```sh
-curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
 ```
 
 两者都是第三方公共服务，不保证所有地区或网络均可达；项目自有短域名入口暂缓提供。安装器默认 `--download-source mirror`：GitHub API 依次尝试 `gh-proxy.com`、官方直连；GitHub 网页、Release 资产及 Compose / Restic 等文件依次尝试 `gh-proxy.com`、`ghfast.top`、官方直连。服务能力参见 [公共镜像服务文档](https://gh-proxy.com/docs/github-accelerator)。追加 `--download-source direct` 可使安装器后续下载完全绕过镜像；入口本身也需直连时，使用[原始脚本地址](https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh)。镜像只改变传输路径，仍使用同一 Release 的版本、SHA-256、架构与归档校验。Docker apt 软件源保持官方地址，不保证整个依赖安装流程都在国内网络可达。
@@ -24,8 +24,8 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 
 | 参数 | 行为 |
 | --- | --- |
-| `--channel stable` / `beta` | 默认为稳定版；显式选择 `beta` 才安装预发布 |
-| `--version v0.3.0` | 固定稳定版；Beta 可用 `--channel beta --version v0.3.1-beta.1` |
+| `--channel stable` / `beta` | 默认 `stable`，目前无正式版会停止；显式 `beta` 选择最新已发布 Beta |
+| `--version v0.3.1-beta.1` | 固定当前 Beta，优先于渠道参数；示例同时显式传入 `--channel beta` |
 | `--download-source mirror` / `direct` | 默认镜像优先并回退直连；`direct` 使安装器后续下载完全直连 |
 | `--listen :8080` | 设置监听地址；新装默认 `:8080`，已有安装保留原值，显式指定时覆盖 |
 | `--migrate-from /绝对路径/data` | 显式迁移手动实例的完整应用数据；保留源目录 |
@@ -49,7 +49,7 @@ sudo systemctl disable docker-manager
 
 ### Beta 通道
 
-仅在学习与测试环境显式选择 Beta；旧的无参数命令和 `--version v0.3.0` 仍按稳定版方式使用：
+仅在学习与测试环境显式选择当前 Beta，或固定本次版本：
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
@@ -62,7 +62,7 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --migrate-from /home/ubuntu/docklane/data --dry-run
+  | sudo bash -s -- --channel beta --migrate-from /home/ubuntu/docklane/data --dry-run
 ```
 
 若无法可靠取得旧实例配置，追加 `--config /绝对路径/config.json`。配置中的相对路径按旧工作目录转换为绝对路径，应用数据和临时目录按受管安装调整；有效配置、数据库内保存的设置及密钥继续保留。不要为了通过路径检查，把旧配置替换成空白示例。
@@ -75,11 +75,11 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
 
 ### 重复执行与在线升级
 
-使用原命令可安装最新正式版本，也可固定版本：
+使用显式 Beta 命令可安装最新已发布的 Beta，也可固定当前版本：
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --version v0.3.0
+  | sudo bash -s -- --channel beta --version v0.3.1-beta.1
 ```
 
 标准受管安装会保留现有配置和实际生效的数据目录；同版本且二进制 SHA-256 一致时跳过替换。版本变化先停服务，再备份实际数据目录、配置、服务单元和旧二进制，之后安装同版本材料并检查健康。显式指定 `--listen` 才更改已有监听地址。需要降级时应按下方回退说明恢复配套备份，不能用旧程序直接打开升级后的数据库。
@@ -102,7 +102,7 @@ sudo docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
 sudo ./scripts/install.sh ./docklane
 ```
 
-arm64 将包名和镜像标签中的 `amd64` 改为 `arm64`。原生包仅含 `docklane` 和 `LICENSE`，安装时还需要同版本材料，不应混用 `main` 的配置或服务文件。源码构建的原始二进制在 `bin/release-internal/`（`RELEASE_BUILD_DIR`），最终附件在 `bin/release/`（`RELEASE_OUTPUT_DIR`）；源码安装使用 `sudo ./scripts/install.sh ./bin/release-internal/docklane-linux-amd64`。v0.3.0 的旧附件布局仍有效，见 [README 稳定版下载](../README.md#稳定版下载v030)。
+arm64 将包名和镜像标签中的 `amd64` 改为 `arm64`。原生包仅含 `docklane` 和 `LICENSE`，安装时还需要同版本材料，不应混用 `main` 的配置或服务文件。源码构建的原始二进制在 `bin/release-internal/`（`RELEASE_BUILD_DIR`），最终附件在 `bin/release/`（`RELEASE_OUTPUT_DIR`）；源码安装使用 `sudo ./scripts/install.sh ./bin/release-internal/docklane-linux-amd64`。已撤回版本不再提供当前下载命令，旧验收记录仅作历史留存。
 
 ## 授权与路径
 
@@ -147,7 +147,7 @@ Docker 模式永远不允许自动写宿主机 daemon 配置。二进制模式�
 
 ## 升级和回退
 
-`--version` 选择目标版本，不保证旧版数据库或旧安装器能接受较新配置。已发布的 v0.3.0 安装辅助程序不识别 Beta worker 标签，显式指定旧版本也可能在停机前被拒绝；从 Beta 回退应恢复升级前同一组备份的程序、配置、数据库与密钥，不能只替换版本号或二进制。
+`--version` 选择目标版本，不保证旧版数据库或旧安装器能接受较新配置。已撤回的 v0.3.0 安装辅助程序不识别 Beta worker 标签，显式指定旧版本也可能在停机前被拒绝；从 Beta 回退应恢复升级前同一组备份的程序、配置、数据库与密钥，不能只替换版本号或二进制。
 
 在线升级见上方流程；离线升级先校验发布 `RELEASE-SHA256SUMS`。二进制使用 `scripts/upgrade.sh /path/to/docklane`，同时保留该版本的 `deployments/docker-manager.service`。脚本停服务后按实际生效的数据目录备份完整数据、配置、原服务单元及存在的 `docklane` / `docker-manager` 二进制，再安装 `/usr/local/bin/docklane` 和匹配的服务单元，执行 daemon-reload 后启动，并在有界等待内检查服务与 `/healthz`。旧 `/usr/local/bin/docker-manager` 保留作为回退材料；已有服务会迁移到新入口，无需迁移数据目录。
 

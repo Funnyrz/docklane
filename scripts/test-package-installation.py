@@ -217,9 +217,21 @@ if args[0]=='api':
     elif '/actions/runs/' in endpoint:
         print(json.dumps({'head_sha':'a'*40,'status':'completed','conclusion':'failure' if os.environ.get('FAILED_CI') else 'success','event':'push','path':'.github/workflows/ci.yml-extra' if os.environ.get('WRONG_CI_WORKFLOW') else '.github/workflows/ci.yml'}))
     elif endpoint.endswith('/releases/latest'):
+        after=(root/'published').exists()
+        status=os.environ.get('LATEST_POST_STATUS' if after else 'LATEST_STATUS','200')
+        if os.environ.get('LATEST_MISSING') or (os.environ.get('LATEST_DISAPPEARS') and after):status='404'
+        if os.environ.get('LATEST_APPEARS'):status='200' if after else '404'
+        if os.environ.get('LATEST_TRANSPORT_ERROR'):
+            print('transport failed, misleading HTTP 404 text',file=sys.stderr)
+            raise SystemExit(1)
         latest='v0.3.0' if '-beta.' in tag else tag
-        if os.environ.get('LATEST_CHANGED') and (root/'published').exists():latest=tag
-        print(json.dumps({'tag_name':latest}))
+        if os.environ.get('LATEST_CHANGED') and after:latest=tag
+        payload={'tag_name':latest} if status=='200' else {'message':'Not Found (HTTP 404)'}
+        if '--include' in args:print('HTTP/2.0 '+status+' Response\\ncontent-type: application/json\\n')
+        print(json.dumps(payload))
+        if status!='200':
+            print('gh: Not Found (HTTP 404)',file=sys.stderr)
+            raise SystemExit(1)
     elif '/releases/tags/' in endpoint:
         print(json.dumps({'draft':False,'prerelease':'-beta.' in tag,'html_url':'https://example.invalid/release'}))
     else:raise SystemExit('Unexpected API endpoint '+endpoint)
@@ -254,22 +266,70 @@ else:raise SystemExit('Unexpected gh call '+str(args))
         self.assertIn('--channel beta', (self.root / 'release-notes.md').read_text())
         self.assertTrue((self.root / 'published').exists())
 
+    def test_beta_publish_without_any_stable_release(self):
+        result = self.publish(LATEST_MISSING='1')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = [json.loads(line) for line in (self.root / 'gh-calls.jsonl').read_text().splitlines()]
+        self.assertEqual(sum(args[0] == 'api' and args[-1].endswith('/releases/latest') for args in calls), 2)
+        edit = next(args for args in calls if args[:2] == ['release', 'edit'])
+        self.assertIn('--prerelease=true', edit)
+        self.assertIn('--latest=false', edit)
+
+    def test_beta_refuses_auth_rate_limit_and_server_errors_for_latest(self):
+        for status in ('401', '403', '429', '500'):
+            with self.subTest(status=status):
+                temporary = tempfile.TemporaryDirectory()
+                self.addCleanup(temporary.cleanup)
+                self.root = Path(temporary.name)
+                self.build, self.output = fixture(self.root)
+                result = self.publish(LATEST_STATUS=status)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse((self.root / 'draft-created').exists())
+
+    def test_latest_transport_failure_is_not_absence(self):
+        result = self.publish(LATEST_TRANSPORT_ERROR='1')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.root / 'draft-created').exists())
+
+    def test_beta_latest_absence_cannot_change_to_a_stable_release(self):
+        result = self.publish(LATEST_APPEARS='1')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('changed the stable latest', result.stderr)
+
+    def test_beta_existing_stable_release_cannot_disappear(self):
+        result = self.publish(LATEST_DISAPPEARS='1')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('changed the stable latest', result.stderr)
+
+    def test_latest_server_error_after_upload_still_fails(self):
+        result = self.publish(LATEST_POST_STATUS='503')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertTrue((self.root / 'published').exists())
+
     def test_beta_latest_guard_detects_changed_stable_channel(self):
         result = self.publish(LATEST_CHANGED='1')
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('changed the stable latest', result.stderr)
 
-    def test_stable_publish_sets_latest(self):
-        # Rebuild the fixture source and stage for stable without touching real source.
-        shutil.rmtree(self.root / 'internal');shutil.rmtree(self.root / 'public')
+    def stable_fixture(self):
+        # Replace only this test's temporary fixture source, never the real source.
         for path in list(self.root.iterdir()):
             if path.is_dir():shutil.rmtree(path)
             else:path.unlink()
         self.build, self.output = fixture(self.root, '0.3.1')
+
+    def test_stable_publish_sets_latest(self):
+        self.stable_fixture()
         result = self.publish('0.3.1')
         self.assertEqual(result.returncode, 0, result.stderr)
         calls = [json.loads(line) for line in (self.root / 'gh-calls.jsonl').read_text().splitlines()]
         self.assertIn('--latest=true', next(args for args in calls if args[:2] == ['release', 'edit']))
+
+    def test_stable_publication_requires_a_latest_release(self):
+        self.stable_fixture()
+        result = self.publish('0.3.1', LATEST_MISSING='1')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('Stable release did not become latest', result.stderr)
 
     def test_existing_release_and_failed_ci_are_not_created(self):
         result = self.publish(EXISTING_RELEASE='1')

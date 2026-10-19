@@ -347,7 +347,10 @@ fetch() {{
         self.assertIn('systemd', self.bash('platform', ok=False).stderr)
 
     def test_help_and_invalid_arguments_do_not_touch_system(self):
-        self.assertIn('--migrate-from', self.bash('main --help').stdout)
+        help_text = self.bash('main --help').stdout
+        self.assertIn('--migrate-from', help_text)
+        self.assertIn('Defaults to the latest stable GitHub Release', help_text)
+        self.assertIn('When no stable release is published, select --channel beta explicitly.', help_text)
         for args in ['--unknown', '--version', '--version latest', '--version v0.3.0-rc1',
                      '--migrate-from relative', '--config relative', '--listen --dry-run',
                      '--download-source', '--download-source https://evil.invalid']:
@@ -540,6 +543,29 @@ curl() {{
                 result = self.bash('resolve_release', prelude=self.api_unavailable_prelude(url), ok=False)
                 self.assertIn('did not resolve to a stable Docklane release', result.stderr)
                 self.assertEqual(len(self.trace.read_text().splitlines()), 2)
+
+    def test_unverifiable_stable_suggests_explicit_beta_without_claiming_absence(self):
+        for status in (401, 403, 404, 500, 503):
+            with self.subTest(http=status):
+                result = self.bash('channel=stable; resolve_release', prelude=f"""
+fetch() {{ printf 'API HTTP {status}\\n' >&2; return 22; }}
+fetch_release_page() {{ return 22; }}
+""", ok=False)
+                self.assertIn('No stable release could be verified', result.stderr)
+                self.assertIn('GitHub API/web access may be unavailable', result.stderr)
+                self.assertIn('--channel beta explicitly', result.stderr)
+                self.assertIn('no channel switch was performed', result.stderr)
+                self.assertNotIn('No stable release is published', result.stderr)
+                self.assertFalse((self.work / 'release-selection').exists())
+                self.assertFalse((self.work / 'binary').exists())
+
+    def test_beta_redirect_is_never_accepted_as_stable(self):
+        result = self.bash('channel=stable; resolve_release',
+                           prelude=self.api_unavailable_prelude('https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1'), ok=False)
+        self.assertIn('did not resolve to a stable Docklane release', result.stderr)
+        self.assertIn('No stable release could be verified', result.stderr)
+        self.assertIn('--channel beta explicitly', result.stderr)
+        self.assertFalse((self.work / 'release-selection').exists())
 
     def test_web_fallback_failure_does_not_download_assets(self):
         self.bash('resolve_release', prelude=self.api_unavailable_prelude(web_failure=True), ok=False)

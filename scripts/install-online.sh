@@ -48,6 +48,7 @@ Usage: install-online.sh [--channel stable|beta] [--version vX.Y.Z[-beta.N]] [--
                          [--download-source mirror|direct] [--dry-run] [--help]
 Requires root, systemd, Ubuntu 24.04 or Debian 12/13, amd64 or arm64.
 Defaults to the latest stable GitHub Release. Existing Docker is never upgraded.
+When no stable release is published, select --channel beta explicitly.
 GitHub downloads use public mirrors with direct fallback; use --download-source direct to bypass mirrors.
 Unknown manual deployments require explicit --migrate-from. Source data is retained.
 EOF
@@ -100,7 +101,11 @@ for release in releases:
         if tag!=requested:continue
     elif beta != (channel=='beta'):continue
     valid.append(release)
-if not valid:raise SystemExit('No published release matches the requested version/channel')
+if not valid:
+    detail='No published release matches the requested version/channel'
+    if (requested and '-beta.' not in requested) or (not requested and channel=='stable'):
+        detail+='\nNo stable release could be verified. A stable release may be unpublished, or GitHub metadata access may be unavailable. Retry access or use --channel beta explicitly; no channel switch was performed.'
+    raise SystemExit(detail)
 r=max(valid,key=lambda release:key(release['tag_name']));tag=r['tag_name']
 slim={'RELEASE-SHA256SUMS','install-online.sh','docker-manager-images.tar.gz','docker-manager-installation.tar.gz',
       f'docklane-{tag}-linux-amd64.tar.gz',f'docklane-{tag}-linux-arm64.tar.gz'}
@@ -166,9 +171,12 @@ download_release_assets() {
 fetch_release_page() {
   fetch_url 'https://github.com/Funnyrz/docklane/releases/latest' "$work/release-page.html" "$work/release-page-url" 120
 }
+stable_selection_error() {
+  die 'No stable release could be verified. A stable release may be unpublished, or GitHub API/web access may be unavailable. Retry access or use --channel beta explicitly; no channel switch was performed.'
+}
 resolve_release_web() {
-  fetch_release_page
-  python3 - "$work/release-page-url" "${requested_version:-$version}" > "$work/web-tag" <<'PY'
+  fetch_release_page || stable_selection_error
+  python3 - "$work/release-page-url" "${requested_version:-$version}" > "$work/web-tag" <<'PY' || stable_selection_error
 import pathlib,re,sys
 url=pathlib.Path(sys.argv[1]).read_text().strip()
 match=re.fullmatch(r'https://github\.com/Funnyrz/docklane/releases/tag/(v\d+\.\d+\.\d+)',url)

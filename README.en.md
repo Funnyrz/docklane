@@ -2,7 +2,7 @@
 
 > This program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use.
 
-The current source version is `0.3.1-beta.1`. Online installation still defaults to the stable channel (currently `v0.3.0`); the beta is a prerelease and does not replace the latest stable release.
+The current source and only downloadable version is the [v0.3.1-beta.1 prerelease](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1). The old v0.3.0 Release has been withdrawn and no formal release is currently available. The stable channel is unavailable until a future formal release. The installer still defaults to `stable`; without parameters it currently stops and suggests `--channel beta`. All commands here explicitly select beta.
 
 **Your containers. Under control.**
 
@@ -95,20 +95,20 @@ The Docker image includes Docker CLI, Compose and Restic. The online installer p
 Run on an `amd64` / `arm64` host with Ubuntu 24.04 or Debian 12/13. Root privileges and a running systemd are required:
 
 ```sh
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
 ```
 
 If this entrypoint is unreachable, use the backup public mirror:
 
 ```sh
-curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --
+curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
 ```
 
 These entrypoints use public third-party services and cannot guarantee access from every region or network. A project-owned short-domain entrypoint is deferred. The installer defaults to `--download-source mirror`: GitHub API requests try `gh-proxy.com`, then the official direct endpoint; GitHub pages, Release assets, and files such as Compose / Restic try `gh-proxy.com`, `ghfast.top`, then the official direct endpoint ([public mirror documentation](https://gh-proxy.com/docs/github-accelerator)). Append `--download-source direct` to bypass all mirrors for subsequent installer downloads; use the [original script URL](https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh) if the entrypoint must also be fetched directly. Release, version, SHA-256 and archive checks remain unchanged. Docker's apt repository remains the official source, so access to every dependency from mainland China is not guaranteed.
 
-The script resolves the latest stable [GitHub Release](https://github.com/Funnyrz/docklane/releases/latest) once, pins that version, and verifies asset SHA-256 checksums, architecture and archive paths. It installs `/usr/local/bin/docklane`, creates a dedicated account and `docker-manager.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. The default listener is `:8080`; the script does not change firewall rules.
+These commands select the newest published beta, or pin a version with `--version` (currently [v0.3.1-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)), using release metadata and verify asset SHA-256 checksums, architecture and archive paths. The installer installs `/usr/local/bin/docklane`, creates a dedicated account and `docker-manager.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. The default listener is `:8080`; the script does not change firewall rules.
 
-If the anonymous GitHub API is rate-limited, the public latest formal Release link can still resolve an installation of latest or that same version; an explicitly requested older version needs API metadata, so the script stops safely and asks you to retry later.
+Beta installation requires available GitHub API metadata. If the API is unreachable or rate-limited, installation stops safely and asks you to retry later; beta status is never inferred from HTML. No Release is currently available for the stable channel.
 
 If Docker is absent, the script installs stable 29.x from the official repository and enables startup at boot. An existing usable Docker 28/29 is neither upgraded nor restarted; conflicting installations fail explicitly. Existing Compose v2 is reused; otherwise v2.40.3 is installed. Restic 0.19.1 is provided through a dedicated tools directory without overwriting versions used by other applications. The matching release's backup worker image is downloaded and loaded. The script installs base dependencies, including Python 3; downloads and package management require network access.
 
@@ -116,14 +116,14 @@ Choose a version and listener, or preview the actions first:
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --version v0.3.0 --listen :8080 --dry-run
+  | sudo bash -s -- --channel beta --version v0.3.1-beta.1 --listen :8080 --dry-run
 ```
 
 Remove `--dry-run` to install; use `--help` for parameters. Repeated execution preserves configuration and data, and skips replacing an identical binary with the same version and checksum. A version change stops the service and creates a backup before upgrading. Explicitly migrate an existing manually started instance rather than treating it as a fresh installation:
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --migrate-from /home/ubuntu/docklane/data
+  | sudo bash -s -- --channel beta --migrate-from /home/ubuntu/docklane/data
 ```
 
 Add `--config /absolute/path/config.json` if the old startup configuration cannot be established reliably. Migration needs downtime and retains both the complete source data and a matching database/key backup. External business paths still need access for the dedicated account. The service retains `ProtectHome=true`; move Compose projects, repositories or backup sources under home directories to suitable authorized locations first. See [migration and recovery](docs/operations.md#手动实例迁移).
@@ -138,7 +138,7 @@ sudo systemctl disable docker-manager      # Disable startup at boot
 
 ### Beta prerelease installation and downloads
 
-For learning and testing only. Select the published beta channel or pin this version; omitting these options continues to install stable:
+For learning and testing only. Select the published beta channel or pin this version:
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
@@ -168,51 +168,37 @@ sudo docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
 sudo ./scripts/install.sh ./docklane
 ```
 
-The materials archive's root-level `VERSION` contains `0.3.1-beta.1` without a `v` prefix. The application version changes while configuration and database schemas remain v1. Raw binaries, `.sha256` sidecars, `IMAGES.txt` and the license are no longer separate beta attachments; these materials remain inside the installation archive. The v0.3.0 instructions below preserve its original release format and stable usage.
+The materials archive's root-level `VERSION` contains `0.3.1-beta.1` without a `v` prefix. The application version changes while configuration and database schemas remain v1. Raw binaries, `.sha256` sidecars, `IMAGES.txt` and the license are no longer separate beta attachments; these materials remain inside the installation archive. Evidence for withdrawn versions remains historical and is not a current download entrypoint.
 
-### Stable downloads (v0.3.0)
+### Native binary package: run directly
 
-Download assets for your architecture from the [v0.3.0 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.0). Online installation fetches matching materials automatically; manual installation requires verifying the corresponding checksum manifest first.
-
-| Download | Use case |
-| --- | --- |
-| `docklane-v0.3.0-linux-amd64.tar.gz` | Slim binary package for x86-64 Linux |
-| `docklane-v0.3.0-linux-arm64.tar.gz` | Slim binary package for ARM64 Linux |
-| `docker-manager-installation.tar.gz` | systemd installation, upgrade, uninstall and online-install helpers, configuration examples, documentation and MIT license |
-| `docker-manager-images.tar.gz` | Both architectures of offline Docker / backup worker images |
-
-Each slim package has a matching `.tar.gz.sha256` sidecar and contains the `docklane` executable and `LICENSE`. The frontend is embedded, so no separate frontend installation is needed. The Release also provides raw binaries for both architectures, `LICENSE` and `RELEASE-SHA256SUMS`. A maintainer-generated `docklane-v0.3.0-<timestamp>.tar.gz` complete bundle places these materials under `docklane-v0.3.0/`.
-
-### Slim binary package: run directly
-
-Download the package and checksum for your architecture into an empty directory. This example targets amd64; replace `amd64` with `arm64` for an ARM64 host:
+Download the native package and `RELEASE-SHA256SUMS` from the [v0.3.1-beta.1 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1) into an empty directory. This example is for amd64; replace the architecture in the package name for arm64:
 
 ```sh
-sha256sum -c docklane-v0.3.0-linux-amd64.tar.gz.sha256
-tar -xzf docklane-v0.3.0-linux-amd64.tar.gz
+sha256sum --check --ignore-missing RELEASE-SHA256SUMS
+tar -xzf docklane-v0.3.1-beta.1-linux-amd64.tar.gz
 DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:8080 ./docklane
 ```
 
-On macOS, use `shasum -a 256 -c` for verification; the executable still requires Linux. Open `http://127.0.0.1:8080` to initialize the administrator.
-
-Slim packages do not bundle Docker CLI, Compose or Restic. Install Docker Engine and grant the current account access before managing containers. Compose features additionally need Compose v2; local backup/restore needs Restic 0.19.1. Volume backup/restore also needs an available matching worker image; see the configuration notes below.
+The frontend is embedded. The package contains only `docklane` and `LICENSE`, without Docker CLI, Compose or Restic. Direct execution requires preparing the relevant tools and access permissions; volume backup/restore also requires loading the matching worker. On macOS, use `shasum -a 256 -c` for verification; the executable still requires Linux.
 
 ### Docker: offline installation
 
-Download and verify the Release installation materials, image archive and manifest in an empty directory (or extract a complete bundle and enter `docklane-v0.3.0/`), then run the following. This example targets amd64; on arm64, replace `amd64` with `arm64` in the image tag.
+Download the current beta's installation materials, image archive and top-level checksum manifest into an empty directory; verify before extracting. This example is for amd64; replace the architecture in the image tag for arm64:
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
 tar -xzf docker-manager-installation.tar.gz
+sha256sum --check IMAGE-SHA256SUMS
 docker load -i docker-manager-images.tar.gz
-docker tag docker-manager:v0.3.0-amd64 docker-manager:v0.3.0
+docker tag docker-manager:v0.3.1-beta.1-amd64 docker-manager:v0.3.1-beta.1
 export DM_BACKUP_HOST_DIR=/srv/docker-manager/backups
 export DM_RESTORE_HOST_DIR=/srv/docker-manager/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
-The archive contains both architectures. Tag only the matching architecture with the common tag before startup. Temporary backup/restore containers use this same local image; the worker image is not pulled automatically by default.
+The archive includes both architectures. Set the common tag for the native architecture before starting; temporary backup/restore containers use the same version of the local worker.
 
 ### Docker: build from source
 
@@ -232,19 +218,9 @@ The example Compose file binds only to `127.0.0.1:8080`. Access it locally, thro
 
 ### Linux binary and systemd
 
-The Release provides `docklane-linux-amd64` and `docklane-linux-arm64`. Installation places the executable at `/usr/local/bin/docklane`; the service remains `docker-manager`. Existing installations should use the new package’s `scripts/upgrade.sh`, which handles switching the old executable path to `docklane` while retaining configuration and data locations.
+The current Release provides native `tar.gz` packages for both architectures. Installation places the executable at `/usr/local/bin/docklane`; the service is `docker-manager`. Follow [Beta prerelease installation and downloads](#beta-prerelease-installation-and-downloads) above, using the extracted `./docklane` rather than downloading a separate raw binary.
 
-Prepare a usable local Docker Engine 28/29, Compose v2 (validated version v2.40.3), Restic 0.19.1 on the service PATH, Python 3 and `runuser` (util-linux). The `docker` group must exist and grant the service account access to the Docker Socket through that supplementary group. Download the matching raw binary, `docker-manager-installation.tar.gz`, `docker-manager-images.tar.gz`, `IMAGE-SHA256SUMS`, `IMAGES.txt` and `RELEASE-SHA256SUMS` from the same Release into an empty directory (or enter an extracted complete bundle). These steps also prepare the required local worker. On arm64, replace `amd64` with `arm64` in both the binary filename and image tag:
-
-```sh
-sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-sha256sum --check IMAGE-SHA256SUMS
-tar -xzf docker-manager-installation.tar.gz
-sudo docker load -i docker-manager-images.tar.gz
-sudo docker tag docker-manager:v0.3.0-amd64 docker-manager:v0.3.0
-sudo ./scripts/install.sh ./docklane-linux-amd64
-sudo journalctl -u docker-manager -f
-```
+Prepare local Docker Engine 28/29, Compose v2 (validated version v2.40.3), Restic 0.19.1 on the service PATH, Python 3 and `runuser` (util-linux). The `docker` group must exist and grant the service account access to the Docker Socket through that supplementary group. Upgrade an existing managed installation with `scripts/upgrade.sh ./docklane` from matching versioned materials, retaining a consistent backup first.
 
 The installer creates a dedicated account and systemd service. Configuration lives at `/etc/docker-manager/config.json`; application data lives at `/var/lib/docker-manager`. Docker group access still grants high privileges. Grant backup-source read access and repository/restore-directory write access separately. Daemon writes and service restarts are not granted by default.
 

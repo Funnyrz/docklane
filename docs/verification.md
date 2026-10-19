@@ -1,5 +1,11 @@
 # v0.3 验证记录
 
+## 当前发布状态
+
+目前唯一可下载版本为 [v0.3.1-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)。原 v0.3.0 Release 已撤回，当前没有正式 Release，也没有可用的正式版 latest 入口；正式通道需等待未来正式发布。当前安装请使用 [README 的显式 Beta 命令](../README.md#一键在线安装推荐)。当前源码为 `0.3.1-beta.1`，安装示例显式使用 `--channel beta`，安装器默认仍为 `stable`，当前无参数安装会停止并提示显式选择 Beta。
+
+> 以下原有发布、CI、公开下载、latest 状态及清理描述均为相应测试/发布时刻的历史记录，保留用于追溯；它们不代表已撤回的 Release 现在仍可下载。原始 JSON、Tag 与历史验收记录未因本次撤回说明而改写。
+
 ## 2026-10-19 Beta 声明与六附件发布
 
 [v0.3.1-beta.1](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1) 已作为预发布版发布，来源为 [7a28708](https://github.com/Funnyrz/docklane/commit/7a28708b5fe5cf17a1e01b0f47db1a8b6e2bf1e1)。[主分支 CI](https://github.com/Funnyrz/docklane/actions/runs/39225538379)、[Tag CI](https://github.com/Funnyrz/docklane/actions/runs/39226372174) 和 [发布工作流](https://github.com/Funnyrz/docklane/actions/runs/39226373513) 全部成功。新 Release 恰好六个上传附件，GitHub 自动源码包不计入；旧 v0.3.0 的 Tag、17 个资产身份/大小/摘要及正式版 latest 保持不变，新旧发布说明均有免责声明。

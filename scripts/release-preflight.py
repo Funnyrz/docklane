@@ -198,7 +198,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=pathlib.Path, default=pathlib.Path(__file__).resolve().parents[1])
     parser.add_argument("--repo", help="Explicit GitHub OWNER/REPO, otherwise inspect origin")
-    parser.add_argument("--tag", help="Exact release tag, for example v0.3.0")
+    parser.add_argument("--tag", help="Exact release tag, for example v0.3.1-beta.1")
     parser.add_argument("--registry", help="Optional future GHCR destination; not required or published by the archive-based release")
     parser.add_argument("--artifacts", type=pathlib.Path, help="Prepared candidate directory; defaults to ROOT/bin/release")
     parser.add_argument("--online", action="store_true", help="Read GitHub account, repo settings, CI and tag using gh; never write")

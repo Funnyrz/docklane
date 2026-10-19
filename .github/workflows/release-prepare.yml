@@ -166,6 +166,25 @@ jobs:
           def api(path):
               return json.loads(gh('api', 'repos/' + repo + '/' + path))
 
+          def latest_stable_tag():
+              # Inspect the actual API response status, never error-message text.
+              # A repository containing only prereleases legitimately returns 404.
+              result = subprocess.run(['gh', 'api', '--include', 'repos/' + repo + '/releases/latest'],
+                                      text=True, capture_output=True)
+              headers, separator, body = result.stdout.partition('\n\n')
+              status = re.match(r'^HTTP/\S+\s+(\d{3})(?:\s|$)', headers)
+              if status and status[1] == '404':
+                  return None
+              if result.returncode:
+                  raise subprocess.CalledProcessError(result.returncode, result.args,
+                                                      output=result.stdout, stderr=result.stderr)
+              if not separator or not status or status[1] != '200':
+                  raise SystemExit('Unexpected response while checking the stable latest release')
+              tag_name = json.loads(body).get('tag_name')
+              if not isinstance(tag_name, str) or not tag_name:
+                  raise SystemExit('Missing stable latest release tag')
+              return tag_name
+
           def verify_tag():
               obj = api('git/ref/tags/' + tag)['object']
               for _ in range(8):
@@ -180,7 +199,7 @@ jobs:
               if run.get('head_sha') != sha or run.get('status') != 'completed' or run.get('conclusion') != 'success' or run.get('event') not in ('push', 'workflow_dispatch') or run.get('path', '').split('@', 1)[0] != '.github/workflows/ci.yml':
                   raise SystemExit('Candidate does not reference successful exact-commit CI')
 
-          previous_latest = api('releases/latest')['tag_name'] if beta else None
+          previous_latest = latest_stable_tag() if beta else None
           names, evidence = validate(root)
           verify_ci(evidence)
           verify_tag()
@@ -221,8 +240,8 @@ jobs:
           gh('release', 'edit', tag, '--repo', repo, '--draft=false', '--prerelease=' + str(beta).lower(), '--latest=' + str(not beta).lower())
           release = api('releases/tags/' + tag)
           if release['draft'] or release['prerelease'] != beta:
-              raise SystemExit('Release did not become a formal release')
-          current_latest = api('releases/latest')['tag_name']
+              raise SystemExit('Release was not published matching the requested channel')
+          current_latest = latest_stable_tag()
           if beta and current_latest != previous_latest:
               raise SystemExit('Beta publication changed the stable latest release')
           if not beta and current_latest != tag:
