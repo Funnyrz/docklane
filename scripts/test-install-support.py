@@ -449,6 +449,25 @@ class LifecycleTests(unittest.TestCase):
         self.assertEqual((m.DATA / 'master.key').read_bytes(), b'k' * 32)
         self.assertTrue(next(m.BACKUPS.iterdir()).joinpath('data/master.key').is_file())
 
+    def test_reinstall_retained_receipt_never_stops_missing_unit(self):
+        self.deploy()
+        self.db(m.DATA).close()
+        m.BINARY.unlink()
+        m.UNIT.unlink()
+        self.run.reset_mock()
+        self.run.side_effect = lambda command, **kwargs: subprocess.CompletedProcess(
+            command, 5 if command[:2] == ['systemctl', 'stop'] else 0, '', 'Unit docklane.service not loaded.')
+        self.deploy()
+        self.assertFalse(any(call.args[0][:2] == ['systemctl', 'stop'] for call in self.run.call_args_list))
+        self.assertTrue(m.UNIT.is_file())
+        self.assertTrue(m.BINARY.is_file())
+        self.assertEqual((m.DATA / 'master.key').read_bytes(), b'k' * 32)
+        with contextlib.closing(sqlite3.connect(m.DATA / 'docker-manager.db')) as db:
+            self.assertEqual(db.execute('SELECT username,password_hash FROM users').fetchone(), ('admin', 'saved-password-hash'))
+        snapshot = next(m.BACKUPS.iterdir())
+        self.assertTrue((snapshot / 'data/master.key').is_file())
+        self.assertTrue((snapshot / 'release.json').is_file())
+
     def test_uninstall_unknown_service_or_changed_binary_removes_nothing(self):
         self.deploy()
         self.db(m.DATA).close()

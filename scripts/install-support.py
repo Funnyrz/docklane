@@ -619,6 +619,7 @@ def deploy(args):
 def _deploy_locked(args, source_dir, candidate):
     refuse_legacy_installation()
     managed = service_context()
+    managed_unit = bool(managed)
     installed_state = read_json(STATE) if STATE.is_file() else {}
     prevent_implicit_downgrade(args.version, installed_state.get('version'), getattr(args, 'explicit_version', False))
     # Uninstall deliberately retains this private receipt and the data/config.
@@ -712,8 +713,9 @@ def _deploy_locked(args, source_dir, candidate):
         if existing:
             # Exit gracefully first; old units may otherwise escalate stop to SIGKILL.
             stop_process(lock)
-            run(['systemctl', 'stop', SERVICE])
-            service_touched = True
+            if managed_unit:
+                run(['systemctl', 'stop', SERVICE])
+                service_touched = True
             lock.acquire_after_stop()
         elif migration and old_pid:
             stop_process(lock)
