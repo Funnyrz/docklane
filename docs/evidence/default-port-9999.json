@@ -1,0 +1,213 @@
+{
+  "verified_at": "2026-10-19T10:18:29.027173+00:00",
+  "result": "passed",
+  "source_commit": "15ec89e67a84aca0175fa2ede22488824949bd40",
+  "bootstrap_sha256": "c58010641d84098d67a014713c2d85e7552f11b61e9360d713a65384efd83048",
+  "new_install_default": ":9999",
+  "existing_managed_listener_retained": ":8080",
+  "source_runtime": {
+    "result": "passed",
+    "checks": [
+      "Only the dedicated cloned guest application state was reset",
+      "Current Compose file validates with Docker Compose v2",
+      "Linux arm64 source binary serves health on 9999 without DM_LISTEN or DM_CONFIG"
+    ],
+    "source_binary_sha256": "fbf0bce489fcbda0a536af6ad51943ca84db973eb561ea05554cc1f1824f36c7",
+    "limitations": [
+      "Cloned Ubuntu 24.04 arm64 guest with Docker and dependencies already installed; no fresh OS dependency installation"
+    ]
+  },
+  "fresh_public_install_and_reboot": {
+    "phases": [
+      {
+        "phase": "install",
+        "started_at": "2026-10-19T10:08:58.358572+00:00",
+        "checks": [],
+        "status": "failed",
+        "error": "[Errno 98] Address already in use",
+        "completed_at": "2026-10-19T10:08:58.362953+00:00"
+      },
+      {
+        "phase": "install",
+        "started_at": "2026-10-19T10:11:22.362841+00:00",
+        "checks": [
+          {
+            "name": "public curl installation starts and enables hardened systemd service",
+            "status": "passed",
+            "evidence": {
+              "unit": {
+                "MainPID": "2082",
+                "User": "docker-manager",
+                "Group": "docker-manager",
+                "ProtectHome": "yes",
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "UnitFileState": "enabled"
+              },
+              "docker_before": {
+                "version": "29.9.1",
+                "pid": "859",
+                "start_ticks": "579",
+                "executable": "/usr/bin/dockerd"
+              },
+              "docker_after": {
+                "version": "29.9.1",
+                "pid": "859",
+                "start_ticks": "579",
+                "executable": "/usr/bin/dockerd"
+              },
+              "docker_installed": false,
+              "private_log": "public-installer-b4c765f6.log"
+            }
+          },
+          {
+            "name": "first administrator setup and fresh login succeed",
+            "status": "passed",
+            "evidence": {
+              "admin_id": "8422bb6af7e20d478f5db27a09545c51"
+            }
+          },
+          {
+            "name": "same-version repeat preserves binary inode, master key, administrator and daemon",
+            "status": "passed",
+            "evidence": {
+              "binary_inode": 87928,
+              "binary_sha256": "d09aa12725985c4739436befd5556d725a99045fb55b1ad5f89c22b1e9f8a9de",
+              "unit": {
+                "MainPID": "2082",
+                "User": "docker-manager",
+                "Group": "docker-manager",
+                "ProtectHome": "yes",
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "UnitFileState": "enabled"
+              },
+              "private_log": "public-installer-897bad1b.log"
+            }
+          }
+        ],
+        "status": "passed",
+        "completed_at": "2026-10-19T10:12:52.938233+00:00"
+      },
+      {
+        "phase": "resume",
+        "started_at": "2026-10-19T10:15:24.167813+00:00",
+        "checks": [
+          {
+            "name": "guest reboot retains automatic startup, health, key, administrator and session",
+            "status": "passed",
+            "evidence": {
+              "before": {
+                "boot_id": "2f44ebd9-aced-4ee5-a136-3e6fbe9dd082",
+                "pid1_start_ticks": "0",
+                "pid1_comm": "systemd"
+              },
+              "after": {
+                "boot_id": "f35ae990-2eb7-40fb-9ebc-9c224a0c9fba",
+                "pid1_start_ticks": "0",
+                "pid1_comm": "systemd"
+              },
+              "unit": {
+                "MainPID": "1092",
+                "User": "docker-manager",
+                "Group": "docker-manager",
+                "ProtectHome": "yes",
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "UnitFileState": "enabled"
+              },
+              "docker": {
+                "version": "29.9.1",
+                "pid": "816",
+                "start_ticks": "478",
+                "executable": "/usr/bin/dockerd"
+              },
+              "binary_inode": 87928
+            }
+          }
+        ],
+        "status": "passed",
+        "completed_at": "2026-10-19T10:15:24.297495+00:00"
+      }
+    ],
+    "limitations": [
+      "A disposable native arm64 Ubuntu 24.04 systemd VM; other distribution/architecture combinations have separate candidate evidence.",
+      "No firewall rule is changed; remote network exposure is not asserted."
+    ],
+    "transport": {
+      "public_url": "https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh",
+      "command": "set -o pipefail; curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --",
+      "mocked_operations": []
+    }
+  },
+  "existing_8080_public_repeat": {
+    "verified_at": "2026-10-19T10:16:06.912271+00:00",
+    "result": "passed",
+    "source_commit": "15ec89e",
+    "bootstrap_sha256": "c58010641d84098d67a014713c2d85e7552f11b61e9360d713a65384efd83048",
+    "commands": [
+      "set -o pipefail; curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s --",
+      "set -o pipefail; curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel stable"
+    ],
+    "checks": [
+      "Public mirror installer matches the committed main bootstrap",
+      "Explicit stable stops clearly when no stable release is available",
+      "No-argument command selects beta and repeat installation succeeds from public assets",
+      "Both invocations preserve binary inode/hash, master key, config, application/Docker PID and receipt",
+      "Service remains active and enabled; health endpoint returns 200",
+      "Existing administrator login and saved settings are retained",
+      "All eight success stages appear in order; failed stable request never reports later stages or completion",
+      "Actual release downloads identify files and completion using plain text in redirected stderr",
+      "Bilingual testing-only disclaimer appears before the verified application installation stage"
+    ],
+    "mocked_operations": [],
+    "environment": "Isolated native arm64 Ubuntu 24.04 systemd VM",
+    "limitations": [
+      "Repeat installation on existing beta; no fresh install or new cross-platform matrix",
+      "No independent mainland ISP measurement"
+    ]
+  },
+  "local_checks": {
+    "python_tests": 162,
+    "python_tests_skipped": 1,
+    "skip_reason": "One lifecycle test requires Linux; local runner is macOS",
+    "go_config_and_buildinfo": "passed",
+    "frontend_typecheck": "passed",
+    "shell_syntax": "passed",
+    "python_compilation": "passed",
+    "actionlint": "passed",
+    "documentation_links": "passed"
+  },
+  "ci": {
+    "url": "https://github.com/Funnyrz/docklane/actions/runs/39235072498",
+    "head_sha": "15ec89e67a84aca0175fa2ede22488824949bd40",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "checks",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 28.5.1 / amd64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / amd64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 29.5.2 / arm64",
+        "conclusion": "success"
+      },
+      {
+        "name": "Docker 28.5.1 / arm64",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "limits": [
+    "Fresh application installation used a cloned isolated native arm64 Ubuntu 24.04 guest with Docker and dependencies already installed; no fresh OS dependency-installation or new cross-distribution VM matrix",
+    "The first acceptance bind probe after the standalone source smoke reported address in use before any installation; after rechecking no listener remained, installation was retried successfully. The original failed preflight is retained in phase history",
+    "Published beta assets retain their original default port; the main online bootstrap supplies 9999 for fresh installations without rewriting versioned assets"
+  ]
+}

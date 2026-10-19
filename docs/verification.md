@@ -4,6 +4,8 @@
 
 目前唯一可下载版本为 [v0.3.1-beta.1 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.1-beta.1)。原 v0.3.0 Release 已撤回，当前没有正式 Release，也没有可用的正式版 latest 入口；正式通道需等待未来正式发布。当前安装请使用 [README 的一键安装命令](../README.md#一键在线安装推荐)。当前源码为 `0.3.1-beta.1`；无参数安装默认选择最新 Beta，并在修改系统前显示测试版警告。显式 `--channel stable` 仍请求正式版，当前会因暂无正式版而停止。
 
+[默认端口 9999 验证记录](evidence/default-port-9999.json)验证当前源码、部署示例与在线新装默认使用 `9999`，已有实例配置不自动改端口。源码 Linux arm64 程序未设置 `DM_LISTEN` / `DM_CONFIG` 时在 9999 健康；隔离 Ubuntu 24.04 VM 通过真实公开 curl 完成应用新装、重复安装及实际重启后自启，管理员、会话和密钥保留。另一旧实例无参数重复执行后仍监听 8080，配置及进程不变。当前 Compose 文件通过实际 Compose v2 校验；本机 162 项 Python 检查（1 项 Linux 专用测试跳过）、Go 配置检查、类型及脚本检查通过，[对应 CI](https://github.com/Funnyrz/docklane/actions/runs/39235072498) 五个 job 全部成功。首次端口可用性探测的失败与后续成功均保留；此为预装依赖的隔离 VM 验证，不代表新增全平台安装矩阵。
+
 [安装进度验证记录](evidence/installer-progress.json)覆盖 156 项脚本相关测试（本机 1 项 Linux 专用测试跳过），包括阶段顺序、失败停止、元数据输出隔离和终端/日志模式。原生 arm64 Ubuntu 24.04 隔离 VM 通过真实公开镜像 curl 验证 8 个安装阶段和下载文件提示，失败请求不误报完成，原程序、管理员、配置、密钥及进程保留。[对应代码提交的 CI](https://github.com/Funnyrz/docklane/actions/runs/39232908207) 五个 job 全部成功，包含 Docker 28/29 × amd64/arm64 集成。本次是既有 Beta 上的重复安装复验；真实终端模式由 PTY 自动化检查进度条参数，未新增全新安装或全平台 VM 矩阵。
 
 [默认 Beta 验证记录](evidence/default-beta-install.json)覆盖 152 项脚本相关测试（本机 1 项 Linux 专用测试跳过），并在原生 arm64 Ubuntu 24.04 隔离 VM 中通过真实公开镜像 curl 验证无参数 Beta 重复安装、测试版警告，以及显式 stable 在暂无正式版时的安全拒绝。管理员、设置、密钥、配置、二进制及应用/Docker 进程均保留；服务 active / enabled，健康检查成功。[对应代码提交的 CI](https://github.com/Funnyrz/docklane/actions/runs/39231392895) 五个 job 全部成功，包含 Docker 28/29 × amd64/arm64 集成。此项仅为既有 Beta 安装上的复验，未新增全新安装或全平台矩阵。
