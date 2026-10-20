@@ -1,6 +1,18 @@
 # v0.3 验证记录
 
-## 2026-10-20 v0.3.2-beta.3 界面整合（发布前验证）
+## 2026-10-20 v0.3.2-beta.3 界面修复发布验收
+
+[v0.3.2-beta.3](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.3) 已公开为预发布版，来源为 [5f31a31](https://github.com/Funnyrz/docklane/commit/5f31a3191ad7e339889febbbdd69356ab7739c0f)。[主分支 CI](https://github.com/Funnyrz/docklane/actions/runs/39378044139)、[Tag CI](https://github.com/Funnyrz/docklane/actions/runs/39378751545)及[发布工作流](https://github.com/Funnyrz/docklane/actions/runs/39378754114)全部成功。深蓝导航、紧凑列表、资源趋势和设置三标签此前留在未提交 UI 中，现已与动态版本、Beta 警告及按需镜像代码一起进入发布源码；保留旧 beta.1/beta.2 Release、说明、附件及 Tag，未将 Beta 设为正式版 latest。
+
+[公开发布及升级证据](evidence/beta-release-0.3.2-beta.3.json)记录七附件摘要、双架构 ELF/MIT、同版本安装材料和 CI 来源。两个发布二进制均包含本轮构建的完整前端资源字节，公开升级后实际 HTTP 返回的 JS/CSS 也与批准指纹完全一致：`index-Dzoxf7pB.js` / `index-BIvvI0N1.css`。本机原生 Go 嵌入程序另通过真实 API 与临时数据库浏览器检查，确认深蓝布局、动态 beta.3、双语警告、配置保存/待生效/重启激活/撤销和远程 Engine 指标不可用，未向模拟 Engine 发送写操作。初次独立下载镜像包遇到传输截断并被 SHA 拒绝，重新下载后的完整字节通过全部校验，未使用不完整归档。
+
+原生 arm64 Ubuntu 24.04 systemd 隔离 VM 通过公开无参数 curl 从 beta.2 升级到 beta.3。旧程序、配置、receipt、数据库和密钥的配套停机备份通过摘要检查；管理员、密钥、用户数据、已保存及生效设置保留，配置仅将默认 worker 引用推进到同版本，Docker 进程未重启。服务 active/enabled，默认端口 9999。连续 30 秒的七次真实 CPU 请求得到 ready 和有效百分比，样本时间前进；新 UI 资源通过实际 HTTP 精确校验。仅首次卷备份下载 beta.3 arm64 镜像至 100%，下载期间写入容器保持运行，旧 beta.2 镜像保留且不会冒充新版，amd64 镜像未下载。恢复旧版已备份的数据内容及 1002:1002 / 0600 权限正确，后续任务复用新镜像。
+
+重复公开安装保留程序 inode、管理员、密钥、配置和安装记录，不下载镜像、不重启 Docker。真实关机/启动后 boot ID 改变，9999 服务自启健康，登录、数据及新前端 HTTP 指纹保持。所有测试 VM 已停止，源 VM 和现有服务器未修改。测试中仅将 CSS 自定义变量空白差异的夹具断言改为容忍空白后继续，未更改应用或重置升级状态，原过程保留在脱敏报告。
+
+本地完整 `make check`、127 项前端、184 项安装/打包/预检检查（macOS 跳过 1 项 Linux 专属测试）、Go race/vet、Shell/Python 和 actionlint 通过；CI Docker 28.5.1/29.5.2 × amd64/arm64 各 16 项集成通过。浏览器布局矩阵及视觉 98 分见下方发布前快照。本次真实 systemd 为预装依赖的 Ubuntu arm64 升级验证，未重跑完整发行版/架构系统矩阵、缺失依赖安装或独立国内运营商网络；程序仍仅供学习与测试，请勿用于生产环境。
+
+## 2026-10-20 v0.3.2-beta.3 界面整合（发布前源码快照）
 
 v0.3.2-beta.2 缺少此前完成但仍未提交的 navy/density 界面；安装所得浅色导航与该 Tag 源码一致。此次将深蓝导航、紧凑列表、工作台趋势及设置页三标签按差异合入现行发布基线，保留动态版本、Beta 免责声明、9999 和按需工作镜像。工作台新增本地主机 CPU 采样，仅在 Linux 二进制且本地 Unix Docker 端点启用；服务器与浏览器时钟差异使用观测时间校准，远程 Engine 不借用本地主机指标。未改配置或数据库 schema。
 

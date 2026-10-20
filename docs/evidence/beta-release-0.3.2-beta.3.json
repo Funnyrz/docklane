@@ -1,0 +1,316 @@
+{
+  "version": "v0.3.2-beta.3",
+  "source_commit": "5f31a3191ad7e339889febbbdd69356ab7739c0f",
+  "verified_at": "2026-10-20T06:47:25.011478+00:00",
+  "problem": "The completed navy/density UI remained uncommitted in the primary checkout and was not part of the beta.2 release source. Merged it into the isolated current release baseline without replacing old releases.",
+  "source_acceptance": "beta3-ui-source-acceptance.json",
+  "local_checks": {
+    "make_check": "passed",
+    "frontend_tests": 127,
+    "installer_package_preflight_tests": 184,
+    "python_linux_only_skip_on_macos": 1,
+    "go_race_vet_shell_python_actionlint": "passed"
+  },
+  "remote": {
+    "v0.3.2-beta.1": "release, body, asset identities/digests and tag unchanged",
+    "v0.3.2-beta.2": "release, body, asset identities/digests and tag unchanged",
+    "stable_latest": "HTTP 404",
+    "source_ci": {
+      "id": 39378044139,
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "5f31a3191ad7e339889febbbdd69356ab7739c0f",
+      "html_url": "https://github.com/Funnyrz/docklane/actions/runs/39378044139"
+    },
+    "publication_ci": {
+      "id": 39378754114,
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "5f31a3191ad7e339889febbbdd69356ab7739c0f",
+      "html_url": "https://github.com/Funnyrz/docklane/actions/runs/39378754114"
+    },
+    "tag_commit": "5f31a3191ad7e339889febbbdd69356ab7739c0f",
+    "tag_ci": {
+      "id": 39378751545,
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "5f31a3191ad7e339889febbbdd69356ab7739c0f",
+      "html_url": "https://github.com/Funnyrz/docklane/actions/runs/39378751545"
+    }
+  },
+  "docker_integration": [
+    {
+      "engine": "29.5.2",
+      "architecture": "aarch64",
+      "passed": 16,
+      "cleanup_errors": []
+    },
+    {
+      "engine": "28.5.1",
+      "architecture": "aarch64",
+      "passed": 16,
+      "cleanup_errors": []
+    },
+    {
+      "engine": "29.5.2",
+      "architecture": "x86_64",
+      "passed": 16,
+      "cleanup_errors": []
+    },
+    {
+      "engine": "28.5.1",
+      "architecture": "x86_64",
+      "passed": 16,
+      "cleanup_errors": []
+    }
+  ],
+  "native_embedded_ui_browser_acceptance": {
+    "completed_at": "2026-10-20T06:04:01.942388+00:00",
+    "source_commit": "5f31a3191ad7e339889febbbdd69356ab7739c0f",
+    "binary_sha256": "7c78575e7803c2625cff5e0b9c4563096074a28b6626381e7f71c1d36b04ed64",
+    "platform": "native macOS arm64 embedded Go application",
+    "application_api": "actual Go API and embedded frontend; no app API interception",
+    "engine": "owned read-only HTTP mock Engine for dashboard; nonexistent Unix socket for settings persistence",
+    "results": {
+      "dashboard_counts_and_search": "pass",
+      "remote_CPU_memory_disk_unavailable": "pass",
+      "navy_navigation_and_docklane_brand": "pass",
+      "dynamic_beta3_version": "pass",
+      "bilingual_nonmodal_Beta_disclaimer": "pass",
+      "actual_settings_save_pending_restart_activation_revocation_and_audit": "pass",
+      "actual_served_JS_CSS_match_built_dist_byte_for_byte": "pass"
+    },
+    "assets": [
+      {
+        "path": "/assets/index-Dzoxf7pB.js",
+        "bytes": 674940,
+        "sha256": "c297f6d2bc800527b8f8780d776202cb281f8768c655e2a68975531d79a2a66c"
+      },
+      {
+        "path": "/assets/index-BIvvI0N1.css",
+        "bytes": 31341,
+        "sha256": "03d5133a9d98aa666b6a9b12f8b06af07f8cf7b42fa860497566cfcfa8e21e31"
+      }
+    ],
+    "engine_mutations": [],
+    "browser_errors": [],
+    "temporary_processes_stopped": true,
+    "port18099_free": true,
+    "disposable_DBs_keys_and_passwords_cleaned_by_scripts": true,
+    "reports": [
+      "real-app-results.json",
+      "settings/real-app-results.json"
+    ],
+    "screenshots": [
+      "real-remote-engine.png",
+      "real-settings-zh-CN.png",
+      "real-settings-en.png",
+      "settings/real-pending.png",
+      "settings/real-active.png"
+    ],
+    "adaptation_record": "adaptation-record.json",
+    "limitation": "Native macOS test confirms unsupported local metrics/host authorization boundary; Linux CPU sampling and systemd validation belongs to parent release tests."
+  },
+  "published_assets": {
+    "embedded_frontend": "both released native binaries contain exact source-build assets",
+    "frontend_sha256": {
+      "index.html": "78251d6cc591e321bdf9132ba4c3c584d13de073b580c984da7e79cbef4562a1",
+      "assets/index-BIvvI0N1.css": "03d5133a9d98aa666b6a9b12f8b06af07f8cf7b42fa860497566cfcfa8e21e31",
+      "assets/index-Dzoxf7pB.js": "c297f6d2bc800527b8f8780d776202cb281f8768c655e2a68975531d79a2a66c"
+    },
+    "status": "passed",
+    "tag": "v0.3.2-beta.3",
+    "source_sha": "5f31a3191ad7e339889febbbdd69356ab7739c0f",
+    "url": "https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.3",
+    "prerelease": true,
+    "asset_count": 7,
+    "asset_sizes": {
+      "docklane-images-amd64.tar.gz": 92071179,
+      "docklane-images-arm64.tar.gz": 86589535,
+      "docklane-installation.tar.gz": 5002720,
+      "docklane-v0.3.2-beta.3-linux-amd64.tar.gz": 10705331,
+      "docklane-v0.3.2-beta.3-linux-arm64.tar.gz": 9665261,
+      "install-online.sh": 28105,
+      "RELEASE-SHA256SUMS": 585
+    },
+    "asset_digests": {
+      "docklane-images-amd64.tar.gz": "sha256:697e64cf8e06b50cf78942ecfef3c747cf62d15c4e6d8d09a3aa1c87c426f3f2",
+      "docklane-images-arm64.tar.gz": "sha256:d077d94087a9cd8ef6b454c83a1d0963f8036962e3684f00e44aeda329469119",
+      "docklane-installation.tar.gz": "sha256:5d233eb9633a73835e9830e74df2ec1b859f64ba1820b6f8c303a8381cd4f217",
+      "docklane-v0.3.2-beta.3-linux-amd64.tar.gz": "sha256:984908255e28ce5e2ff5f3f55b0d6d33c17c53997da7e10de419c2048e35eab3",
+      "docklane-v0.3.2-beta.3-linux-arm64.tar.gz": "sha256:3e99142daf2925bb084a31c6bcf5c600dfa1efe6ff1c860d6b06de4c76d3f78a",
+      "install-online.sh": "sha256:1c2cc3714a378e07bd002bd7b0e251ad93b38253aec61438c597d17eabdfd774",
+      "RELEASE-SHA256SUMS": "sha256:2ea8ea39eb37b9b97ed643ebfaa240687be2497903a6ffffb9cba08b5c9f14ef"
+    },
+    "candidate_validation": {
+      "names": [
+        "RELEASE-SHA256SUMS",
+        "docklane-images-amd64.tar.gz",
+        "docklane-images-arm64.tar.gz",
+        "docklane-installation.tar.gz",
+        "docklane-v0.3.2-beta.3-linux-amd64.tar.gz",
+        "docklane-v0.3.2-beta.3-linux-arm64.tar.gz",
+        "install-online.sh"
+      ],
+      "version": "0.3.2-beta.3",
+      "prerelease": true,
+      "evidence": {
+        "version": "0.3.2-beta.3",
+        "tag": "v0.3.2-beta.3",
+        "head_sha": "5f31a3191ad7e339889febbbdd69356ab7739c0f",
+        "ci_run_url": "https://github.com/Funnyrz/docklane/actions/runs/39378044139",
+        "ci_run_id": 39378044139,
+        "publication": "candidate"
+      }
+    },
+    "source_file_bytes": "matched",
+    "native_default_port": 9999,
+    "same_release_materials": true,
+    "architecture_archives_and_mit": "both validated"
+  },
+  "public_upgrade_acceptance": {
+    "result": "passed",
+    "prepared_at": "2026-10-20T05:57:54.714155+00:00",
+    "source_vm": "docklane-032-beta2-public-arm64 (remains stopped, unchanged)",
+    "target_vm": "docklane-032-beta3-upgrade-arm64",
+    "environment": "Ubuntu24.04 native arm64 systemd clone; existing dependencies retained",
+    "installed_version": "v0.3.2-beta.3",
+    "administrator_login": "works using retained private fixture credentials",
+    "service": "active/enabled",
+    "port": 9999,
+    "mode": "binary",
+    "existing_worker": "v0.3.2-beta.2 linux/arm64 canonical alias matches native image",
+    "fixtures": "beta2 volume, repo, policies, restored files and private credentials retained",
+    "beta2_frontend_assets": {
+      "/assets/index-CXtFXTJT.js": {
+        "sha256": "7d7164e350bb8ce1d63ca02a7c99526dfde9efd7aaa7c47b46981be70ae5d3c2",
+        "size": 651925
+      },
+      "/assets/index-B09zZpo4.css": {
+        "sha256": "9191f47cdabd90606a8d65dfab8ae795ff2469d94ea268a38c8bb2cb0c334678",
+        "size": 24918
+      }
+    },
+    "phase": "completed",
+    "upgrade": "v0.3.2-beta.2 -> v0.3.2-beta.3",
+    "default_port": 9999,
+    "administrator_and_key": "preserved",
+    "database_users": "exact original user rows preserved",
+    "settings": "effective and saved capability settings preserved",
+    "config": "all fields retained except default worker advanced to same release",
+    "backup_group": "/var/backups/docklane/20261020T063921.654845Z",
+    "stopped_backup": "old binary/receipt/config/key matched; complete paired data-sha256 verified",
+    "docker_daemon": "original PID retained",
+    "installer_worker_downloads": false,
+    "beta2_worker": "retained unchanged",
+    "binary_sha256": "2183cc5f81374331300f1c5bd8861f662c3557bcedcc8e64e157dac2006375ae",
+    "harness_note": "Exact CSS hash initially passed; updated navy custom property assertion to accept preserved CSS whitespace and resumed after verified upgrade without reinstall or state changes.",
+    "frontend_assets": {
+      "/assets/index-Dzoxf7pB.js": {
+        "sha256": "c297f6d2bc800527b8f8780d776202cb281f8768c655e2a68975531d79a2a66c",
+        "size": 674940
+      },
+      "/assets/index-BIvvI0N1.css": {
+        "sha256": "03d5133a9d98aa666b6a9b12f8b06af07f8cf7b42fa860497566cfcfa8e21e31",
+        "size": 31341
+      }
+    },
+    "frontend": "Exact approved embedded JS/CSS bytes served over actual HTTP; navy --nav:#0d1b2f, lowercase dock/lane mark, beta3 frontend version and bilingual warning present",
+    "cpu_actual_host_sampling": {
+      "result": "passed",
+      "duration_seconds": 30,
+      "samples": [
+        {
+          "cpu_status": "ready",
+          "cpu_percent": 0.3670337003670337,
+          "cpu_sampled_at": "2026-10-20T14:42:12.89962652+08:00",
+          "cpu_observed_at": "2026-10-20T06:42:27.78196562Z"
+        },
+        {
+          "cpu_status": "ready",
+          "cpu_percent": 1.4691151919866445,
+          "cpu_sampled_at": "2026-10-20T14:42:27.796927281+08:00",
+          "cpu_observed_at": "2026-10-20T06:42:32.965630493Z"
+        },
+        {
+          "cpu_status": "ready",
+          "cpu_percent": 1.4691151919866445,
+          "cpu_sampled_at": "2026-10-20T14:42:27.796927281+08:00",
+          "cpu_observed_at": "2026-10-20T06:42:38.142586555Z"
+        },
+        {
+          "cpu_status": "ready",
+          "cpu_percent": 1.6355140186915886,
+          "cpu_sampled_at": "2026-10-20T14:42:42.796931033+08:00",
+          "cpu_observed_at": "2026-10-20T06:42:43.317119239Z"
+        },
+        {
+          "cpu_status": "ready",
+          "cpu_percent": 1.6355140186915886,
+          "cpu_sampled_at": "2026-10-20T14:42:42.796931033+08:00",
+          "cpu_observed_at": "2026-10-20T06:42:48.483039661Z"
+        },
+        {
+          "cpu_status": "ready",
+          "cpu_percent": 1.6355140186915886,
+          "cpu_sampled_at": "2026-10-20T14:42:42.796931033+08:00",
+          "cpu_observed_at": "2026-10-20T06:42:53.632789085Z"
+        },
+        {
+          "cpu_status": "ready",
+          "cpu_percent": 2.3023023023023024,
+          "cpu_sampled_at": "2026-10-20T14:42:57.79692924+08:00",
+          "cpu_observed_at": "2026-10-20T06:42:58.787589283Z"
+        }
+      ],
+      "trend": "7 real timestamped API samples, ready status, advancing sample and observation times, valid0..100percent"
+    },
+    "first_worker_task": "ffd2e3b9a7b896da7ccf28ecd8fd86ed",
+    "native_worker": {
+      "image_id": "sha256:167187231d1ccb6a796bd4070998bbd6e390b7ee862c1273c562c088ce68f022",
+      "architecture": "linux/arm64",
+      "source_release": "v0.3.2-beta.3",
+      "archive": "docklane-images-arm64.tar.gz",
+      "download_progress": "logged through100%",
+      "beta2_image": "retained unchanged, not reused as beta3",
+      "amd64_image": "absent",
+      "writer_during_download": "observed running"
+    },
+    "restore_task": "13526a0038fc49f170da1679ec6459dd",
+    "restore": "Exact original beta2 payload restored to new directory with1002:1002/mode0600; beta3 native worker reused without downloads",
+    "repeat_install": "binary inode/key/config/receipt/admin preserved; noimages downloaded",
+    "completed_at": "2026-10-20T06:44:10.379257+00:00",
+    "retention": "SourceVM unchanged/stopped; only own new writer removed; private credentials and own volume/repo/restoreddata retained",
+    "cold_reboot": {
+      "result": "passed",
+      "new_kernel_boot_id": true,
+      "service": "active/enabled",
+      "healthz": 200,
+      "port": 9999,
+      "version": "0.3.2-beta.3",
+      "administrator_login": "preserved",
+      "key_config_binary_receipt": "exact bytes retained",
+      "native_worker": "same localimage persisted; amd64 tag absent",
+      "frontend": "Exact approved JS/CSS SHA retained and served over HTTP after new kernel boot"
+    },
+    "beta3_worker_tags_before_upgrade": "all absent",
+    "beta3_worker_tags": "canonical andarm64 present with verifiedsameID; amd64 absent",
+    "baseline_state": "No app/data/config/unit/receipt reset; ready for real public beta2 to beta3 upgrade"
+  },
+  "public_asset_download_attempts": {
+    "initial_gh_download": "Transfer ended with unexpected EOF; both partial image archives failed SHA validation and were not used.",
+    "retry": "Both image archives re-downloaded with curl, verified against RELEASE-SHA256SUMS and GitHub digests; full seven-asset preflight and exact embedded frontend checks then passed."
+  },
+  "cleanup": {
+    "new_upgrade_vm": "Stopped",
+    "source_vm": "Stopped and unchanged",
+    "native_UI_processes": "Stopped; disposable databases/keys removed",
+    "isolated_release_worktree": "Original primary checkout UI and other pending changes left intact"
+  },
+  "limitations": [
+    "Public systemd upgrade validation is native arm64 Ubuntu 24.04 with existing dependencies, not a new full distro/architecture VM matrix or missing-dependency installation test.",
+    "Development/browser fixtures are explicitly synthetic; native embedded browser testing uses an owned read-only mock Engine. The public upgrade test uses the real isolated Linux Docker Engine.",
+    "No independent mainland ISP measurement; beta remains for learning/testing only, not production.",
+    "Existing beta.1 and beta.2 Releases/tags/assets were preserved; beta.3 is a prerelease and stable latest remains unavailable."
+  ]
+}
