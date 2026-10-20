@@ -18,7 +18,7 @@ SOURCE = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location('release_preflight', SOURCE / 'scripts/release-preflight.py')
 HELPER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(HELPER)
-VERSION = '0.3.2-beta.2'
+VERSION = '0.3.2-beta.3'
 SHA = 'a' * 40
 
 

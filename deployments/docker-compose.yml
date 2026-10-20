@@ -1,7 +1,7 @@
 name: docklane
 services:
   docklane:
-    image: docklane:v0.3.2-beta.2
+    image: docklane:v0.3.2-beta.3
     build: ..
     restart: unless-stopped
     ports:

@@ -50,6 +50,7 @@ export function describeCapability(key: string, value: Capability) {
     status: t(`capabilities.states.${state}`),
     tone: state === 'available' ? 'success' : state === 'connectionError' || state === 'unknown' ? 'danger' : state === 'unsupported' ? '' : 'warning',
     reason: available ? t('capabilities.ready') : t(`capabilities.reasons.${issue.message}`, params),
+    shortReason: available ? '—' : t(`capabilities.shortReasons.${issue.message}`),
     solution: available ? '' : t(`capabilities.solutions.${issue.message}`, params),
     rawReason: value.reason,
     reasonCode: value.reason_code,

@@ -2,7 +2,7 @@
 
 > This program has not undergone sufficient, rigorous testing. It is for learning and testing only; do not use it in production. Assess the risks yourself and back up important data before use.
 
-The current version is [v0.3.2-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2). The v0.3.1-beta.1 and v0.3.1-beta.2 Releases, attachments and remote tags have been withdrawn. The old v0.3.0 Release has also been withdrawn and no formal release is currently available. The stable channel is unavailable until a future formal release. Online installation without parameters defaults to the newest beta and displays the testing-only, no-production warning before making system changes. You can still explicitly select `--channel beta` or pin a version.
+The current version is [v0.3.2-beta.3](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.3). The v0.3.1-beta.1 and v0.3.1-beta.2 Releases, attachments and remote tags have been withdrawn. The old v0.3.0 Release has also been withdrawn and no formal release is currently available. The stable channel is unavailable until a future formal release. Online installation without parameters defaults to the newest beta and displays the testing-only, no-production warning before making system changes. You can still explicitly select `--channel beta` or pin a version.
 
 The online installer installs the native binary without downloading worker images. The first backup/restore task that needs a worker prepares the same version for the native architecture.
 
@@ -22,7 +22,7 @@ The Go service embeds the Vue interface and runs as a Linux binary or Docker con
 
 | Area | Available today |
 | --- | --- |
-| Overview | Local host connection status, resource counts, backup summary and recent tasks |
+| Overview | Host status, running/stopped container counts, live CPU/memory/disk trends, container preview, backup summary and recent tasks |
 | Containers | Start, stop, restart, delete, details, logs, terminal, statistics, configuration preflight and controlled rebuilds |
 | Images | Filter local lists, inspect, pull, import/export tar archives and delete individual images; encrypted registry credentials and authentication tests |
 | Networks and storage | Create, inspect and delete networks and volumes; view container references and mounts; scan authorized directories for capacity |
@@ -30,14 +30,17 @@ The Go service embeds the Vue interface and runs as a Linux binary or Docker con
 | Local backups | Create/import local Restic repositories; file/directory, local-volume, container and Compose backups; Cron schedules with time zones and retention of the latest N snapshots |
 | Restore | Snapshot preflight, new-directory restore by default, explicitly confirmed overwrite and controlled service reconstruction |
 | Image acceleration | TCP/Registry connectivity diagnostics and explicit image pull tests; preview and apply mirror configuration when authorization requirements are met |
-| Operations | Task progress, logs and cancellation, audit records and host diagnostics |
+| Settings | Overview & capabilities, Mirror diagnostics and Operation audit tabs; distinguish missing tools, missing configuration and authorization, inspect resolutions, and configure directory access and controlled host operations |
+| Operations | Task progress, logs and cancellation, paginated audit records and host diagnostics |
 | Bilingual interface | Simplified Chinese `zh-CN` and English `en`, instant switching and a saved browser preference |
 
 Docklane currently manages a single host. See [Current limitations](#current-limitations) for feature boundaries.
 
 ## Screenshots
 
-Captured directly from the deployed Docklane test environment on 2026-10-19, these screenshots show real resources, empty states and feature availability. The Compose capture includes only the upper section, excluding raw configuration; Settings shows the first screen only. Logs, terminal output, raw configuration and audit details are excluded.
+Captured directly from the latest deployed Docklane on 2026-10-19, these screenshots show the collapsible navy navigation, light cards, compact lists and real resource state. The overview includes CPU, memory and disk curves plus a container preview. Trends accumulate every 15 seconds within the current page session; they are not stored monitoring history.
+
+Settings opens on Overview & capabilities with six compact capability rows. Full reasons, resolution steps and raw diagnostics are available in detail drawers; Mirror diagnostics and Operation audit have separate tabs. Empty states and restricted capabilities reflect the real test environment, without demo data. Compose is captured only above raw configuration. Login credentials, logs, terminal output and audit details are excluded.
 
 ![Docklane English overview](docs/images/en/overview.jpg)
 
@@ -112,7 +115,7 @@ These entrypoints use public third-party services and cannot guarantee access fr
 
 Installation shows its stages and the current download, source and retry attempt. Interactive terminals also show a real download progress bar; redirected logs use plain text.
 
-These commands select the newest published beta, or pin a version with `--version` (currently [v0.3.2-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2)), using release metadata and verify asset SHA-256 checksums, architecture and archive paths. The installer installs `/usr/local/bin/docklane`, creates a dedicated account and `docklane.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. New installations listen on `:9999` by default; the script does not change firewall rules. Existing configurations retain their listener. Append `--listen :9999` to the installation command to change an existing installation to port 9999.
+These commands select the newest published beta, or pin a version with `--version` (currently [v0.3.2-beta.3](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.3)), using release metadata and verify asset SHA-256 checksums, architecture and archive paths. The installer installs `/usr/local/bin/docklane`, creates a dedicated account and `docklane.service`, starts the service in the background and enables startup at boot. It checks service state, boot enablement and `/healthz`, then prints the access address. Create the administrator on your first browser visit. New installations listen on `:9999` by default; the script does not change firewall rules. Existing configurations retain their listener. Append `--listen :9999` to the installation command to change an existing installation to port 9999.
 
 Beta installation requires available GitHub API metadata. If the API is unreachable or rate-limited, installation stops safely and asks you to retry later; beta status is never inferred from HTML. No Release is currently available for the stable channel.
 
@@ -122,7 +125,7 @@ Choose a version and listener, or preview the actions first:
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --channel beta --version v0.3.2-beta.2 --listen :9999 --dry-run
+  | sudo bash -s -- --channel beta --version v0.3.2-beta.3 --listen :9999 --dry-run
 ```
 
 A configuration supplied with `--config` that sets `listen` retains that address unless `--listen` overrides it. Remove `--dry-run` to install; use `--help` for parameters. Repeated execution preserves configuration and data, and skips replacing an identical binary with the same version and checksum. A version change stops the service and creates a backup before upgrading. Explicitly migrate an existing manually started instance rather than treating it as a fresh installation:
@@ -147,15 +150,15 @@ sudo systemctl disable docklane      # Disable startup at boot
 For learning and testing only. Pin this version explicitly:
 
 ```sh
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.2-beta.2
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.2-beta.3
 ```
 
-[v0.3.2-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2) uses seven attachments; `RELEASE-SHA256SUMS` covers the other six. GitHub's automatically generated Source code archives are not uploaded attachments.
+[v0.3.2-beta.3](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.3) uses seven attachments; `RELEASE-SHA256SUMS` covers the other six. GitHub's automatically generated Source code archives are not uploaded attachments.
 
 | Attachment | Contents |
 | --- | --- |
-| `docklane-v0.3.2-beta.2-linux-amd64.tar.gz` | amd64 `docklane` and `LICENSE` |
-| `docklane-v0.3.2-beta.2-linux-arm64.tar.gz` | arm64 `docklane` and `LICENSE` |
+| `docklane-v0.3.2-beta.3-linux-amd64.tar.gz` | amd64 `docklane` and `LICENSE` |
+| `docklane-v0.3.2-beta.3-linux-arm64.tar.gz` | arm64 `docklane` and `LICENSE` |
 | `docklane-installation.tar.gz` | Scripts, configuration, documentation, `VERSION`, MIT, internal executable/image checksums, image identities, tool versions and CI provenance |
 | `docklane-images-amd64.tar.gz` | amd64 application and backup worker image |
 | `docklane-images-arm64.tar.gz` | arm64 application and backup worker image |
@@ -166,12 +169,12 @@ Offline systemd installation requires the Docker, Compose, Restic, Python and ac
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.2-beta.2-linux-amd64.tar.gz
+tar -xzf docklane-v0.3.2-beta.3-linux-amd64.tar.gz
 tar -xzf docklane-installation.tar.gz
 sudo ./scripts/install.sh ./docklane
 ```
 
-The materials' `VERSION` contains `0.3.2-beta.2` without a `v` prefix. Configuration and database schemas remain v1. Use materials from the same Release, without mixing configuration, service files or helpers from other versions.
+The materials' `VERSION` contains `0.3.2-beta.3` without a `v` prefix. Configuration and database schemas remain v1. Use materials from the same Release, without mixing configuration, service files or helpers from other versions.
 
 Historical v0.3.2-beta.1 retains its Release, Tag and six attachments, including eager loading of both image architectures during installation. To install that historical version, use its Tag-pinned script with an explicit `--version v0.3.2-beta.1`; never use an old script without a version to install newer layouts. Earlier v0.3.1-beta.1 and v0.3.1-beta.2 releases have been withdrawn.
 
@@ -185,18 +188,18 @@ To use workers without network access, additionally download and preload the sam
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
 sha256sum --check --ignore-missing IMAGE-SHA256SUMS
 sudo docker load -i docklane-images-amd64.tar.gz
-sudo docker tag docklane:v0.3.2-beta.2-amd64 docklane:v0.3.2-beta.2
+sudo docker tag docklane:v0.3.2-beta.3-amd64 docklane:v0.3.2-beta.3
 ```
 
 `IMAGE-SHA256SUMS` comes from the verified materials archive. Verify the downloaded native image only; the other architecture is not required. See [operations](docs/operations.md#按需工作镜像) for details.
 
 ### Native binary package: run directly
 
-Download the native package and `RELEASE-SHA256SUMS` from the [v0.3.2-beta.2 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2) into an empty directory. This example is for amd64; replace the architecture in the package name for arm64:
+Download the native package and `RELEASE-SHA256SUMS` from the [v0.3.2-beta.3 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.3) into an empty directory. This example is for amd64; replace the architecture in the package name for arm64:
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.2-beta.2-linux-amd64.tar.gz
+tar -xzf docklane-v0.3.2-beta.3-linux-amd64.tar.gz
 DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:9999 ./docklane
 ```
 
@@ -211,14 +214,14 @@ sha256sum --check --ignore-missing RELEASE-SHA256SUMS
 tar -xzf docklane-installation.tar.gz
 sha256sum --check --ignore-missing IMAGE-SHA256SUMS
 docker load -i docklane-images-amd64.tar.gz
-docker tag docklane:v0.3.2-beta.2-amd64 docklane:v0.3.2-beta.2
+docker tag docklane:v0.3.2-beta.3-amd64 docklane:v0.3.2-beta.3
 export DM_BACKUP_HOST_DIR=/srv/docklane/backups
 export DM_RESTORE_HOST_DIR=/srv/docklane/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
-Each archive contains one architecture. Set the common tag for the native architecture before starting; temporary backup/restore containers use the same version of the local worker. The Compose file inside v0.3.2-beta.2 already maps `127.0.0.1:9999:9999` and sets `DM_LISTEN: ":9999"`.
+Each archive contains one architecture. Set the common tag for the native architecture before starting; temporary backup/restore containers use the same version of the local worker. The Compose file inside v0.3.2-beta.3 already maps `127.0.0.1:9999:9999` and sets `DM_LISTEN: ":9999"`.
 
 ### Docker: build from source
 
@@ -227,7 +230,7 @@ Install Git, Docker Engine, Docker Buildx (for BuildKit builds) and Compose v2, 
 ```sh
 git clone https://github.com/Funnyrz/docklane.git
 cd docklane
-docker build -t docklane:v0.3.2-beta.2 .
+docker build -t docklane:v0.3.2-beta.3 .
 export DM_BACKUP_HOST_DIR=/srv/docklane/backups
 export DM_RESTORE_HOST_DIR=/srv/docklane/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"

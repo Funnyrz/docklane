@@ -135,7 +135,7 @@ onUnmounted(() => {
   <n-config-provider :theme-overrides="isSmallScreen ? mobileTheme : theme" :locale="locale === 'en' ? enUS : zhCN" :date-locale="locale === 'en' ? dateEnUS : dateZhCN">
     <div v-if="!auth.ready || !auth.authenticated" class="auth-shell">
       <aside class="auth-story">
-        <div class="brand"><span class="brand-mark"><AppIcon name="containers" /></span><span class="brand-copy"><b>DOCKLANE</b></span></div>
+        <div class="brand"><span class="brand-mark"><AppIcon name="containers" /></span><span class="brand-copy"><b>dock<span>lane</span></b></span></div>
         <div class="auth-story-copy">
           <p class="eyebrow">{{ t('common.tagline') }}</p>
           <h1>{{ t('auth.headlineFirst') }}<br>{{ t('auth.headlineLast') }}</h1>
@@ -177,7 +177,7 @@ onUnmounted(() => {
       <aside id="main-navigation" ref="sidebar" class="sidebar" :class="{ open: navigationOpen }" :inert="isSmallScreen && !navigationOpen" :role="navigationOpen ? 'dialog' : undefined" :aria-modal="navigationOpen ? true : undefined" :aria-label="t('nav.main')">
         <a class="brand sidebar-brand" href="#dashboard" aria-label="Docklane" :title="desktopCollapsed ? 'Docklane' : undefined" @click.prevent="navigate('dashboard')">
           <span class="brand-mark"><AppIcon name="containers" /></span>
-          <span class="brand-copy"><b>DOCKLANE</b></span>
+          <span class="brand-copy"><b>dock<span>lane</span></b></span>
         </a>
         <div class="host-label"><AppIcon name="server" />{{ t('nav.localHost') }}<span>01</span></div>
         <p class="sidebar-caption">{{ t('nav.caption') }}</p>
@@ -207,7 +207,7 @@ onUnmounted(() => {
           <div class="topbar-end"><LanguageSelect /><span class="host-pill"><AppIcon name="server" />{{ t('nav.localHost') }}</span><span class="avatar" :title="str(auth.user.username)">{{ userInitial }}</span></div>
         </header>
         <main class="page">
-          <div v-if="active.key !== 'dashboard'" class="page-heading">
+          <div v-if="!['dashboard', 'settings'].includes(active.key)" class="page-heading">
             <h1>{{ active.title }}</h1>
           </div>
           <p v-if="error" class="notice error" role="alert">{{ message(error) }}</p>

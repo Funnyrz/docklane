@@ -7,6 +7,7 @@ import (
 	"github.com/docker-manager/docker-manager/internal/api"
 	"github.com/docker-manager/docker-manager/internal/config"
 	"github.com/docker-manager/docker-manager/internal/database"
+	"github.com/docker-manager/docker-manager/internal/hostmetrics"
 	"github.com/docker-manager/docker-manager/internal/platform"
 	"github.com/docker-manager/docker-manager/internal/resources"
 	"github.com/docker-manager/docker-manager/internal/restoreworker"
@@ -20,6 +21,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"syscall"
 	"time"
 )
@@ -127,6 +129,10 @@ func serve() error {
 	defer cancel()
 	manager := task.New(db)
 	app := &platform.App{DB: db, Docker: docker, Tasks: manager, Vault: vault, Config: cfg}
+	cpu := hostmetrics.NewCPUSampler(hostmetrics.SupportsLocalHost(runtime.GOOS, cfg.Mode, cfg.DockerEndpoint))
+	app.CPU = cpu
+	cpu.Start(ctx)
+	defer func() { cancel(); cpu.Wait() }()
 	_, e = db.Exec("INSERT INTO hosts(id,name,docker_endpoint) VALUES('local','Local Docker',?) ON CONFLICT(id) DO UPDATE SET docker_endpoint=excluded.docker_endpoint", cfg.DockerEndpoint)
 	if e != nil {
 		return e

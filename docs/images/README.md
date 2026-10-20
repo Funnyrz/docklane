@@ -11,17 +11,17 @@
 
 ## Actual screenshots / 真实界面截图
 
-Captured on 2026-10-19 directly from the deployed Docklane test application using an authenticated browser. The screenshots show the current compact console, dashboard, sidebar and capability settings. Resources and metrics come from the test environment without API interception or fixtures.
+Captured on 2026-10-19 directly from the latest deployed Docklane using an authenticated browser. These screenshots show the collapsible navy sidebar, live resource trends, container preview, compact lists and tabbed capability settings. Data comes from the actual test host, without API interception or demo fixtures. Trends accumulated through normal 15-second polling in the current page session.
 
-截图于 2026-10-19 直接采集自已部署的 Docklane 测试环境，展示新版控制台、工作台、侧栏及功能配置界面。资源和指标均来自真实环境，没有 API 拦截或模拟数据。采集期间仅登录、浏览页面、切换浏览器语言并退出，不执行 Docker 资源或配置变更。
+截图于 2026-10-19 直接采集自已部署的最新版 Docklane，展示深蓝可折叠侧栏、真实资源曲线、容器概览、紧凑列表和设置页三个标签。资源及指标来自真实测试主机，没有拦截 API、填充演示数据或制造历史曲线；曲线由页面每 15 秒正常采样积累。保留真实空状态与缺少工具、未配置、未授权状态。
 
-- `zh/`: Simplified Chinese / 简体中文
-- `en/`: English / 英文
-- Six pages per language: overview, containers, Compose, images, backups, settings.
-- Original browser JPEG captures are retained without image edits at their native exported dimensions. The default browser viewport is 1280 × 720 CSS pixels.
-- Compose uses a shorter 1280 × 500 viewport to exclude raw discovery configuration. Settings uses the default viewport to omit lower diagnostics and audit details. Empty states and restricted capabilities reflect the real host.
-- No login credentials or test-service address are included. Historical QA screenshots retain their original brand as evidence.
+- `zh/`: Simplified Chinese / 简体中文。
+- `en/`: English / 英文。
+- Six pages per language: overview, containers, Compose, images, backups and settings.
+- Original browser JPEG exports are retained without post-processing or image edits. Screenshots use the current browser viewport; they show the actual first screen rather than forcing the entire dashboard into one image.
+- Compose uses a 1391 × 500 CSS-pixel viewport to exclude raw discovery configuration. The browser viewport override is reset afterward. Settings shows the complete default Overview & capabilities tab, including all six capability rows; diagnostics and audit are separate tabs.
+- The supplied promotional PNGs remain unchanged. They are concept images rather than evidence of current features.
 
-All 12 captures were visually checked for the Docklane brand, correct language, readable page headings, resource state and excluded sensitive detail. The supplied promotional images above remain unchanged.
+采集期间仅登录、浏览、切换浏览器语言并退出。没有启动、停止或删除容器，没有保存配置、修改授权、运行诊断或触发备份。截图不包含测试服务地址、登录凭据、日志、终端、原始 Compose 配置或审计详情。
 
-Validation for this update covers JPEG integrity, matching image language and page, changed image hashes, unchanged promotional image hashes and README image/link targets. This screenshot update does not change application code; broader product verification is documented in [the verification report](../verification.md).
+All 12 captures were visually checked for correct language, page, resource state, legible headings and clean screenshot composition. Validation covers JPEG integrity/dimensions, updated image hashes, unchanged promotional image hashes, matching screenshot sets and README image/link targets. This update changes documentation and images only; broader product verification is documented in [the verification report](../verification.md).

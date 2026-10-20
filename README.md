@@ -2,7 +2,7 @@
 
 > 本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。
 
-当前版本为 [v0.3.2-beta.2 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2)。旧 v0.3.1-beta.1、v0.3.1-beta.2 的 Release、附件及远端 Tag 已撤回；v0.3.0 Release 也已撤回，目前没有正式版；正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
+当前版本为 [v0.3.2-beta.3 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.3)。旧 v0.3.1-beta.1、v0.3.1-beta.2 的 Release、附件及远端 Tag 已撤回；v0.3.0 Release 也已撤回，目前没有正式版；正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
 
 默认一键安装原生二进制，不下载工作镜像；首次需要工作容器的备份/恢复任务才准备同版本、本机架构镜像。
 
@@ -22,7 +22,7 @@ Go 服务嵌入 Vue 界面，支持 Linux 二进制和 Docker 部署。Docker En
 
 | 能力 | 当前提供 |
 | --- | --- |
-| 工作台 | 本地主机连接状态、资源统计、备份概况和最近任务 |
+| 工作台 | 主机状态、运行中/已停止容器数量、CPU/内存/磁盘实时趋势、容器概览、备份概况和最近任务 |
 | 容器管理 | 启动、停止、重启、删除、详情、日志、终端、统计、配置预检与受控重建 |
 | 镜像管理 | 本地列表筛选、详情、拉取、tar 导入/导出、单项删除，镜像仓库凭据加密保存与认证测试 |
 | 网络与存储 | 网络和卷的创建、查看、删除，容器引用与挂载关系查看，授权目录容量扫描 |
@@ -30,14 +30,17 @@ Go 服务嵌入 Vue 界面，支持 Linux 二进制和 Docker 部署。Docker En
 | 本地备份 | 本地 Restic 仓库创建/导入，文件或目录、本地卷、容器及 Compose 备份，Cron/时区计划与最近 N 份保留策略 |
 | 恢复 | 快照预检、默认恢复到新目录、显式确认的原位置覆盖与受控服务重建 |
 | 镜像加速 | TCP/Registry 连通性诊断、显式镜像拉取测试；满足授权条件时预览和应用镜像源配置 |
-| 运维记录 | 任务进度、日志与取消，审计记录及主机诊断 |
+| 系统设置 | 概览与能力、镜像诊断、操作审计三个标签；区分缺少工具、未配置和未授权，查看原因及解决方法，配置目录访问与受控操作授权 |
+| 运维记录 | 任务进度、日志与取消，分页审计记录及主机诊断 |
 | 中英文界面 | 简体中文 `zh-CN` 与英语 `en`，即时切换并记住浏览器选择 |
 
 当前面向单机管理，具体功能边界见下方[当前限制](#当前限制)。
 
 ## 界面预览
 
-以下截图于 2026-10-19 直接采集自已部署的 Docklane 测试环境，展示真实资源、空状态及功能可用性。Compose 仅截取不含原始配置的页面上半区；设置页仅展示首屏，未收录日志、终端、原始配置和审计详情。
+以下截图于 2026-10-19 从已部署的最新版 Docklane 直接采集，展示深蓝可折叠导航、浅色卡片、紧凑列表与真实资源状态。工作台包含 CPU、内存和磁盘曲线及容器概览；趋势在当前页面会话内每 15 秒积累，不代表历史监控数据。
+
+系统设置默认展示“概览与能力”，六项主机能力集中呈现，完整原因、解决方法和原始诊断按需在详情抽屉查看；“镜像诊断”和“操作审计”独立成标签。截图保留测试环境中的空状态与受限能力，没有填充演示数据。Compose 仅截取原始配置之前的区域；未收录登录凭据、日志、终端或审计详情。
 
 ![Docklane 中文工作台](docs/images/zh/overview.jpg)
 
@@ -112,7 +115,7 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 
 安装过程显示执行阶段及当前下载文件、来源和尝试序号；交互式终端还会显示真实下载进度条，重定向日志时使用普通文本。
 
-本页命令从已发布元数据选择最新 Beta，或通过 `--version` 固定版本（当前为 [v0.3.2-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2)），并校验下载资产的 SHA-256、架构和归档路径，安装 `/usr/local/bin/docklane`，创建专用账号及 `docklane.service`，自动后台启动并设置开机自启。结束时检查服务状态、自启和 `/healthz`，输出访问地址；首次打开页面创建管理员。新装默认监听 `:9999`，不自动修改防火墙。已有配置保留原监听地址；需要改为 9999 时，在安装命令末尾显式追加 `--listen :9999`。
+本页命令从已发布元数据选择最新 Beta，或通过 `--version` 固定版本（当前为 [v0.3.2-beta.3](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.3)），并校验下载资产的 SHA-256、架构和归档路径，安装 `/usr/local/bin/docklane`，创建专用账号及 `docklane.service`，自动后台启动并设置开机自启。结束时检查服务状态、自启和 `/healthz`，输出访问地址；首次打开页面创建管理员。新装默认监听 `:9999`，不自动修改防火墙。已有配置保留原监听地址；需要改为 9999 时，在安装命令末尾显式追加 `--listen :9999`。
 
 Beta 安装需要可用的 GitHub API 元数据；API 不可达或限流时安全停止并提示稍后重试，不从网页推断 Beta 状态。当前没有可供正式通道使用的 Release。
 
@@ -122,7 +125,7 @@ Beta 安装需要可用的 GitHub API 元数据；API 不可达或限流时安�
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --channel beta --version v0.3.2-beta.2 --listen :9999 --dry-run
+  | sudo bash -s -- --channel beta --version v0.3.2-beta.3 --listen :9999 --dry-run
 ```
 
 若通过 `--config` 提供的配置中已设置 `listen`，未指定 `--listen` 时会保留该地址。去掉 `--dry-run` 执行安装；`--help` 查看参数。再次执行会保留现有配置与数据，同版本且校验和相同则跳过二进制替换；版本变化先停机备份再升级。已有手动运行实例必须显式迁移，不能直接当作全新安装：
@@ -147,15 +150,15 @@ sudo systemctl disable docklane      # 取消开机自启
 仅用于学习与测试。固定本次版本：
 
 ```sh
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.2-beta.2
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.2-beta.3
 ```
 
-[v0.3.2-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2) 使用七个附件；`RELEASE-SHA256SUMS` 校验其余六个文件。GitHub 自动生成的 Source code 源码包不计入上传附件。
+[v0.3.2-beta.3](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.3) 使用七个附件；`RELEASE-SHA256SUMS` 校验其余六个文件。GitHub 自动生成的 Source code 源码包不计入上传附件。
 
 | 附件 | 内容 |
 | --- | --- |
-| `docklane-v0.3.2-beta.2-linux-amd64.tar.gz` | amd64 的 `docklane` 与 `LICENSE` |
-| `docklane-v0.3.2-beta.2-linux-arm64.tar.gz` | arm64 的 `docklane` 与 `LICENSE` |
+| `docklane-v0.3.2-beta.3-linux-amd64.tar.gz` | amd64 的 `docklane` 与 `LICENSE` |
+| `docklane-v0.3.2-beta.3-linux-arm64.tar.gz` | arm64 的 `docklane` 与 `LICENSE` |
 | `docklane-installation.tar.gz` | 安装脚本、配置、文档、`VERSION`、MIT、内部程序/镜像摘要、镜像身份、工具版本和 CI 来源记录 |
 | `docklane-images-amd64.tar.gz` | amd64 应用及备份 worker 镜像 |
 | `docklane-images-arm64.tar.gz` | arm64 应用及备份 worker 镜像 |
@@ -166,12 +169,12 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.2-beta.2-linux-amd64.tar.gz
+tar -xzf docklane-v0.3.2-beta.3-linux-amd64.tar.gz
 tar -xzf docklane-installation.tar.gz
 sudo ./scripts/install.sh ./docklane
 ```
 
-安装材料的 `VERSION` 为 `0.3.2-beta.2`（无 `v` 前缀）；配置和数据库 schema 仍为 v1。全部材料须来自同一 Release，不混用其他版本的配置、服务文件或 helper。
+安装材料的 `VERSION` 为 `0.3.2-beta.3`（无 `v` 前缀）；配置和数据库 schema 仍为 v1。全部材料须来自同一 Release，不混用其他版本的配置、服务文件或 helper。
 
 历史 v0.3.2-beta.1 保留原 Release、Tag 和六附件，仍在安装时加载双架构镜像。需要该历史版本时，使用其固定 Tag 的脚本并显式传入 `--version v0.3.2-beta.1`；不要用旧脚本无参数安装新版。更早的 v0.3.1-beta.1、v0.3.1-beta.2 已撤回。
 
@@ -185,18 +188,18 @@ sudo ./scripts/install.sh ./docklane
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
 sha256sum --check --ignore-missing IMAGE-SHA256SUMS
 sudo docker load -i docklane-images-amd64.tar.gz
-sudo docker tag docklane:v0.3.2-beta.2-amd64 docklane:v0.3.2-beta.2
+sudo docker tag docklane:v0.3.2-beta.3-amd64 docklane:v0.3.2-beta.3
 ```
 
 此处 `IMAGE-SHA256SUMS` 来自已校验的安装材料；只校验已下载的本机镜像，不要求下载另一种架构。详见[按需工作镜像说明](docs/operations.md#按需工作镜像)。
 
 ### 原生二进制包：直接运行
 
-从 [v0.3.2-beta.2 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2) 下载本机架构包及 `RELEASE-SHA256SUMS`，放入空目录。以下以 amd64 为例，arm64 替换包名中的架构：
+从 [v0.3.2-beta.3 Release](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.3) 下载本机架构包及 `RELEASE-SHA256SUMS`，放入空目录。以下以 amd64 为例，arm64 替换包名中的架构：
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.2-beta.2-linux-amd64.tar.gz
+tar -xzf docklane-v0.3.2-beta.3-linux-amd64.tar.gz
 DM_DATA_DIR=./data DM_LISTEN=127.0.0.1:9999 ./docklane
 ```
 
@@ -211,14 +214,14 @@ sha256sum --check --ignore-missing RELEASE-SHA256SUMS
 tar -xzf docklane-installation.tar.gz
 sha256sum --check --ignore-missing IMAGE-SHA256SUMS
 docker load -i docklane-images-amd64.tar.gz
-docker tag docklane:v0.3.2-beta.2-amd64 docklane:v0.3.2-beta.2
+docker tag docklane:v0.3.2-beta.3-amd64 docklane:v0.3.2-beta.3
 export DM_BACKUP_HOST_DIR=/srv/docklane/backups
 export DM_RESTORE_HOST_DIR=/srv/docklane/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"
 docker compose -f deployments/docker-compose.yml up -d --no-build
 ```
 
-每个归档仅含一种架构镜像，启动前为本机架构设置通用标签；临时备份/恢复容器使用相同版本的本地 worker。v0.3.2-beta.2 包内 Compose 已设置 `127.0.0.1:9999:9999` 端口映射和 `DM_LISTEN: ":9999"`。
+每个归档仅含一种架构镜像，启动前为本机架构设置通用标签；临时备份/恢复容器使用相同版本的本地 worker。v0.3.2-beta.3 包内 Compose 已设置 `127.0.0.1:9999:9999` 端口映射和 `DM_LISTEN: ":9999"`。
 
 ### Docker：从源码构建
 
@@ -227,7 +230,7 @@ docker compose -f deployments/docker-compose.yml up -d --no-build
 ```sh
 git clone https://github.com/Funnyrz/docklane.git
 cd docklane
-docker build -t docklane:v0.3.2-beta.2 .
+docker build -t docklane:v0.3.2-beta.3 .
 export DM_BACKUP_HOST_DIR=/srv/docklane/backups
 export DM_RESTORE_HOST_DIR=/srv/docklane/restores
 mkdir -p "$DM_BACKUP_HOST_DIR" "$DM_RESTORE_HOST_DIR"

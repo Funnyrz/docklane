@@ -1,0 +1,146 @@
+{
+  "completed_at": "2026-10-20T05:59:38.501181+00:00",
+  "version": "0.3.2-beta.3",
+  "scope": "UI browser regression against temporary localhost Vite; all application API requests intercepted as fixtures; no real Docker/host/server operations",
+  "reports": {
+    "fixture-results.json": {
+      "checks": 120,
+      "browser_errors": []
+    },
+    "five-list-results.json": {
+      "checks": 84,
+      "browser_errors": []
+    },
+    "settings-layout-results.json": {
+      "checks": 10,
+      "browser_errors": []
+    },
+    "dashboard-results.json": {
+      "checks": 14,
+      "browser_errors": []
+    },
+    "collapse-results.json": {
+      "checks": null,
+      "browser_errors": []
+    },
+    "settings/browser-results.json": {
+      "checks": 12,
+      "browser_errors": []
+    },
+    "release-ui-results.json": {
+      "checks": 2,
+      "browser_errors": []
+    }
+  },
+  "checks_summary": {
+    "full_site_screenshots": 120,
+    "five_record_list_scenarios": 42,
+    "bilingual_settings_viewport_groups": 10,
+    "dashboard_scenarios": 14,
+    "configuration_editor_checks": 12,
+    "collapse": "208/64px and persisted preference",
+    "release_ui_bilingual_checks": 2
+  },
+  "release_ui": [
+    "deep navy sidebar rgb(13,27,47)",
+    "docklane wordmark",
+    "dynamic package version0.3.2-beta.3",
+    "settings fixture version0.3.2-beta.3 and listen:9999",
+    "bilingual nonmodal Beta disclaimer retained",
+    "no horizontal overflow in tested matrix"
+  ],
+  "visual_verdict": {
+    "score": 98,
+    "verdict": "pass",
+    "category_match": true,
+    "differences": [
+      "与真实主机参考相比，容器名称、数量和状态使用明确的测试fixture数据；视口1440×900与原真实截图1391×1033不同。",
+      "设置页保留新增Beta免责声明，页首增加约55px；动态版本显示0.3.2-beta.3，配置fixture显示:9999。深蓝侧栏、表格密度和三标签结构与density参考一致。"
+    ],
+    "suggestions": [],
+    "reasoning": "整合版恢复深蓝导航、鲜蓝选中态、白卡片与紧凑表格；保留的测试警告与动态版本没有破坏桌面首屏可读性。未见裁切、重叠或非预期横向溢出。"
+  },
+  "representative_screenshots": [
+    "/tmp/docklane-beta3-ui-qa/fixture-containers-zh-CN-1440x900.png",
+    "/tmp/docklane-beta3-ui-qa/release-settings-zh-CN.png",
+    "/tmp/docklane-beta3-ui-qa/release-settings-en.png",
+    "/tmp/docklane-beta3-ui-qa/dashboard-zh-CN-1440.png"
+  ],
+  "test_harness_adaptations": {
+    "script_copies": [
+      {
+        "script": "fixtures.cjs",
+        "source_sha256": "33b346d53daee63653428cce8ede6c38991e710160e9211d64b332939176db77",
+        "adapted_sha256": "c1c091713e1afeb62ef6e7cc13a1ca35913dfbc8306e200eaf54a251abf6d7f0"
+      },
+      {
+        "script": "five-lists.cjs",
+        "source_sha256": "8b5b51c821a63d3093b79c4d65b0c959af5ec7dbb22e4b47f82d2b50bb8d1330",
+        "adapted_sha256": "f8fe1c825988f29b3ed676fecdc2174785bc41904c39f95d4c69dca738c731ce"
+      },
+      {
+        "script": "settings-layout.cjs",
+        "source_sha256": "c5e9d1e72c0c97c862abac1e965fb504ee6f99da6c61080ea4a26204e6da32cd",
+        "adapted_sha256": "927d3eb0d39e2f734ff96c7ec93006fd4910021ce89571c6675c3277f930fe97"
+      },
+      {
+        "script": "dashboard.cjs",
+        "source_sha256": "e61af7f4f2704c56c4b3766f71ca9be1bb97fbf47c010610f8f8cd6a0e92c2a9",
+        "adapted_sha256": "e61af7f4f2704c56c4b3766f71ca9be1bb97fbf47c010610f8f8cd6a0e92c2a9"
+      },
+      {
+        "script": "collapse.cjs",
+        "source_sha256": "889507fbbccde59be818c79f92358f68be4eb453d0a63c42f8fcf5461b0725c3",
+        "adapted_sha256": "d3785806abdcd3810c1b31aa89235967d77c5a88b35b3bd1535e290d6ef37502"
+      },
+      {
+        "script": "settings/verify.cjs",
+        "source_sha256": "46218edaa8d3c5673de33248772bbf096eaa2b0b45526f373ecbb7d44224b618",
+        "adapted_sha256": "9e55720bcbcc7d7888fa50f4128a0203493f575bb4e3a3176cafa00af6f2544a"
+      }
+    ],
+    "adaptations": [
+      "Fixture settings version 0.3.0 changed to0.3.2-beta.3; fixture listen:8080 changed to:9999 only in /tmp scripts.",
+      "Full matrix first run failed late in loading scenario because getByText('正在读取实际状态…') matched summary and container list loading notices. Changed only test locator to .first(); original failure kept in fixtures.log; complete rerun logged in fixtures-rerun.log."
+    ],
+    "source_evidence_unchanged": true,
+    "product_source_modified_by_this_agent": false
+  },
+  "source_files_modified_by_this_agent": false,
+  "owned_dev_server": {
+    "port": 18098,
+    "stopped": true,
+    "stop_exit": 130,
+    "port_no_longer_listening": true
+  },
+  "limitations": [
+    "Browser APIs use synthetic fixture data; these images do not demonstrate production host data.",
+    "Backend CPU server/browser clock-skew behavior is validated by parent regression tests, while browser dashboard suite confirms old fixture compatibility after source update."
+  ],
+  "original_working_tree": "Uncommitted navy/density UI from the primary checkout, absent from v0.3.2-beta.2; merged into the current isolated release baseline, preserving dynamic versions, Beta disclaimer and lazy worker support.",
+  "local_checks": {
+    "make_check": "passed",
+    "frontend_tests": 127,
+    "installer_package_preflight_tests": 184,
+    "linux_only_test_skipped_on_macos": 1,
+    "go_tests_race_vet": "passed",
+    "actionlint": "passed",
+    "cpu_clock_skew": "New regression failed before fix, then passed for server clock +/-60 seconds and actual sample expiry"
+  },
+  "source_sha256": {
+    "web/src/App.vue": "7353beb5c903bf1393338ce4c640ebb52226cbb1b984cb40c3d35d8bc0b0368c",
+    "web/src/style.css": "44d4e6721781b03efe87978cb3ac76b4200723cdfae2f64c6b7c6093d424e7a1",
+    "web/src/theme.ts": "713e0c4a92d70164ff828c53ce314881d6cba3bdbc06752cd011fdb7afb2a3db",
+    "web/src/views/SettingsView.vue": "d88c8d99e5c1ef2e4aee414eff8408da1d011f49eb393aeb6e8737b07afee70e",
+    "web/src/views/DashboardView.vue": "73c47fd18ca26a8722a5afbbeb1e737d906235efce1c26fb702164d0bff2d39b",
+    "web/src/dashboard-history.ts": "728df5315c8a31acb007d6edcf01da55706e2e35d44426d1cbb368227b501357",
+    "internal/hostmetrics/cpu.go": "baaf98c1da4a09f3d40a87ab0d42292a1f83f23981899644278f0c6d043d96e1",
+    "internal/api/dashboard.go": "ac1d80b5236fe837e39e8b449a39ada922b594a2e3949cf91c954e5bbec20751"
+  },
+  "frontend_assets": {
+    "assets/index-BIvvI0N1.css": "03d5133a9d98aa666b6a9b12f8b06af07f8cf7b42fa860497566cfcfa8e21e31",
+    "assets/index-Dzoxf7pB.js": "c297f6d2bc800527b8f8780d776202cb281f8768c655e2a68975531d79a2a66c",
+    "index.html": "78251d6cc591e321bdf9132ba4c3c584d13de073b580c984da7e79cbef4562a1"
+  },
+  "phase": "Source acceptance only; exact-source CI, public packages and installed embedded UI require post-publication verification."
+}

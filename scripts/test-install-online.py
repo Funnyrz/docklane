@@ -135,7 +135,7 @@ fetch() {{
             self.slim_materials['SHA256SUMS'] = (self.assets / 'SHA256SUMS').read_bytes()
         self.repack_slim()
 
-    def make_slim_release(self, tag='v0.3.2-beta.2'):
+    def make_slim_release(self, tag='v0.3.2-beta.3'):
         for path in self.assets.iterdir():
             path.unlink()
         self.slim_tag = tag
@@ -198,8 +198,8 @@ fetch() {
 }
 install_docker() { echo "selected:$version:$channel"; exit 0; }
 ''')
-        self.assertIn('selected:v0.3.2-beta.2:beta', result.stdout)
-        self.assertIn('Verified v0.3.2-beta.2 for amd64', result.stdout)
+        self.assertIn('selected:v0.3.2-beta.3:beta', result.stdout)
+        self.assertIn('Verified v0.3.2-beta.3 for amd64', result.stdout)
         self.assertLess(result.stdout.index('do not use it in production'),
                         result.stdout.index('dependency-preparation'))
         calls = self.trace.read_text()
@@ -309,7 +309,7 @@ bootstrap_tools() {{ echo mutation-started; }}
         return '''
 bootstrap_tools() { :; }
 resolve_release() {
- version=v0.3.2-beta.2
+ version=v0.3.2-beta.3
  printf slim > "$work/layout"
  printf fixture > "$work/binary.sha256"
 }
@@ -372,17 +372,17 @@ fetch_release_page() { printf '%s' 'https://github.com/Funnyrz/docklane/releases
 
     def test_new_six_assets_use_hashed_internal_metadata(self):
         self.make_slim_release()
-        self.bash('version=v0.3.2-beta.2; resolve_release; verify_release')
+        self.bash('version=v0.3.2-beta.3; resolve_release; verify_release')
         calls = self.trace.read_text()
         self.assertEqual(sum('download/' in line for line in calls.splitlines()), 3)
         self.assertNotIn('linux-arm64.tar.gz', calls)
         self.assertNotIn('/install-online.sh', calls)
         self.assertEqual((self.work / 'VERSION').exists(), False)
-        self.assertEqual((self.work / 'materials/VERSION').read_text().strip(), '0.3.2-beta.2')
+        self.assertEqual((self.work / 'materials/VERSION').read_text().strip(), '0.3.2-beta.3')
         self.assertEqual((self.work / 'binary/docklane').read_bytes(), self.binary)
 
     def test_internal_version_ci_worker_license_and_archive_integrity(self):
-        for name, value in [('VERSION', b'9.0.0'), ('release-ci-evidence.json', b'{"version":"0.3.2-beta.2","tag":"v0.3.2","head_sha":"bad"}'),
+        for name, value in [('VERSION', b'9.0.0'), ('release-ci-evidence.json', b'{"version":"0.3.2-beta.3","tag":"v0.3.2","head_sha":"bad"}'),
                             ('deployments/config.example.json', b'{"backup_worker_image":"docklane:v0.3.2"}'),
                             ('LICENSE', b'other license'), ('IMAGES.txt', b'[docklane:v0.3.2-amd64] sha256:' + b'1' * 64 + b' linux/amd64\n'), ('TOOL-VERSIONS.txt', b''), ('SECURITY-NOTES.md', b''),
                             ('unsafe-link', (tarfile.SYMTYPE, '/etc/passwd'))]:
@@ -392,7 +392,7 @@ fetch_release_page() { printf '%s' 'https://github.com/Funnyrz/docklane/releases
                 self.make_slim_release()
                 self.slim_materials[name] = value
                 self.repack_slim()
-                self.bash('version=v0.3.2-beta.2; resolve_release; verify_release', ok=False)
+                self.bash('version=v0.3.2-beta.3; resolve_release; verify_release', ok=False)
                 self.assertFalse((self.work / 'binary.sha256').exists())
 
     def test_withdrawn_asset_names_are_not_accepted(self):
@@ -403,7 +403,7 @@ fetch_release_page() { printf '%s' 'https://github.com/Funnyrz/docklane/releases
                     asset['name'] = 'docker-manager-images.tar.gz'
                     asset['browser_download_url'] = asset['browser_download_url'].replace('docklane-images.tar.gz', asset['name'])
         self.change_release(rename_asset)
-        result = self.bash('version=v0.3.2-beta.2; resolve_release', ok=False)
+        result = self.bash('version=v0.3.2-beta.3; resolve_release', ok=False)
         self.assertIn('six legacy or seven architecture-specific supported assets', result.stderr)
         self.assertFalse((self.work / 'binary').exists())
 
@@ -411,7 +411,7 @@ fetch_release_page() { printf '%s' 'https://github.com/Funnyrz/docklane/releases
         self.make_slim_release()
         manifest = self.assets / 'RELEASE-SHA256SUMS'
         manifest.write_text(''.join(line + '\n' for line in manifest.read_text().splitlines() if 'arm64' not in line))
-        self.assertIn('every other supported asset', self.bash('version=v0.3.2-beta.2; resolve_release; verify_release', ok=False).stderr)
+        self.assertIn('every other supported asset', self.bash('version=v0.3.2-beta.3; resolve_release; verify_release', ok=False).stderr)
 
     def use_split_images(self):
         (self.assets / 'docklane-images.tar.gz').unlink()
@@ -444,7 +444,7 @@ fetch_release_page() { printf '%s' 'https://github.com/Funnyrz/docklane/releases
                     for _ in range(2):
                         shutil.rmtree(self.work)
                         self.work.mkdir()
-                        self.bash(f'arch={arch}; version=v0.3.2-beta.2; resolve_release; verify_release', prelude='''
+                        self.bash(f'arch={arch}; version=v0.3.2-beta.3; resolve_release; verify_release', prelude='''
 local_docker() { echo unexpected-docker >&2; return 90; }
 ''')
                     calls = self.trace.read_text()
@@ -458,7 +458,7 @@ local_docker() { echo unexpected-docker >&2; return 90; }
     def test_binary_only_install_main_keeps_progress_without_loading_images(self):
         self.make_slim_release()
         self.use_split_images()
-        result = self.bash('main --version v0.3.2-beta.2', prelude='''
+        result = self.bash('main --version v0.3.2-beta.3', prelude='''
 bootstrap_tools() { :; }
 install_docker() { :; }
 install_tools() { :; }
@@ -507,7 +507,7 @@ install_tools() { echo unexpected-tool-change; }
                     f'{checksum(self.assets / "docklane-installation.tar.gz")}  docklane-installation.tar.gz'
                     if line.endswith('  docklane-installation.tar.gz') else line
                     for line in sums.read_text().splitlines()) + '\n')
-                result = self.bash('version=v0.3.2-beta.2; resolve_release; verify_release', ok=False)
+                result = self.bash('version=v0.3.2-beta.3; resolve_release; verify_release', ok=False)
                 self.assertIn('Inconsistent manifest', result.stderr)
 
     def test_beta_pages_select_highest_numeric_published_beta(self):
@@ -530,11 +530,11 @@ fetch() {{
 
     def test_explicit_version_overrides_channel_but_checks_prerelease_status(self):
         self.make_slim_release()
-        self.bash('channel=stable; version=v0.3.2-beta.2; resolve_release; verify_release')
+        self.bash('channel=stable; version=v0.3.2-beta.3; resolve_release; verify_release')
         shutil.rmtree(self.work)
         self.work.mkdir()
         self.change_release(lambda release: release.update(prerelease=False))
-        self.bash('channel=beta; version=v0.3.2-beta.2; resolve_release', ok=False)
+        self.bash('channel=beta; version=v0.3.2-beta.3; resolve_release', ok=False)
 
     def test_nonboolean_or_missing_draft_is_never_a_published_release(self):
         for value in (None, 0, '', True, 'false', 'missing'):
@@ -547,7 +547,7 @@ fetch() {{
                 else:
                     self.slim_metadata['draft'] = value
                 (self.assets / 'release.json').write_text(json.dumps(self.slim_metadata))
-                self.bash('version=v0.3.2-beta.2; resolve_release', ok=False)
+                self.bash('version=v0.3.2-beta.3; resolve_release', ok=False)
                 (self.assets / 'release.json').write_text(json.dumps([self.slim_metadata]))
                 self.bash('channel=beta; resolve_release', prelude='fetch() { cp "$assets/release.json" "$2"; }', ok=False)
 
@@ -555,7 +555,7 @@ fetch() {{
         result = self.bash('channel=beta; resolve_release', prelude='fetch() { return 22; }; fetch_release_page() { echo unwanted-web >&2; }', ok=False)
         self.assertIn('Beta release metadata is unavailable', result.stderr)
         self.assertNotIn('unwanted-web', result.stderr)
-        result = self.bash('version=v0.3.2-beta.2; resolve_release', prelude='fetch() { return 22; }; fetch_release_page() { echo unwanted-web >&2; }', ok=False)
+        result = self.bash('version=v0.3.2-beta.3; resolve_release', prelude='fetch() { return 22; }; fetch_release_page() { echo unwanted-web >&2; }', ok=False)
         self.assertNotIn('unwanted-web', result.stderr)
 
     def test_implicit_downgrade_is_rejected(self):
@@ -847,7 +847,7 @@ fetch_release_page() {{ return 22; }}
 
     def test_beta_redirect_is_never_accepted_as_stable(self):
         result = self.bash('channel=stable; resolve_release',
-                           prelude=self.api_unavailable_prelude('https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2'), ok=False)
+                           prelude=self.api_unavailable_prelude('https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.3'), ok=False)
         self.assertIn('did not resolve to a stable Docklane release', result.stderr)
         self.assertIn('No stable release could be verified', result.stderr)
         self.assertIn('--channel beta explicitly', result.stderr)

@@ -80,7 +80,7 @@ class LifecycleTests(unittest.TestCase):
         (self.material / 'web/package.json').write_text('{"version":"0.3.1-beta.10"}')
         self.assertEqual(m.material_version(self.material), 'v0.3.1-beta.10')
         (self.material / 'web/package.json').unlink()
-        self.assertEqual(m.material_version(self.material), 'v0.3.2-beta.2')
+        self.assertEqual(m.material_version(self.material), 'v0.3.2-beta.3')
 
     def test_numeric_version_order_places_stable_after_same_core_beta(self):
         self.assertGreater(m.version_key('v0.3.1-beta.10'), m.version_key('v0.3.1-beta.2'))
@@ -201,10 +201,10 @@ class LifecycleTests(unittest.TestCase):
         self.assertEqual(set(DEFAULT_LEGACY_PATHS), expected)
 
     def test_new_beta_installation_records_version_and_canonical_worker(self):
-        (self.material / 'VERSION').write_text('0.3.2-beta.2\n')
-        self.args.version = 'v0.3.2-beta.2'
+        (self.material / 'VERSION').write_text('0.3.2-beta.3\n')
+        self.args.version = 'v0.3.2-beta.3'
         self.deploy()
-        self.assertEqual(json.loads(m.CONFIG.read_text())['backup_worker_image'], 'docklane:v0.3.2-beta.2')
+        self.assertEqual(json.loads(m.CONFIG.read_text())['backup_worker_image'], 'docklane:v0.3.2-beta.3')
         self.assertEqual(json.loads(m.STATE.read_text())['version'], self.args.version)
         self.assertEqual(m.material_version(self.material), self.args.version)
 

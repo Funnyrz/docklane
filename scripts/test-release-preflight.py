@@ -44,7 +44,7 @@ class ReleasePreflightTests(unittest.TestCase):
             for item in sorted(names)))
 
     def refresh(self):
-        self.manifest('RELEASE-SHA256SUMS', preflight.release_assets('v0.3.2-beta.2'))
+        self.manifest('RELEASE-SHA256SUMS', preflight.release_assets('v0.3.2-beta.3'))
 
     def run_command(self, args, root, timeout=30):
         if args[:2] == ['git', 'rev-parse']:
@@ -83,7 +83,7 @@ class ReleasePreflightTests(unittest.TestCase):
 
     def inspect(self, *options):
         args = ['release-preflight.py', '--root', str(self.root), '--artifacts', str(self.artifacts),
-                '--tag', 'v0.3.2-beta.2', '--actionlint', '/mock/actionlint', *options]
+                '--tag', 'v0.3.2-beta.3', '--actionlint', '/mock/actionlint', *options]
         stream = io.StringIO()
         with mock.patch.object(sys, 'argv', args), mock.patch.object(preflight, 'run', self.run_command), \
                 mock.patch.object(preflight.shutil, 'which', return_value='/mock/gh'), contextlib.redirect_stdout(stream):
@@ -99,7 +99,7 @@ class ReleasePreflightTests(unittest.TestCase):
         self.assertTrue(all(value == 'passed' for value in report['gate_status'].values()))
 
     def test_public_inventory_has_independent_architecture_worker_archives(self):
-        expected = preflight.release_assets('v0.3.2-beta.2')
+        expected = preflight.release_assets('v0.3.2-beta.3')
         self.assertEqual(len(expected), 6)
         self.assertIn('docklane-images-amd64.tar.gz', expected)
         self.assertIn('docklane-images-arm64.tar.gz', expected)
@@ -136,7 +136,7 @@ class ReleasePreflightTests(unittest.TestCase):
 
     def test_existing_release_is_never_overwritten(self):
         for draft in (True, False):
-            self.releases = [[{'tag_name': 'v0.3.2-beta.2', 'draft': draft}]]
+            self.releases = [[{'tag_name': 'v0.3.2-beta.3', 'draft': draft}]]
             code, _ = self.inspect('--online')
             self.assertEqual(code, 2)
 

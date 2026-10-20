@@ -30,6 +30,9 @@ describe('Localized capability explanations', () => {
     expect(item.solution).toContain(solution)
     expect(item.reason).not.toContain(raw)
     expect(item.rawReason).toBe(raw)
+    expect(item.shortReason).not.toContain(raw)
+    expect(item.shortReason).not.toMatch(/capabilities\./)
+    expect(item.shortReason.length).toBeLessThan(24)
   })
 
   it('labels all six known functions in meaningful order and follows the current language', () => {
@@ -49,7 +52,7 @@ describe('Localized capability explanations', () => {
   })
 
   it('uses backend availability rather than a stale reason code and handles omitted parameters', () => {
-    expect(describeCapability('docker.manage', { available: true, reason_code: 'DOCKER_UNAVAILABLE' })).toMatchObject({ available: true, state: 'available', status: '可用', solution: '' })
+    expect(describeCapability('docker.manage', { available: true, reason_code: 'DOCKER_UNAVAILABLE' })).toMatchObject({ available: true, state: 'available', status: '可用', solution: '', shortReason: '—' })
     expect(describeCapability('host.daemon_config', { available: false, reason_code: 'HOST_PERMISSION_DENIED' }).reason).toContain('相关配置目录或文件')
   })
 })

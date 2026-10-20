@@ -20,6 +20,13 @@ export const capabilitiesZh = {
   recheck: '修改配置或运行环境后，重启 Docklane 使设置生效，再点击“重新检测”。每次显示当前检测到的首个阻塞原因。',
   requiredTool: '所需的宿主机工具',
   requiredPath: '相关配置目录或文件',
+  shortReasons: {
+    dockerUnavailable: 'Docker Engine 无法连接', dockerCliMissing: '缺少 Docker CLI', composeUnavailable: 'Compose v2 不可用', resticMissing: '缺少 Restic',
+    allowedPathsMissing: '未设置允许目录', pathMappingsMissing: '未设置目录映射', hostOsUnsupported: '需要 Linux 系统', hostModeUnsupported: '需要二进制部署',
+    daemonNotAuthorized: '未开启宿主机操作授权', localEndpointRequired: '需要本机 Docker 连接', configPathInvalid: '配置路径不是绝对路径',
+    configNotRegular: '配置不是普通文件', configInspectionFailed: '配置状态检查失败', configDirectoryMissing: '配置目录不可访问',
+    hostToolMissing: '缺少所需系统工具', hostPermissionDenied: '系统访问权限不足', configNotWritable: '配置缺少写入权限', unknown: '请查看原始诊断',
+  },
   reasons: {
     dockerUnavailable: 'Docklane 无法连接 Docker Engine。',
     dockerCliMissing: '运行 Docklane 的环境中找不到 Docker 命令行工具。',
@@ -82,6 +89,13 @@ export const capabilitiesEn: MessageSchema<typeof capabilitiesZh> = {
   recheck: 'After changing configuration or the runtime environment, restart Docklane to apply it, then select Check again. Each check reports the first blocker it finds.',
   requiredTool: 'the required host tool',
   requiredPath: 'the relevant configuration file or directory',
+  shortReasons: {
+    dockerUnavailable: 'Docker Engine is unreachable', dockerCliMissing: 'Docker CLI is missing', composeUnavailable: 'Compose v2 is unavailable', resticMissing: 'Restic is missing',
+    allowedPathsMissing: 'Allowed directories are not set', pathMappingsMissing: 'Directory mappings are not set', hostOsUnsupported: 'Linux is required', hostModeUnsupported: 'Binary deployment is required',
+    daemonNotAuthorized: 'Host operations are not authorized', localEndpointRequired: 'A local Docker connection is required', configPathInvalid: 'Configuration path is not absolute',
+    configNotRegular: 'Configuration is not a regular file', configInspectionFailed: 'Configuration inspection failed', configDirectoryMissing: 'Configuration directory is inaccessible',
+    hostToolMissing: 'A required system tool is missing', hostPermissionDenied: 'System access permission is missing', configNotWritable: 'Configuration is not writable', unknown: 'Review the raw diagnostic',
+  },
   reasons: {
     dockerUnavailable: 'Docklane cannot connect to Docker Engine.',
     dockerCliMissing: 'The Docker CLI cannot be found in the environment running Docklane.',

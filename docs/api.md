@@ -18,6 +18,8 @@
 ## 主机与系统
 
 - `GET /hosts/local/dashboard`：Engine 状态、资源统计、宿主机已知指标、最近备份及策略覆盖情况；不可用指标为 null，不伪装为 0。
+
+  `host` 另含 `cpu_percent`、`cpu_sampled_at`、`cpu_status` 和 `cpu_observed_at`。仅 Linux 二进制部署且连接本地 Unix Docker Socket 时采集本机 CPU；每 15 秒更新，首次建立基线后才能计算百分比。状态为 `ready`、`warming_up`、`unavailable` 或 `unsupported`，没有有效结果时百分比及采样时间为 null。`cpu_observed_at` 始终为服务器生成响应时的时间；前端以服务器观察时间与采样时间之差，再加上浏览器收到响应后的经过时间判断 30 秒有效期，避免两端时钟偏差造成误判。早期响应缺少该字段时兼容原有时间校验。CPU 使用率根据相邻 `/proc/stat` 计数差计算，idle 与 iowait 计为空闲，guest 不重复相加。远程 Engine 不混用 Docklane 所在机器的 CPU、负载、可用内存、运行时间或磁盘数据。曲线历史仅在当前工作台页面内存保存，不提供持久化历史接口。
 - `GET /hosts/local/capabilities`：`{host_id,mode,capabilities}`，每项包含 available 与 reason；不可用时还包含稳定的 `reason_code` 及可选 `reason_params`，供页面本地化解释与解决方法。
 - `GET /settings`：非秘密配置及能力，另含 `capability_settings: {effective,saved,pending_restart,daemon_toggle_supported}`。effective 是当前运行配置，saved 是下次启动使用的配置；三个可编辑字段为 `allowed_paths`、`path_mappings`、`enable_daemon_write`。
 - `POST /settings/capabilities`：完整 JSON `{allowed_paths:[],path_mappings:[],enable_daemon_write:false,password:"当前管理员密码",confirm:true}`。验证当前管理员密码、会话和 CSRF；密码失败有次数限制。拒绝不完整字段、未知字段、根目录、相对路径、重复路径和超过 128 项的目录/映射；不支持的部署不能开启宿主机授权。设置与审计原子保存，返回与 GET 相同的结构；运行配置保持不变，重启 Docklane 生效。密码不会存入设置或审计。

@@ -1,5 +1,11 @@
 # v0.3 验证记录
 
+## 2026-10-20 v0.3.2-beta.3 界面整合（发布前验证）
+
+v0.3.2-beta.2 缺少此前完成但仍未提交的 navy/density 界面；安装所得浅色导航与该 Tag 源码一致。此次将深蓝导航、紧凑列表、工作台趋势及设置页三标签按差异合入现行发布基线，保留动态版本、Beta 免责声明、9999 和按需工作镜像。工作台新增本地主机 CPU 采样，仅在 Linux 二进制且本地 Unix Docker 端点启用；服务器与浏览器时钟差异使用观测时间校准，远程 Engine 不借用本地主机指标。未改配置或数据库 schema。
+
+[源码验收记录](evidence/beta3-ui-source-acceptance.json)包含关键源码/构建资源指纹、124 项原有/整合前端测试及新增 3 项时钟差回归（合计 127 项）、184 项安装/打包/预检检查（macOS 跳过 1 项 Linux 专用测试）、Go race/vet、Shell/Python 和 actionlint。浏览器使用明确 fixture 数据完成 120 个全站场景、42 个五记录列表场景、中英 10 组设置尺寸、14 项趋势、12 项配置编辑及侧栏折叠检查，视觉复核 98 分，浏览器错误为零。旧测试定位器因两个加载提示而发生歧义，仅调整测试定位器后全量重跑；未放宽产品权限或修改真实资源。公开包与真实安装验证将在新版签发后单独记录，以下历史结果不替代本轮发布验收。
+
 ## 2026-10-20 v0.3.2-beta.2 按需镜像发布验收
 
 [v0.3.2-beta.2](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2) 已公开为预发布版，来源为 [e1219b2](https://github.com/Funnyrz/docklane/commit/e1219b24317ce7fff4c1b67fac4e4be652f82d14)。[准确提交 CI](https://github.com/Funnyrz/docklane/actions/runs/39280589806) 在创建 Tag 前确认成功，Docker 28.5.1 / 29.5.2 × amd64 / arm64 各 16 项真实集成通过，资源清理无错误。[发布工作流](https://github.com/Funnyrz/docklane/actions/runs/39284333735) 成功完成候选检查、草稿上传、下载复核及正式公开。[脱敏验收记录](evidence/beta-release-0.3.2-beta.2.json) 保留最终成功状态、早期接口状态滞后的快照、实际发布日志及公开资产证据。

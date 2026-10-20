@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/docker-manager/docker-manager/internal/hostmetrics"
 	"github.com/docker-manager/docker-manager/internal/platform"
 	"github.com/docker-manager/docker-manager/internal/workflows"
 	"github.com/docker/docker/api/types"
@@ -74,7 +75,17 @@ func dashboard(c *gin.Context, a *platform.App) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 8*time.Second)
 	defer cancel()
 	name, _ := os.Hostname()
-	out := gin.H{"host_id": "local", "docker": gin.H{"connected": false}, "containers": nil, "images": nil, "volumes": nil, "host": gin.H{"hostname": name, "os": runtime.GOOS, "architecture": runtime.GOARCH}, "backup": gin.H{"latest": nil, "unprotected": nil}, "capabilities": capabilities(ctx, a)}
+	cpu := hostmetrics.CPUSnapshot{Status: "unsupported"}
+	localHost := hostmetrics.SupportsLocalHost(runtime.GOOS, a.Config.Mode, a.Config.DockerEndpoint)
+	if localHost && a.CPU != nil {
+		cpu = a.CPU.Snapshot()
+	}
+	host := gin.H{"hostname": name, "os": runtime.GOOS, "architecture": runtime.GOARCH, "cpu_percent": cpu.Percent, "cpu_sampled_at": cpu.SampledAt, "cpu_status": cpu.Status}
+	out := gin.H{"host_id": "local", "docker": gin.H{"connected": false}, "containers": nil, "images": nil, "volumes": nil, "host": host, "backup": gin.H{"latest": nil, "unprotected": nil}, "capabilities": capabilities(ctx, a)}
+	respond := func() {
+		host["cpu_observed_at"] = time.Now().UTC()
+		c.JSON(200, out)
+	}
 	backup := gin.H{"latest": nil, "unprotected": nil}
 	out["backup"] = backup
 	var snapshotID, snapshotRef, created string
@@ -84,23 +95,23 @@ func dashboard(c *gin.Context, a *platform.App) {
 	info, e := a.Docker.Info(ctx)
 	if e != nil {
 		out["docker"] = gin.H{"connected": false, "error": fmt.Sprintf("Docker connection failed: %v", e)}
-		c.JSON(200, out)
+		respond()
 		return
 	}
 	version, e := a.Docker.ServerVersion(ctx)
 	if e != nil {
 		out["docker"] = gin.H{"connected": false, "error": e.Error()}
-		c.JSON(200, out)
+		respond()
 		return
 	}
 	out["docker"] = gin.H{"connected": true, "info": info, "version": version}
-	out["host"] = gin.H{"hostname": info.Name, "os": info.OperatingSystem, "architecture": info.Architecture, "kernel": info.KernelVersion, "cpus": info.NCPU, "memory_total": info.MemTotal, "docker_root_dir": info.DockerRootDir}
-	host := out["host"].(gin.H)
+	host["hostname"], host["os"], host["architecture"] = info.Name, info.OperatingSystem, info.Architecture
+	host["kernel"], host["cpus"], host["memory_total"], host["docker_root_dir"] = info.KernelVersion, info.NCPU, info.MemTotal, info.DockerRootDir
 	host["memory_available"] = nil
 	host["load_1m"] = nil
 	host["uptime"] = nil
 	host["disk"] = nil
-	if runtime.GOOS == "linux" && a.Config.Mode == "binary" {
+	if localHost {
 		if b, e := os.ReadFile("/proc/meminfo"); e == nil {
 			for _, line := range strings.Split(string(b), "\n") {
 				f := strings.Fields(line)
@@ -130,7 +141,7 @@ func dashboard(c *gin.Context, a *platform.App) {
 	containers, e := a.Docker.ContainerList(ctx, container.ListOptions{All: true})
 	if e != nil {
 		out["resource_error"] = e.Error()
-		c.JSON(200, out)
+		respond()
 		return
 	}
 	running, stopped, abnormal := 0, 0, 0
@@ -163,7 +174,7 @@ func dashboard(c *gin.Context, a *platform.App) {
 	if usage, err := a.Docker.DiskUsage(diskCtx, types.DiskUsageOptions{}); err == nil {
 		out["docker_usage"] = usage
 	}
-	c.JSON(200, out)
+	respond()
 }
 
 func coverage(a *platform.App, containers []container.Summary, volumes []*volume.Volume) (gin.H, int) {

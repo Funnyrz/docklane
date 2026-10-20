@@ -32,12 +32,12 @@ describe('Docklane branding', () => {
     })
 
     expect(document.title).toBe(title)
-    expect(wrapper.find('.auth-story .brand').text()).toBe('DOCKLANE')
+    expect(wrapper.find('.auth-story .brand').text()).toBe('docklane')
     expect(wrapper.find('.auth-story-footer').text()).toContain(`v${appVersion}`)
 
     auth.authenticated = true
     await wrapper.vm.$nextTick()
-    expect(wrapper.find('.sidebar-brand .brand-copy').text()).toBe('DOCKLANE')
+    expect(wrapper.find('.sidebar-brand .brand-copy').text()).toBe('docklane')
     expect(wrapper.find('.page-footer').text()).toContain(`Docklane / v${appVersion}`)
     expect(wrapper.find('.version').text()).toContain(`v${appVersion}`)
     expect(wrapper.text()).not.toMatch(/docker\s*manager/i)
@@ -69,7 +69,8 @@ describe('Console navigation', () => {
       expect(location.hash).toBe(`#${route}`)
       expect(wrapper.findAll('.sidebar nav [aria-current="page"]')).toHaveLength(1)
       expect(buttons[index]!.attributes('aria-current')).toBe('page')
-      if (route !== 'dashboard') expect(wrapper.find('.page-heading h1').text()).toBe(titles[index])
+      if (!['dashboard', 'settings'].includes(route)) expect(wrapper.find('.page-heading h1').text()).toBe(titles[index])
+      else expect(wrapper.find('.page-heading').exists()).toBe(false)
       if (['containers', 'images', 'networks', 'volumes'].includes(route)) {
         expect(wrapper.find('resources-view-stub').attributes('kind')).toBe(route)
       } else {

@@ -6,7 +6,7 @@ on:
       release_tag:
         description: 'Existing stable or beta.N tag matching the source package version and successful CI'
         required: true
-        default: v0.3.2-beta.2
+        default: v0.3.2-beta.3
         type: string
       publish:
         description: 'Publish a new release only after the candidate has passed all checks'
@@ -231,6 +231,8 @@ jobs:
           ```
 
           Download assets from this same release and verify `RELEASE-SHA256SUMS` before offline use.
+          本版修复此前安装包遗漏新版界面的问题，包含深蓝导航、紧凑布局、资源趋势和设置页三标签。
+          This release includes the previously omitted navy console, compact layout, resource trends and three-tab settings.
           默认仅安装二进制；首次需要工作容器的备份或恢复任务按本机程序架构下载同版本镜像（须匹配本地 Docker Engine）。
           Installs the binary by default; the first backup or restore requiring a worker downloads the matching version for the native executable architecture (matching the local Docker Engine).
           Offline workers: `docklane-images-amd64.tar.gz` and `docklane-images-arm64.tar.gz`.

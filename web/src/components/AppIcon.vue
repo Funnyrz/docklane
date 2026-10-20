@@ -25,6 +25,7 @@ const paths: Record<string, string[]> = {
   'chevron-right': ['m9 5 7 7-7 7'],
   clock: ['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z', 'M12 7v5l3 2'],
   plus: ['M12 4v16M4 12h16'],
+  search: ['M16.5 16.5 21 21', 'M18 10.5a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z'],
   activity: ['M3 12h4l3-8 4 16 3-8h4'],
 }
 const iconPaths = computed(() => paths[props.name] ?? paths.inbox)

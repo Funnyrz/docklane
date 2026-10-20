@@ -2,7 +2,7 @@
 
 > 本程序尚未经过充分、严格的测试，仅供学习与测试使用，请勿用于生产环境。使用前请自行评估风险并备份重要数据。
 
-当前版本为 [v0.3.2-beta.2 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.2)，配置与数据库 schema 仍为 v1。旧 v0.3.1-beta.1、v0.3.1-beta.2 的 Release、附件及远端 Tag 已撤回；v0.3.0 Release 也已撤回，目前没有正式版，正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
+当前版本为 [v0.3.2-beta.3 预发布版](https://github.com/Funnyrz/docklane/releases/tag/v0.3.2-beta.3)，配置与数据库 schema 仍为 v1。旧 v0.3.1-beta.1、v0.3.1-beta.2 的 Release、附件及远端 Tag 已撤回；v0.3.0 Release 也已撤回，目前没有正式版，正式通道在未来正式发布前不可用。无参数在线安装默认选择最新 Beta，并在修改系统前显示测试版及禁止生产使用的警告；仍可显式使用 `--channel beta` 或指定版本。
 
 ## 一键在线安装
 
@@ -27,7 +27,7 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/Funnyrz/docklane
 | 参数 | 行为 |
 | --- | --- |
 | `--channel stable` / `beta` | 默认 `beta`，选择最新已发布 Beta；显式 `stable` 请求正式版，目前无正式版会停止 |
-| `--version v0.3.2-beta.2` | 固定当前 Beta，优先于渠道参数；示例同时显式传入 `--channel beta` |
+| `--version v0.3.2-beta.3` | 固定当前 Beta，优先于渠道参数；示例同时显式传入 `--channel beta` |
 | `--download-source mirror` / `direct` | 默认镜像优先并回退直连；`direct` 使安装器后续下载完全直连 |
 | `--listen :9999` | 设置监听地址；新装默认 `:9999`，已有安装保留原值，显式指定时覆盖 |
 | `--migrate-from /绝对路径/data` | 显式迁移手动实例的完整应用数据；保留源目录 |
@@ -55,7 +55,7 @@ sudo systemctl disable docklane
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.2-beta.2
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh | sudo bash -s -- --channel beta --version v0.3.2-beta.3
 ```
 
 ### 手动实例迁移
@@ -83,7 +83,7 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
 
 ```sh
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/docklane/main/scripts/install-online.sh \
-  | sudo bash -s -- --channel beta --version v0.3.2-beta.2
+  | sudo bash -s -- --channel beta --version v0.3.2-beta.3
 ```
 
 标准受管安装会保留现有配置和实际生效的数据目录；同版本且二进制 SHA-256 一致时跳过替换。版本变化先停服务，再备份实际数据目录、配置、服务单元和旧二进制，之后安装同版本材料并检查健康。显式指定 `--listen` 才更改已有监听地址。要将自定义监听改为 9999，在上述在线命令末尾追加 `--listen :9999`；无参数重跑会保留已配置地址。需要降级时应按下方回退说明恢复配套备份，不能用旧程序直接打开升级后的数据库。
@@ -94,13 +94,13 @@ curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Funnyrz/dockla
 
 Beta 离线安装保留单参数入口。准备本地 Docker Engine 28/29、Compose v2（验证版本 v2.40.3）、服务 PATH 可用的 Restic 0.19.1、Python 3 与 `runuser`（util-linux）；`docker` 组须存在，服务账号须能通过该附加组访问 Docker Socket。
 
-v0.3.2-beta.2 为七附件：两个原生 `tar.gz`、安装材料、两个独立架构镜像归档、在线脚本及 `RELEASE-SHA256SUMS`；顶层清单校验其余六项。安装材料根目录携带 `VERSION`（不含 `v`）、`LICENSE`、内部 `SHA256SUMS`、`IMAGE-SHA256SUMS`、`IMAGES.txt`、工具版本和 CI 来源记录，不再单独上传这些元数据或原始二进制。
+v0.3.2-beta.3 为七附件：两个原生 `tar.gz`、安装材料、两个独立架构镜像归档、在线脚本及 `RELEASE-SHA256SUMS`；顶层清单校验其余六项。安装材料根目录携带 `VERSION`（不含 `v`）、`LICENSE`、内部 `SHA256SUMS`、`IMAGE-SHA256SUMS`、`IMAGES.txt`、工具版本和 CI 来源记录，不再单独上传这些元数据或原始二进制。
 
 在空目录下载本机架构包、同版本安装材料和顶层清单后执行。安装与升级不要求预加载 worker 镜像：
 
 ```sh
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
-tar -xzf docklane-v0.3.2-beta.2-linux-amd64.tar.gz
+tar -xzf docklane-v0.3.2-beta.3-linux-amd64.tar.gz
 tar -xzf docklane-installation.tar.gz
 sudo ./scripts/install.sh ./docklane
 ```
@@ -121,7 +121,7 @@ v0.3.2-beta.1 的 Release、Tag 和原六附件保留，其安装器仍预加载
 sha256sum --check --ignore-missing RELEASE-SHA256SUMS
 sha256sum --check --ignore-missing IMAGE-SHA256SUMS
 sudo docker load -i docklane-images-amd64.tar.gz
-sudo docker tag docklane:v0.3.2-beta.2-amd64 docklane:v0.3.2-beta.2
+sudo docker tag docklane:v0.3.2-beta.3-amd64 docklane:v0.3.2-beta.3
 ```
 
 七附件布局的两个镜像摘要均保存在安装材料内，`--ignore-missing` 仅跳过未下载的另一种架构。Docker 部署本身需要应用镜像，按本机架构下载和导入；默认二进制部署无需提前下载该包。
@@ -142,7 +142,7 @@ sudo docker tag docklane:v0.3.2-beta.2-amd64 docklane:v0.3.2-beta.2
 
 非 root 服务备份其他 UID 的本地 Volume 时，临时执行容器只获得指定只读数据源、可写仓库和私有临时目录，并以仓库所有者身份写入仓库。恢复不同 UID/GID 的文件需要受限恢复容器：仓库只读、仓库锁目录可写、恢复目标可写，禁用网络，不挂载 Docker Socket；授予恢复文件元数据必需的 Linux capabilities。镜像准备失败、缺少 Docker 权限或能力时任务失败，不将未校验的恢复标记成功。运行镜像和 `backup_worker_image` 应使用相同版本。
 
-当前 Beta 本地构建和离线归档使用 `docklane:v0.3.2-beta.2`；若以后从正式 registry 安装，需同时将应用镜像与 `DM_BACKUP_WORKER_IMAGE`（二进制模式为 `backup_worker_image`）设为实际发布的完整镜像引用，建议固定已核对架构的 Digest。只拉取 `ghcr.io/…` 不会生成默认的本地 tag。启动后先执行一次 Volume 备份和新目录恢复，确认 worker 镜像可用。远端仓库、权限和签发要求见 [发布配置要求](remote-release-requirements.md)。
+当前 Beta 本地构建和离线归档使用 `docklane:v0.3.2-beta.3`；若以后从正式 registry 安装，需同时将应用镜像与 `DM_BACKUP_WORKER_IMAGE`（二进制模式为 `backup_worker_image`）设为实际发布的完整镜像引用，建议固定已核对架构的 Digest。只拉取 `ghcr.io/…` 不会生成默认的本地 tag。启动后先执行一次 Volume 备份和新目录恢复，确认 worker 镜像可用。远端仓库、权限和签发要求见 [发布配置要求](remote-release-requirements.md)。
 
 Docker 模式应将目录备份源单独只读挂入管理容器，将仓库和恢复目录分别可写映射；不要将三者共同的父目录可写挂入面板。停机备份会拒绝停止面板自身或共享其应用数据的容器；无法确认自身身份时也会拒绝，以免停止执行备份和补偿的进程。需要在线文件备份时可显式选择 file 模式并接受一致性风险。临时备份容器将 HOME、临时文件和 Restic 缓存放在私有 `/tmp` tmpfs，兼容只读根目录。
 

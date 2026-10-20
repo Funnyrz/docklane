@@ -533,7 +533,7 @@ def main():
     parser.add_argument("--state", type=pathlib.Path, required=True)
     parser.add_argument("--source", type=pathlib.Path, required=True)
     parser.add_argument("--binary", type=pathlib.Path, required=True)
-    parser.add_argument("--image", default="docklane:v0.3.2-beta.2")
+    parser.add_argument("--image", default="docklane:v0.3.2-beta.3")
     parser.add_argument("--fixture-image", default="busybox:1.37.0")
     parser.add_argument("--report", type=pathlib.Path, required=True)
     args = parser.parse_args()
